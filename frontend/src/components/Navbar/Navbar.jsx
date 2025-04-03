@@ -1,14 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Added import for useNavigate
 import UniversityBanner from "../Banner/UniversityBanner";
 
 const Navbar = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
   const navItems = [
     { name: "Home", href: "#home", isActive: true },
     { name: "About", href: "#about" },
     { name: "Contact", href: "#contact" },
     { name: "Fees", href: "#pricing" },
     { name: "Login", href: "#login" },
-    { name: "Register", href: "#signup" },
+    { name: "Register", href: "/register" }, // Updated href for Register
   ];
 
   return (
@@ -35,7 +37,11 @@ const Navbar = () => {
                       className={`btn bg-amber-400 border-2 p-1 rounded-md ${
                         item.name === "Login" ? "btn-primary" : "btn-secondary"
                       }`}
-                      onClick={() => (window.location.href = item.href)}
+                      onClick={() =>
+                        item.name === "Register"
+                          ? navigate(item.href) // Navigate to Register page
+                          : (window.location.href = item.href)
+                      }
                     >
                       {item.name}
                     </button>
