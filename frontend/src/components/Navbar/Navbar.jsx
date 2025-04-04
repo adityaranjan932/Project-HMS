@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Use Link for routing
+import { Link } from "react-router-dom";
 import UniversityBanner from "../Banner/UniversityBanner";
 
 const Navbar = () => {

@@ -17,25 +17,25 @@ const Login = () => {
             Login Options
           </h1>
           <Link
-            to="/student-login"
+            to="/login/student-login"
             className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
           >
             <FaUserGraduate /> Student Login
           </Link>
           <Link
-            to="/chief-provost-login"
+            to="/login/chief-provost-login"
             className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
           >
             <FaUserTie /> Chief Provost Login
           </Link>
           <Link
-            to="/provost-login"
+            to="/login/provost-login"
             className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
           >
             <FaUserShield /> Provost Login
           </Link>
           <Link
-            to="/other-login"
+            to="/login/other-login"
             className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
             <FaUsers /> Other Login

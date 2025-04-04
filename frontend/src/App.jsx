@@ -14,12 +14,25 @@ import PublicNotice from "./pages/Dashboard/Provost_Dashboard/PublicNotice";
 import Navbar from "./components/Navbar/Navbar";
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
+import StudentLogin from "./pages/Login/StudentLogin";
+import ChiefProvostLogin from "./pages/Login/ChiefProvostLogin";
+import ProvostLogin from "./pages/Login/ProvostLogin";
+import OtherLogin from "./pages/Login/OtherLogin";
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navbar />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/login/student-login" element={<StudentLogin />} />
+        <Route
+          path="/login/chief-provost-login"
+          element={<ChiefProvostLogin />}
+        />
+        <Route path="/login/provost-login" element={<ProvostLogin />} />
+        <Route path="/login/other-login" element={<OtherLogin />} />
 
         {/* Student Dashboard Routes */}
         <Route path="/student-login" element={<Adminbar />}>
@@ -36,9 +49,6 @@ const App = () => {
           <Route path="student-queries" element={<StudentQueries />} />
           <Route path="public-notice" element={<PublicNotice />} />
         </Route>
-
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
