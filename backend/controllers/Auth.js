@@ -82,24 +82,7 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // 2. Validate OTP
-    const recentOtp = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    if (!recentOtp || recentOtp.otp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
-    }
-
-    // 3. Check password match
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
-
-    // 4. Fetch and check LU result for eligibility
+    // 2. Fetch LU Result & Check Eligibility
     const result = await fetchResult({
       CourseId: courseId,
       Semester: semester,
@@ -115,19 +98,56 @@ exports.signup = async (req, res) => {
 
     const resultData = Object.fromEntries(result.result.map(item => [item.key, item.value]));
 
-    // Eligibility check
+    // Extract SGPA and Result Status
     const sgpa = parseFloat(resultData["SGPA"]);
-    if (resultData["Result"] !== "PASSED" || isNaN(sgpa) || sgpa < 5.0) {
+    const resultStatus = resultData["Result"];
+
+    // Extract and calculate percentage from Total Marks
+    const totalMarksStr = resultData["Total Marks"] || "0 / 100";
+    const [obtainedMarks, totalMarks] = totalMarksStr.split("/").map(val => parseInt(val.trim()));
+    const percentage = (obtainedMarks / totalMarks) * 100;
+
+    // 3. Determine Hostel Eligibility
+    let isEligibleForHostel = true;
+    const currentSemester = parseInt(semester);
+    const isEvenSemester = currentSemester % 2 === 0;
+
+    if (resultStatus !== "PASSED") {
+      if (isEvenSemester) {
+        isEligibleForHostel = false; // Backlog in even sem → not eligible
+      }
+    }
+
+    if (percentage < 50) {
+      isEligibleForHostel = false; // Less than 50% marks → not eligible
+    }
+
+    if (!isEligibleForHostel) {
       return res.status(403).json({
         success: false,
-        message: "You are not eligible for hostel (must have SGPA >= 5.0 and pass status)",
+        message: "You are not eligible for hostel (due to backlog in even semester or marks < 50%)",
       });
     }
 
-    // 5. Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 4. Validate OTP
+    const recentOtp = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOtp || recentOtp.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
 
-    // 6. Create user
+    // 5. Check Passwords Match
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    // 6. Hash Password & Create User
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       firstName,
       lastName,
@@ -139,14 +159,28 @@ exports.signup = async (req, res) => {
       name: resultData["Name of Student"],
       fatherName: resultData["Father's Name"],
       motherName: resultData["Mother's Name"],
-      resultStatus: resultData["Result"],
+      resultStatus,
       sgpa,
       totalMarks: resultData["Total Marks"],
       examTitle: resultData["Name of Examination"],
       isVerifiedLU: true,
     });
 
-    // 7. Create JWT
+    // 7. Create Student Profile
+    await StudentProfile.create({
+      userId: newUser._id,
+      rollNo: rollno,
+      name: resultData["Name of Student"],
+      fatherName: resultData["Father's Name"],
+      motherName: resultData["Mother's Name"],
+      sgpa,
+      totalMarks: obtainedMarks,
+      percentage,
+      resultStatus,
+      isEligibleForHostel,
+    });
+
+    // 8. Generate JWT Token
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email, role: "student" },
       process.env.JWT_SECRET,
@@ -162,7 +196,8 @@ exports.signup = async (req, res) => {
         name: newUser.firstName + " " + newUser.lastName,
         email: newUser.email,
         sgpa,
-        resultStatus: resultData["Result"]
+        resultStatus,
+        isEligibleForHostel
       }
     });
 
@@ -174,6 +209,7 @@ exports.signup = async (req, res) => {
     });
   }
 };
+
 
 
 // LOGIN
