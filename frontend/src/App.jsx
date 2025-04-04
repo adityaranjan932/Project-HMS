@@ -19,6 +19,8 @@ import ChiefProvostLogin from "./pages/Login/ChiefProvostLogin";
 import ProvostLogin from "./pages/Login/ProvostLogin";
 import OtherLogin from "./pages/Login/OtherLogin";
 import Home from "./pages/Home/Home";
+import MultiStepForm from "./pages/Registration/Registration";
+
 
 const App = () => {
   return (
@@ -50,6 +52,9 @@ const App = () => {
           <Route path="student-queries" element={<StudentQueries />} />
           <Route path="public-notice" element={<PublicNotice />} />
         </Route>
+
+        <Route path="/registration" element={<MultiStepForm/>} />
+
       </Routes>
     </Router>
   );
