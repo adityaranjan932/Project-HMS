@@ -11,19 +11,20 @@ import ViewProfiles from "./pages/Dashboard/Provost_Dashboard/ViewProfiles";
 import StudentNotice from "./pages/Dashboard/Provost_Dashboard/StudentNotice";
 import StudentQueries from "./pages/Dashboard/Provost_Dashboard/StudentQueries";
 import PublicNotice from "./pages/Dashboard/Provost_Dashboard/PublicNotice";
-import Navbar from "./components/Navbar/Navbar";
+
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
 import StudentLogin from "./pages/Login/StudentLogin";
 import ChiefProvostLogin from "./pages/Login/ChiefProvostLogin";
 import ProvostLogin from "./pages/Login/ProvostLogin";
 import OtherLogin from "./pages/Login/OtherLogin";
+import Home from "./pages/Home/Home";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navbar />} />
+        <Route path="/" element={<Home/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login/student-login" element={<StudentLogin />} />
