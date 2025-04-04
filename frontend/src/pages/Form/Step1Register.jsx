@@ -18,6 +18,7 @@ const Step1Register = () => {
     subjectName: "",
     rollNo: "",
     dob: "",
+    gender: "",
     photo: null,
     signature: null,
     aadharNo: "",
@@ -38,13 +39,16 @@ const Step1Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleSubmit}
-        className="max-w-lg mx-auto p-8 bg-gradient-to-r from-white to-gray-50 shadow-xl rounded-xl space-y-6 border border-gray-300"
+        className="max-w-sm sm:max-w-lg mx-auto p-6 sm:p-8 bg-gradient-to-r from-white to-gray-50 shadow-xl rounded-xl space-y-4 sm:space-y-6 border border-gray-300"
       >
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
+          Fill Details
+        </h1>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaBook /> Course Name:
           </span>
           <select
@@ -52,7 +56,7 @@ const Step1Register = () => {
             value={formData.courseName}
             onChange={handleChange}
             required
-            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           >
             <option value="">Select Course</option>
             <option value="11">B.Tech (Civil Engineering)</option>
@@ -83,7 +87,7 @@ const Step1Register = () => {
           </select>
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaBook /> Semester:
           </span>
           <select
@@ -91,7 +95,7 @@ const Step1Register = () => {
             value={formData.semester}
             onChange={handleChange}
             required
-            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           >
             <option value="">Select Semester</option>
             <option value="1">I</option>
@@ -105,7 +109,7 @@ const Step1Register = () => {
           </select>
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaUser /> Roll No.:
           </span>
           <input
@@ -114,11 +118,11 @@ const Step1Register = () => {
             value={formData.rollNo}
             onChange={handleChange}
             required
-            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           />
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaCalendarAlt /> Date of Birth:
           </span>
           <input
@@ -127,11 +131,11 @@ const Step1Register = () => {
             value={formData.dob}
             onChange={handleChange}
             required
-            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           />
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaImage /> Photo:
           </span>
           <input
@@ -140,11 +144,11 @@ const Step1Register = () => {
             accept="image/*"
             onChange={handleChange}
             required
-            className="mt-2 block w-full text-gray-700 border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full text-gray-700 border border-gray-300 rounded-lg text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           />
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaPen /> Signature:
           </span>
           <input
@@ -153,11 +157,11 @@ const Step1Register = () => {
             accept="image/*"
             onChange={handleChange}
             required
-            className="mt-2 block w-full text-gray-700 border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full text-gray-700 border border-gray-300 rounded-lg text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           />
         </label>
         <label className="block">
-          <span className="text-gray-900 font-semibold flex items-center gap-2">
+          <span className="text-gray-900 font-semibold flex items-center gap-2 text-sm sm:text-base">
             <FaIdCard /> Aadhar No.:
           </span>
           <input
@@ -166,12 +170,12 @@ const Step1Register = () => {
             value={formData.aadharNo}
             onChange={handleChange}
             required
-            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 hover:bg-gray-50 transition"
+            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base py-2 sm:py-3 px-2 sm:px-3 hover:bg-gray-50 transition"
           />
         </label>
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 sm:py-3 px-4 sm:px-5 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
           <FaPen /> Submit
         </button>

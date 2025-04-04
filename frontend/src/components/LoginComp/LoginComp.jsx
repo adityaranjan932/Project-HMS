@@ -15,9 +15,11 @@ const LoginComp = ({ onSubmit }) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-sm sm:max-w-md">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-6">
+          Login
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center border rounded-lg px-3 py-2">
             <FaEnvelope className="text-gray-500 mr-2" />
@@ -27,7 +29,7 @@ const LoginComp = ({ onSubmit }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="w-full outline-none"
+              className="w-full outline-none text-sm sm:text-base"
               required
             />
           </div>
@@ -39,13 +41,13 @@ const LoginComp = ({ onSubmit }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full outline-none"
+              className="w-full outline-none text-sm sm:text-base"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition text-sm sm:text-base"
           >
             Login
           </button>
