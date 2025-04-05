@@ -10,6 +10,10 @@ dataBase.connect();
 //middleware
 app.use(express.json());
 
+
+//  Mount the auth routes here
+app.use("/api/v1/auth", authRoutes);
+
    //default routes 
    app.get('/',(req,res)=>{
     return res.json({
