@@ -58,17 +58,19 @@ const MaintenanceRequest = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-md shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Service Request</h2>
+    <div className="p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Service Request</h2>
 
       {/* Form for submitting a new request */}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Request Type</label>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">
+            Request Type
+          </label>
           <select
             value={requestType}
             onChange={(e) => setRequestType(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="">Select type</option>
             <option value="maintenance">Maintenance</option>
@@ -76,19 +78,21 @@ const MaintenanceRequest = () => {
             <option value="others">Others</option>
           </select>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Description</label>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">
+            Description
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             rows="4"
             placeholder="Describe your request..."
           ></textarea>
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
           disabled={loading}
         >
           {loading ? "Submitting..." : "Submit Request"}
@@ -96,27 +100,35 @@ const MaintenanceRequest = () => {
       </form>
 
       {/* Error message */}
-      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {error && <p className="text-red-500 mt-4 font-medium">{error}</p>}
 
       {/* List of existing requests */}
-      <h3 className="text-lg font-semibold mt-6 mb-2">My Requests</h3>
+      <h3 className="text-xl font-semibold text-gray-800 mt-8 mb-4">
+        My Requests
+      </h3>
       {loading && !requests.length ? (
-        <p>Loading...</p>
+        <p className="text-gray-600">Loading...</p>
       ) : (
-        <ul>
+        <ul className="space-y-4">
           {requests.map((request) => (
-            <li key={request._id} className="mb-2 p-2 border rounded">
-              <p>
-                <strong>Type:</strong> {request.requestType}
+            <li
+              key={request._id}
+              className="p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm"
+            >
+              <p className="text-gray-700">
+                <strong className="font-medium">Type:</strong>{" "}
+                {request.requestType}
               </p>
-              <p>
-                <strong>Description:</strong> {request.description}
+              <p className="text-gray-700">
+                <strong className="font-medium">Description:</strong>{" "}
+                {request.description}
               </p>
-              <p>
-                <strong>Status:</strong> {request.status}
+              <p className="text-gray-700">
+                <strong className="font-medium">Status:</strong>{" "}
+                {request.status}
               </p>
-              <p>
-                <strong>Created At:</strong>{" "}
+              <p className="text-gray-700">
+                <strong className="font-medium">Created At:</strong>{" "}
                 {new Date(request.createdAt).toLocaleString()}
               </p>
             </li>
