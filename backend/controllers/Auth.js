@@ -8,52 +8,51 @@ require("dotenv").config();
 
 // send otp
 exports.sendOTP = async (req, res) => {
-    try {
-        const { email } = req.body;
-        //check if the user is already present 
-        const checkUserPresent = await User.findOne({ email });
+  try {
+    const { email } = req.body;
+    //check if the user is already present
+    const checkUserPresent = await User.findOne({ email });
 
-        if (checkUserPresent) {
-            return res.status(401).json({
-                success: false,
-                message: `User is already registered`,
-            });
-        }
-        var otp = otpGenerator.generate(6, {
-            upperCaseAlphabets: false,
-            lowerCaseAlphabets: false,
-            specialChars: false,
-        });
-        console.log("OTP generated", otp);
-
-        //check unique otp 
-        let result = await OTP.findOne({ otp: otp });
-        while (result) {
-            otp = otpGenerator.generate(6, {
-                upperCaseAlphabets: false,
-                lowerCaseAlphabets: false,
-                specialChars: false,
-            });
-            result = await OTP.findOne({ otp: otp });
-        }
-        const otpPayload = { email, otp };
-        //create an entry in DB
-        await OTP.create(otpPayload);
-        console.log(otpPayload);
-
-        return res.status(200).json({
-            success: true,
-            message: `Otp sent successfully`,
-            otp,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+    if (checkUserPresent) {
+      return res.status(401).json({
+        success: false,
+        message: `User is already registered`,
+      });
     }
-};
+    var otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+    console.log("OTP generated", otp);
 
+    //check unique otp
+    let result = await OTP.findOne({ otp: otp });
+    while (result) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
+      });
+      result = await OTP.findOne({ otp: otp });
+    }
+    const otpPayload = { email, otp };
+    //create an entry in DB
+    await OTP.create(otpPayload);
+    console.log(otpPayload);
+
+    return res.status(200).json({
+      success: true,
+      message: `Otp sent successfully`,
+      otp,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // Register Student
 exports.signup = async (req, res) => {
@@ -82,24 +81,7 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // 2. Validate OTP
-    const recentOtp = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    if (!recentOtp || recentOtp.otp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
-    }
-
-    // 3. Check password match
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
-
-    // 4. Fetch and check LU result for eligibility
+    // 2. Fetch LU Result & Check Eligibility
     const result = await fetchResult({
       CourseId: courseId,
       Semester: semester,
@@ -110,24 +92,68 @@ exports.signup = async (req, res) => {
     });
 
     if (result.status !== "success") {
-      return res.status(404).json({ success: false, message: "Result not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Result not found" });
     }
 
-    const resultData = Object.fromEntries(result.result.map(item => [item.key, item.value]));
+    const resultData = Object.fromEntries(
+      result.result.map((item) => [item.key, item.value])
+    );
 
-    // Eligibility check
+    // Extract SGPA and Result Status
     const sgpa = parseFloat(resultData["SGPA"]);
-    if (resultData["Result"] !== "PASSED" || isNaN(sgpa) || sgpa < 5.0) {
+    const resultStatus = resultData["Result"];
+
+    // Extract and calculate percentage from Total Marks
+    const totalMarksStr = resultData["Total Marks"] || "0 / 100";
+    const [obtainedMarks, totalMarks] = totalMarksStr
+      .split("/")
+      .map((val) => parseInt(val.trim()));
+    const percentage = (obtainedMarks / totalMarks) * 100;
+
+    // 3. Determine Hostel Eligibility
+    let isEligibleForHostel = true;
+    const currentSemester = parseInt(semester);
+    const isEvenSemester = currentSemester % 2 === 0;
+
+    if (resultStatus !== "PASSED") {
+      if (isEvenSemester) {
+        isEligibleForHostel = false; // Backlog in even sem → not eligible
+      }
+    }
+
+    if (percentage < 50) {
+      isEligibleForHostel = false; // Less than 50% marks → not eligible
+    }
+
+    if (!isEligibleForHostel) {
       return res.status(403).json({
         success: false,
-        message: "You are not eligible for hostel (must have SGPA >= 5.0 and pass status)",
+        message:
+          "You are not eligible for hostel (due to backlog in even semester or marks < 50%)",
       });
     }
 
-    // 5. Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 4. Validate OTP
+    const recentOtp = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOtp || recentOtp.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
 
-    // 6. Create user
+    // 5. Check Passwords Match
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    // 6. Hash Password & Create User
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       firstName,
       lastName,
@@ -139,14 +165,28 @@ exports.signup = async (req, res) => {
       name: resultData["Name of Student"],
       fatherName: resultData["Father's Name"],
       motherName: resultData["Mother's Name"],
-      resultStatus: resultData["Result"],
+      resultStatus,
       sgpa,
       totalMarks: resultData["Total Marks"],
       examTitle: resultData["Name of Examination"],
       isVerifiedLU: true,
     });
 
-    // 7. Create JWT
+    // 7. Create Student Profile
+    await StudentProfile.create({
+      userId: newUser._id,
+      rollNo: rollno,
+      name: resultData["Name of Student"],
+      fatherName: resultData["Father's Name"],
+      motherName: resultData["Mother's Name"],
+      sgpa,
+      totalMarks: obtainedMarks,
+      percentage,
+      resultStatus,
+      isEligibleForHostel,
+    });
+
+    // 8. Generate JWT Token
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email, role: "student" },
       process.env.JWT_SECRET,
@@ -162,10 +202,10 @@ exports.signup = async (req, res) => {
         name: newUser.firstName + " " + newUser.lastName,
         email: newUser.email,
         sgpa,
-        resultStatus: resultData["Result"]
-      }
+        resultStatus,
+        isEligibleForHostel,
+      },
     });
-
   } catch (error) {
     console.error("Signup error:", error);
     return res.status(500).json({
@@ -174,7 +214,6 @@ exports.signup = async (req, res) => {
     });
   }
 };
-
 
 // LOGIN
 exports.login = async (req, res) => {
@@ -241,67 +280,77 @@ exports.login = async (req, res) => {
 };
 
 exports.loginProvost = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Compare with hardcoded provost credentials
-      if (email !== process.env.PROVOST_EMAIL) {
-        return res.status(401).json({ success: false, message: "Invalid provost email" });
-      }
-  
-      const passwordMatch = await bcrypt.compare(password, process.env.PROVOST_PASSWORD_HASH);
-      if (!passwordMatch) {
-        return res.status(401).json({ success: false, message: "Invalid password" });
-      }
-  
-      const payload = { email, role: "provost" };
-  
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "3h",
-      });
-  
-      res.status(200).json({
-        success: true,
-        message: "Provost login successful",
-        token,
-        role: "provost",
-      });
-  
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Internal error" });
-    }
-  };
-  
-  exports.loginChiefProvost = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Compare with hardcoded chief provost credentials
-      if (email !== process.env.CHIEF_PROVOST_EMAIL) {
-        return res.status(401).json({ success: false, message: "Invalid chief provost email" });
-      }
-  
-      const passwordMatch = await bcrypt.compare(password, process.env.CHIEF_PROVOST_PASSWORD_HASH);
-      if (!passwordMatch) {
-        return res.status(401).json({ success: false, message: "Invalid password" });
-      }
-  
-      const payload = { email, role: "chief-provost" };
-  
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "3h",
-      });
-  
-      res.status(200).json({
-        success: true,
-        message: "Chief Provost login successful",
-        token,
-        role: "chief-provost",
-      });
-  
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Internal error" });
-    }
-  };
-  
+  try {
+    const { email, password } = req.body;
 
+    // Compare with hardcoded provost credentials
+    if (email !== process.env.PROVOST_EMAIL) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid provost email" });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      password,
+      process.env.PROVOST_PASSWORD_HASH
+    );
+    if (!passwordMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
+    }
+
+    const payload = { email, role: "provost" };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "3h",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Provost login successful",
+      token,
+      role: "provost",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal error" });
+  }
+};
+
+exports.loginChiefProvost = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Compare with hardcoded chief provost credentials
+    if (email !== process.env.CHIEF_PROVOST_EMAIL) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid chief provost email" });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      password,
+      process.env.CHIEF_PROVOST_PASSWORD_HASH
+    );
+    if (!passwordMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
+    }
+
+    const payload = { email, role: "chief-provost" };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "3h",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Chief Provost login successful",
+      token,
+      role: "chief-provost",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal error" });
+  }
+};
