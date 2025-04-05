@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 require("dotenv").config();
 const authRoutes = require('./routes/authRoutes');
-
+const serviceRequestsRoutes = require('./routes/serviceRequests');
 const dataBase = require("./config/dataBase");
 
 dataBase.connect();
@@ -17,7 +17,9 @@ app.get('/', (req, res) => {
         message: "your server is running",
     })
 });
-app.use('/api', require('./routes/serviceRequests'));
+
+app.use('/api', serviceRequestsRoutes);
+
 // Define PORT
 const PORT = process.env.PORT || 4000;
 

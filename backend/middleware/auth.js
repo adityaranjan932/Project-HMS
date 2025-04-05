@@ -1,28 +1,28 @@
 const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    console.error('Authorization header missing or token not provided');
+    return res.status(401).json({ message: 'No token provided, authorization denied' });
+  }
+
+  console.log('Received token:', token);
+
   try {
-    const authHeader = req.header('Authorization');
-    if (!authHeader) {
-      return res.status(401).json({ message: 'Authorization header is missing' });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ message: 'Token is missing, authorization denied' });
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Sets req.user with user data (e.g., _id, role)
+    console.log('Decoded token:', decoded); // Debugging: Log decoded token
+    req.user = decoded; // Attach decoded user info to the request object
     next();
-  } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token has expired' });
+  } catch (err) {
+    console.error('Token verification failed:', err.message); // Log error for debugging
+    if (err.name === 'JsonWebTokenError') {
+      const message = err.message === 'jwt malformed'
+        ? 'Malformed token, authorization denied'
+        : 'Invalid token format, authorization denied';
+      return res.status(401).json({ message });
     }
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(401).json({ message: 'Invalid token, authorization denied' });
   }
 };
 
