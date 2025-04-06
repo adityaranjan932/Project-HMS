@@ -14,11 +14,15 @@ const MaintenanceRequest = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token"); // Assuming token is stored after login
-        const response = await fetch("/api/service-requests/my", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://localhost:4000/api/service-requests/my",
+          {
+            // Updated URL
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!response.ok) throw new Error("Failed to fetch requests");
         const data = await response.json();
         setRequests(data);
@@ -37,14 +41,18 @@ const MaintenanceRequest = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/service-requests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ requestType, description }),
-      });
+      const response = await fetch(
+        "http://localhost:4000/api/service-requests",
+        {
+          // Updated URL
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ requestType, description }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to submit request");
       const newRequest = await response.json();
       setRequests([newRequest, ...requests]); // Add new request to list

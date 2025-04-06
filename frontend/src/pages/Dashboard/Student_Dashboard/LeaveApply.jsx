@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const LeaveApply = () => {
   const [formData, setFormData] = useState({
+    studentId: "12345", // Replace with actual student ID from context or state
     reason: "",
     startDate: "",
     endDate: "",
@@ -12,10 +14,17 @@ const LeaveApply = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Leave Application Submitted:", formData);
-    // Add submission logic here
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/leave/submit",
+        formData
+      );
+      alert(response.data.message);
+    } catch (error) {
+      alert(error.response?.data?.error || "An error occurred.");
+    }
   };
 
   return (
