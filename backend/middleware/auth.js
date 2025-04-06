@@ -1,29 +1,91 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const User = require("../models/User");
 
-const auth = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) {
-    console.error('Authorization header missing or token not provided');
-    return res.status(401).json({ message: 'No token provided, authorization denied' });
-  }
-
-  console.log('Received token:', token);
-
+// Middleware to check if the user is authenticated
+exports.auth = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token:', decoded); // Debugging: Log decoded token
-    req.user = decoded; // Attach decoded user info to the request object
-    next();
-  } catch (err) {
-    console.error('Token verification failed:', err.message); // Log error for debugging
-    if (err.name === 'JsonWebTokenError') {
-      const message = err.message === 'jwt malformed'
-        ? 'Malformed token, authorization denied'
-        : 'Invalid token format, authorization denied';
-      return res.status(401).json({ message });
+    const token =
+      req.cookies?.token ||
+      req.body?.token ||
+      req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token missing",
+      });
     }
-    return res.status(401).json({ message: 'Invalid token, authorization denied' });
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // Attach decoded token to request
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Something went wrong while validating the token",
+    });
   }
 };
 
-module.exports = auth;
+// Middleware for Student-only routes
+exports.isStudent = async (req, res, next) => {
+  try {
+    if (req.user.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Students only.",
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "User role can't be verified",
+    });
+  }
+};
+
+// Middleware for Provost-only routes
+exports.isProvost = async (req, res, next) => {
+  try {
+    if (req.user.role !== "provost") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Provosts only.",
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "User role can't be verified",
+    });
+  }
+};
+
+// Middleware for Chief Provost-only routes
+exports.isChiefProvost = async (req, res, next) => {
+  try {
+    if (req.user.role !== "chiefProvost") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Chief Provosts only.",
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "User role can't be verified",
+    });
+  }
+};
