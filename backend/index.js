@@ -18,6 +18,8 @@ app.get('/', (req, res) => {
         message: "your server is running",
     })
 });
+// Routes
+app.use("/api/auth", authRoutes); 
 
 app.use('/api', serviceRequestsRoutes);
 app.use('/api/feedback', feedbackRoutes); // Add feedback routes

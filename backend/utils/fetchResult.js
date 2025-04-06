@@ -141,4 +141,5 @@ if (require.main === module) {
 }
 
 // Export for use in controllers
-module.exports = { fetchResult };
+module.exports = fetchResult;
+

@@ -2,11 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const {
+    sendOTP,
     signup,
     login,
     loginProvost,
     loginChiefProvost
 } = require("../controllers/Auth");
+
+//send Otp
+router.post("/sendotp", sendOTP);
+
 
 // Student routes
 router.post("/signup", signup);

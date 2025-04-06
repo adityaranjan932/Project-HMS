@@ -3,7 +3,8 @@ const OTP = require("../models/OTP");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { fetchResult } = require("../utils/fetchResult");
+const fetchResult = require("../utils/fetchResult");
+
 require("dotenv").config();
 
 // send otp
@@ -55,6 +56,7 @@ exports.sendOTP = async (req, res) => {
 };
 
 // Register Student
+
 exports.signup = async (req, res) => {
   try {
     const {
@@ -72,16 +74,43 @@ exports.signup = async (req, res) => {
       subjectId,
     } = req.body;
 
-    // 1. Check if user already exists
+    // Basic validations
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !otp ||
+      !rollno ||
+      !dob ||
+      !courseId ||
+      !semester ||
+      !examType ||
+      !subjectId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already registered",
+        message: "User already exists. Please login.",
       });
     }
 
-    // 2. Fetch LU Result & Check Eligibility
+    // Fetch LU Result
     const result = await fetchResult({
       CourseId: courseId,
       Semester: semester,
@@ -92,68 +121,39 @@ exports.signup = async (req, res) => {
     });
 
     if (result.status !== "success") {
-      return res
-        .status(404)
-        .json({ success: false, message: "Result not found" });
-    }
-
-    const resultData = Object.fromEntries(
-      result.result.map((item) => [item.key, item.value])
-    );
-
-    // Extract SGPA and Result Status
-    const sgpa = parseFloat(resultData["SGPA"]);
-    const resultStatus = resultData["Result"];
-
-    // Extract and calculate percentage from Total Marks
-    const totalMarksStr = resultData["Total Marks"] || "0 / 100";
-    const [obtainedMarks, totalMarks] = totalMarksStr
-      .split("/")
-      .map((val) => parseInt(val.trim()));
-    const percentage = (obtainedMarks / totalMarks) * 100;
-
-    // 3. Determine Hostel Eligibility
-    let isEligibleForHostel = true;
-    const currentSemester = parseInt(semester);
-    const isEvenSemester = currentSemester % 2 === 0;
-
-    if (resultStatus !== "PASSED") {
-      if (isEvenSemester) {
-        isEligibleForHostel = false; // Backlog in even sem → not eligible
-      }
-    }
-
-    if (percentage < 50) {
-      isEligibleForHostel = false; // Less than 50% marks → not eligible
-    }
-
-    if (!isEligibleForHostel) {
-      return res.status(403).json({
+      return res.status(404).json({
         success: false,
-        message:
-          "You are not eligible for hostel (due to backlog in even semester or marks < 50%)",
+        message: "Data not found. Please check your details.",
       });
     }
 
-    // 4. Validate OTP
-    const recentOtp = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    if (!recentOtp || recentOtp.otp !== otp) {
+    const resultData = Object.fromEntries(result.result.map(item => [item.key, item.value]));
+    const resultStatus = resultData["Result"];
+    const totalMarksStr = resultData["Total Marks"] || "0 / 100";
+    const [obtained, total] = totalMarksStr.split("/").map(val => parseInt(val.trim()));
+    const percentage = (obtained / total) * 100;
+
+    // Hostel eligibility
+    if (resultStatus !== "PASSED" || percentage < 50) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not eligible for hostel (result not passed or marks < 50%)",
+      });
+    }
+
+    // Validate OTP
+    const otpRecord = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+    if (!otpRecord.length || otpRecord[0].otp !== otp.toString()) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired OTP",
       });
     }
 
-    // 5. Check Passwords Match
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
-
-    // 6. Hash Password & Create User
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
     const newUser = await User.create({
       firstName,
       lastName,
@@ -166,34 +166,34 @@ exports.signup = async (req, res) => {
       fatherName: resultData["Father's Name"],
       motherName: resultData["Mother's Name"],
       resultStatus,
-      sgpa,
+      sgpa: parseFloat(resultData["SGPA"]),
       totalMarks: resultData["Total Marks"],
       examTitle: resultData["Name of Examination"],
       isVerifiedLU: true,
     });
 
-    // 7. Create Student Profile
+    // Create profile
     await StudentProfile.create({
       userId: newUser._id,
       rollNo: rollno,
       name: resultData["Name of Student"],
       fatherName: resultData["Father's Name"],
       motherName: resultData["Mother's Name"],
-      sgpa,
-      totalMarks: obtainedMarks,
+      sgpa: parseFloat(resultData["SGPA"]),
+      totalMarks: obtained,
       percentage,
       resultStatus,
-      isEligibleForHostel,
+      isEligibleForHostel: true,
     });
 
-    // 8. Generate JWT Token
+    // Generate JWT
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email, role: "student" },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Signup successful",
       token,
@@ -201,14 +201,15 @@ exports.signup = async (req, res) => {
         id: newUser._id,
         name: newUser.firstName + " " + newUser.lastName,
         email: newUser.email,
-        sgpa,
         resultStatus,
-        isEligibleForHostel,
+        percentage,
+        sgpa: parseFloat(resultData["SGPA"]),
+        isEligibleForHostel: true,
       },
     });
   } catch (error) {
     console.error("Signup error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Server error during signup",
     });
