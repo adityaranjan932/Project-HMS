@@ -176,13 +176,10 @@ exports.signUp = async (req, res) => {
       gender,
       department: "",
       semester: 0,
-      result: {
-        percentage: 0,
-        backlog: true,
-      },
       isEligible: false,
       admissionYear: new Date().getFullYear(),
     });
+    
 
     return res.status(200).json({
       success: true,

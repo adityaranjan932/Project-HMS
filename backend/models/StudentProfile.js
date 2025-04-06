@@ -23,16 +23,6 @@ const StudentProfileSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  result: {
-    percentage: {
-      type: Number,
-      default: 0,
-    },
-    backlog: {
-      type: Boolean,
-      default: true,
-    },
-  },
   isEligible: {
     type: Boolean,
     default: false,
