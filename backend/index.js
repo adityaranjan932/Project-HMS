@@ -4,7 +4,6 @@ require("dotenv").config();
 const authRoutes = require('./routes/authRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
-const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const dataBase = require("./config/dataBase");
 
 dataBase.connect();
@@ -20,11 +19,10 @@ app.get('/', (req, res) => {
     })
 });
 // Routes
-app.use("/api/auth", authRoutes); 
+app.use("/api/auth", authRoutes);
 
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/leave', leaveRoutes);
-app.use("/api/service-requests", maintenanceRoutes);
 
 // Define PORT
 const PORT = process.env.PORT || 4000;
