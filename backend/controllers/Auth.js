@@ -4,94 +4,131 @@ const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fetchResult = require("../utils/fetchResult");
+const StudentProfile = require("../models/StudentProfile");
 
 require("dotenv").config();
 
-// send otp
+// Send OTP
 exports.sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
-    //check if the user is already present
-    const checkUserPresent = await User.findOne({ email });
 
+    const checkUserPresent = await User.findOne({ email });
     if (checkUserPresent) {
       return res.status(401).json({
         success: false,
         message: `User is already registered`,
       });
     }
-    var otp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
-    });
-    console.log("OTP generated", otp);
 
-    //check unique otp
-    let result = await OTP.findOne({ otp: otp });
-    while (result) {
+    // Optional: Delete old OTPs for same email
+    await OTP.deleteMany({ email });
+
+    let otp;
+    let existingOTP;
+
+    // Generate unique OTP
+    do {
       otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false,
         lowerCaseAlphabets: false,
         specialChars: false,
       });
-      result = await OTP.findOne({ otp: otp });
-    }
-    const otpPayload = { email, otp };
-    //create an entry in DB
+      existingOTP = await OTP.findOne({ otp });
+    } while (existingOTP);
+
+    const otpPayload = {
+      email,
+      otp,
+      expiresAt: Date.now() + 10 * 60 * 1000, // expires in 10 minutes
+    };
+
     await OTP.create(otpPayload);
-    console.log(otpPayload);
 
     return res.status(200).json({
       success: true,
-      message: `Otp sent successfully`,
-      otp,
+      message: `OTP sent successfully`,
+      otp, // remove in production
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to send OTP",
+      error: error.message,
     });
   }
 };
 
-// Register Student
 
-exports.signup = async (req, res) => {
+// Check Hostel Eligibility
+exports.checkHostelEligibility = async (req, res) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      otp,
-      rollno,
-      dob,
-      courseId,
-      semester,
-      examType,
-      subjectId,
-    } = req.body;
+    const { CourseId, Semester, ExamType, SubjectId, Rollno, Dob1 } = req.body;
 
-    // Basic validations
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !otp ||
-      !rollno ||
-      !dob ||
-      !courseId ||
-      !semester ||
-      !examType ||
-      !subjectId
-    ) {
+    const resultData = await fetchResult({
+      CourseId,
+      Semester,
+      ExamType,
+      SubjectId,
+      Rollno,
+      Dob1,
+    });
+
+    if (resultData.status !== "success") {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "Result not found. Please verify the input details.",
+      });
+    }
+
+    const resultArray = resultData.result;
+    const result = resultArray.find(item => item.key === "Result")?.value;
+    const totalMarksStr = resultArray.find(item => item.key === "Total Marks")?.value;
+
+    if (!result || !totalMarksStr) {
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete result data. Cannot verify eligibility.",
+      });
+    }
+
+    const [obtained, total] = totalMarksStr.split("/").map(s => parseFloat(s.trim()));
+    const percentage = (obtained / total) * 100;
+
+    if (result !== "PASSED" || percentage < 50) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not eligible for hostel registration (must be PASSED and ≥ 50% marks).",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "You are eligible for hostel registration.",
+      data: {
+        result,
+        percentage: percentage.toFixed(2),
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+exports.signUp = async (req, res) => {
+  try {
+    const { email, password, confirmPassword, otp, name, gender } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !confirmPassword || !otp || !name || !gender) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields (email, password, confirmPassword, otp, name, gender) are required",
       });
     }
 
@@ -106,47 +143,16 @@ exports.signup = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists. Please login.",
-      });
-    }
-
-    // Fetch LU Result
-    const result = await fetchResult({
-      CourseId: courseId,
-      Semester: semester,
-      ExamType: examType,
-      SubjectId: subjectId,
-      Rollno: rollno,
-      Dob1: dob,
-    });
-
-    if (result.status !== "success") {
-      return res.status(404).json({
-        success: false,
-        message: "Data not found. Please check your details.",
-      });
-    }
-
-    const resultData = Object.fromEntries(result.result.map(item => [item.key, item.value]));
-    const resultStatus = resultData["Result"];
-    const totalMarksStr = resultData["Total Marks"] || "0 / 100";
-    const [obtained, total] = totalMarksStr.split("/").map(val => parseInt(val.trim()));
-    const percentage = (obtained / total) * 100;
-
-    // Hostel eligibility
-    if (resultStatus !== "PASSED" || percentage < 50) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not eligible for hostel (result not passed or marks < 50%)",
+        message: "User already exists. Please log in.",
       });
     }
 
     // Validate OTP
-    const otpRecord = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-    if (!otpRecord.length || otpRecord[0].otp !== otp.toString()) {
+    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOTP || recentOTP.otp.toString() !== otp.toString()) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP",
+        message: "Invalid OTP",
       });
     }
 
@@ -154,74 +160,50 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const newUser = await User.create({
-      firstName,
-      lastName,
+    const user = await User.create({
+      name,
       email,
       password: hashedPassword,
-      rollno,
-      dob,
-      enrollmentNo: resultData["Enrollment No."],
-      name: resultData["Name of Student"],
-      fatherName: resultData["Father's Name"],
-      motherName: resultData["Mother's Name"],
-      resultStatus,
-      sgpa: parseFloat(resultData["SGPA"]),
-      totalMarks: resultData["Total Marks"],
-      examTitle: resultData["Name of Examination"],
+      role: "student",
+      gender,
       isVerifiedLU: true,
     });
 
     // Create profile
-    await StudentProfile.create({
-      userId: newUser._id,
-      rollNo: rollno,
-      name: resultData["Name of Student"],
-      fatherName: resultData["Father's Name"],
-      motherName: resultData["Mother's Name"],
-      sgpa: parseFloat(resultData["SGPA"]),
-      totalMarks: obtained,
-      percentage,
-      resultStatus,
-      isEligibleForHostel: true,
+    const profile = await StudentProfile.create({
+      userId: user._id,
+      name,
+      gender,
+      department: "",
+      semester: 0,
+      isEligible: false,
+      admissionYear: new Date().getFullYear(),
     });
+    
 
-    // Generate JWT
-    const token = jwt.sign(
-      { id: newUser._id, email: newUser.email, role: "student" },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Signup successful",
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.firstName + " " + newUser.lastName,
-        email: newUser.email,
-        resultStatus,
-        percentage,
-        sgpa: parseFloat(resultData["SGPA"]),
-        isEligibleForHostel: true,
-      },
+      user,
+      profile,
     });
+
   } catch (error) {
-    console.error("Signup error:", error);
-    res.status(500).json({
+    console.error("Signup Error:", error);
+    return res.status(500).json({
       success: false,
-      message: "Server error during signup",
+      message: "Signup failed",
+      error: error.message,
     });
   }
 };
 
-// LOGIN
+
+// Student Login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -229,129 +211,134 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User not found. Please register first.",
+        message: "User is not registered",
       });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    if (user.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Not a student account",
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid password",
+        message: "Incorrect password",
       });
     }
 
-    // Generate JWT
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
-    // Send response
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
       user: {
         id: user._id,
-        name: user.firstName + " " + user.lastName,
+        name: `${user.firstName} ${user.lastName}`,
         email: user.email,
+        role: user.role,
       },
     });
+
   } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Login failed. Please try again.",
+      message: "Login failed due to server error",
+      error: error.message,
     });
   }
 };
 
-exports.loginProvost = async (req, res) => {
+// Provost Login
+exports.provostLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Compare with hardcoded provost credentials
     if (email !== process.env.PROVOST_EMAIL) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid provost email" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid provost email.",
+      });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      process.env.PROVOST_PASSWORD_HASH
+    const isPasswordValid = await bcrypt.compare(password, process.env.PROVOST_PASSWORD_HASH);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid provost password.",
+      });
+    }
+
+    const token = jwt.sign(
+      { email, role: "provost" },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
     );
-    if (!passwordMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid password" });
-    }
 
-    const payload = { email, role: "provost" };
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "3h",
-    });
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Provost login successful",
+      message: "Provost logged in successfully.",
       token,
       role: "provost",
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal error" });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
 
-exports.loginChiefProvost = async (req, res) => {
+// Chief Provost Login
+exports.chiefProvostLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Compare with hardcoded chief provost credentials
     if (email !== process.env.CHIEF_PROVOST_EMAIL) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid chief provost email" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid chief provost email.",
+      });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      process.env.CHIEF_PROVOST_PASSWORD_HASH
+    const isPasswordValid = await bcrypt.compare(password, process.env.CHIEF_PROVOST_PASSWORD_HASH);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid chief provost password.",
+      });
+    }
+
+    const token = jwt.sign(
+      { email, role: "chief-provost" },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
     );
-    if (!passwordMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid password" });
-    }
 
-    const payload = { email, role: "chief-provost" };
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "3h",
-    });
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Chief Provost login successful",
+      message: "Chief Provost logged in successfully.",
       token,
       role: "chief-provost",
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal error" });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
   }
 };

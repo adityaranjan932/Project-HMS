@@ -16,10 +16,13 @@ app.get('/', (req, res) => {
     return res.json({
         success: true,
         message: "your server is running",
-    })
-});
+
+//Routes
+app.use("/api/auth", authRoutes); 
+=======
 // Routes
 app.use("/api/auth", authRoutes);
+
 
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/leave', leaveRoutes);
