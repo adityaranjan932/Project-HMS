@@ -15,9 +15,8 @@ const MaintenanceRequest = () => {
       try {
         const token = localStorage.getItem("token"); // Assuming token is stored after login
         const response = await fetch(
-          "http://localhost:4000/api/service-requests/my",
+          "http://localhost:4000/api/service-requests/my", // Updated endpoint
           {
-            // Updated URL
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -42,9 +41,8 @@ const MaintenanceRequest = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:4000/api/service-requests",
+        "http://localhost:4000/api/service-requests", // Updated endpoint
         {
-          // Updated URL
           method: "POST",
           headers: {
             "Content-Type": "application/json",
