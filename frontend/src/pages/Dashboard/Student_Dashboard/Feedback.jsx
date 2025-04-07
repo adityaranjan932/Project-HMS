@@ -16,13 +16,18 @@ const Feedback = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        feedbackType,
+        message,
+      };
+
+      if (feedbackType === "Other") {
+        payload.customSubject = customSubject;
+      }
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/feedback/submit`,
-        {
-          feedbackType,
-          customSubject,
-          message,
-        }
+        payload
       );
       alert(response.data.message);
       setFeedbackType("");
