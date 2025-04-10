@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 require("dotenv").config();
 const authRoutes = require('./routes/authRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
@@ -8,6 +9,14 @@ const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const dataBase = require("./config/dataBase");
 
 dataBase.connect();
+
+// CORS middleware
+app.use(cors({
+    origin: 'http://localhost:5173', // Your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 //middleware
 app.use(express.json());

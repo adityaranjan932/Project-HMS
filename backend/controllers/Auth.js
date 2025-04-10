@@ -65,6 +65,14 @@ exports.checkHostelEligibility = async (req, res) => {
   try {
     const { CourseId, Semester, ExamType, SubjectId, Rollno, Dob1 } = req.body;
 
+    // Validate required fields
+    if (!CourseId || !Semester || !ExamType || !SubjectId || !Rollno || !Dob1) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
     const resultData = await fetchResult({
       CourseId,
       Semester,
@@ -74,48 +82,27 @@ exports.checkHostelEligibility = async (req, res) => {
       Dob1,
     });
 
-    if (resultData.status !== "success") {
+    if (resultData.status === "error") {
       return res.status(400).json({
         success: false,
-        message: "Result not found. Please verify the input details.",
+        message: resultData.message,
+        data: resultData.data || null
       });
     }
 
-    const resultArray = resultData.result;
-    const result = resultArray.find(item => item.key === "Result")?.value;
-    const totalMarksStr = resultArray.find(item => item.key === "Total Marks")?.value;
-
-    if (!result || !totalMarksStr) {
-      return res.status(400).json({
-        success: false,
-        message: "Incomplete result data. Cannot verify eligibility.",
-      });
-    }
-
-    const [obtained, total] = totalMarksStr.split("/").map(s => parseFloat(s.trim()));
-    const percentage = (obtained / total) * 100;
-
-    if (result !== "PASSED" || percentage < 50) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not eligible for hostel registration (must be PASSED and ≥ 50% marks).",
-      });
-    }
-
+    // If we reach here, the student is eligible
     return res.status(200).json({
       success: true,
-      message: "You are eligible for hostel registration.",
-      data: {
-        result,
-        percentage: percentage.toFixed(2),
-      }
+      message: resultData.message,
+      data: resultData.data
     });
 
-  } catch (err) {
+  } catch (error) {
+    console.error("Eligibility check error:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error",
-      error: err.message,
+      message: "Server error during eligibility check",
+      error: error.message
     });
   }
 };
@@ -179,7 +166,7 @@ exports.signUp = async (req, res) => {
       isEligible: false,
       admissionYear: new Date().getFullYear(),
     });
-    
+
 
     return res.status(200).json({
       success: true,

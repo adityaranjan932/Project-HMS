@@ -9,6 +9,7 @@ import Navbar from "../../components/Navbar/Navbar";
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(1);
+  const [isEligible, setIsEligible] = useState(false);
   const [formData, setFormData] = useState({
     // Personal Information
     course: "",
@@ -16,6 +17,11 @@ const MultiStepForm = () => {
     examType: "",
     rollno: "",
     dateOfBirth: "",
+    subject: "",
+    studentName: "",
+    fatherName: "",
+    cgpa: "",
+    sgpa: "",
 
     // Email & Mobile Verification
     email: "",
@@ -43,7 +49,8 @@ const MultiStepForm = () => {
           formData.semester &&
           formData.examType &&
           formData.rollno &&
-          formData.dateOfBirth
+          formData.dateOfBirth &&
+          isEligible
         );
       case 2:
         return formData.email && formData.mobile && formData.otp;
@@ -64,7 +71,7 @@ const MultiStepForm = () => {
       ...prevCompletion,
       [step]: isStepComplete(step),
     }));
-  }, [formData, step]);
+  }, [formData, step, isEligible]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,6 +79,19 @@ const MultiStepForm = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const handleEligibilityCheck = (eligible, studentDetails) => {
+    setIsEligible(eligible);
+    if (eligible && studentDetails) {
+      setFormData((prevData) => ({
+        ...prevData,
+        studentName: studentDetails.name,
+        fatherName: studentDetails.fatherName,
+        cgpa: studentDetails.cgpa,
+        sgpa: studentDetails.sgpa,
+      }));
+    }
   };
 
   const nextStep = () => {
@@ -108,6 +128,7 @@ const MultiStepForm = () => {
                 <PersonalInformation
                   formData={formData}
                   handleChange={handleChange}
+                  onEligibilityCheck={handleEligibilityCheck}
                 />
               )}
               {step === 2 && (

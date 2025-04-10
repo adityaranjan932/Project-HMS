@@ -31,7 +31,10 @@ async function fetchResult(data) {
   };
 
   try {
+    // First request to get cookies
     await axios.get(url, { headers });
+
+    // Second request to get results
     const response = await axios.post(url, new URLSearchParams(payload), {
       headers,
     });
@@ -92,18 +95,58 @@ async function fetchResult(data) {
           value: summaryText[2].replace("PROMOTION :", "").trim(),
         });
 
+        // Check eligibility
+        const result = resultArray.find(item => item.key === "Result")?.value;
+        const totalMarksStr = resultArray.find(item => item.key === "Total Marks")?.value;
+
+        if (!result || !totalMarksStr) {
+          return {
+            status: "error",
+            message: "Incomplete result data. Cannot verify eligibility.",
+          };
+        }
+
+        const [obtained, total] = totalMarksStr.split("/").map(s => parseFloat(s.trim()));
+        const percentage = (obtained / total) * 100;
+
+        if (result !== "PASSED" || percentage < 50) {
+          return {
+            status: "error",
+            message: "You are not eligible for hostel registration (must be PASSED and ≥ 50% marks).",
+            data: {
+              result,
+              percentage: percentage.toFixed(2),
+            }
+          };
+        }
+
         return {
           status: "success",
-          result: resultArray,
+          message: "You are eligible for hostel registration.",
+          data: {
+            result,
+            percentage: percentage.toFixed(2),
+            details: resultArray
+          }
         };
       } else {
-        return { status: "error", message: "Result not found. Check input data." };
+        return {
+          status: "error",
+          message: "Result not found. Please verify the input details.",
+        };
       }
     } else {
-      return { status: "error", message: `HTTP Error ${response.status}` };
+      return {
+        status: "error",
+        message: `HTTP Error ${response.status}`,
+      };
     }
   } catch (error) {
-    return { status: "error", message: error.message };
+    console.error("Error fetching result:", error);
+    return {
+      status: "error",
+      message: "Failed to fetch result. Please try again later.",
+    };
   }
 }
 
