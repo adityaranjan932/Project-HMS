@@ -13,9 +13,11 @@ const axios = wrapper(
   })
 );
 
-// Fetch result function
-async function fetchResult(data) {
-  const url = "https://result.lkouniv.ac.in/Results/LU_OddResult2025";
+// Combined fetch result function
+async function fetchResult(data, isEvenSemester = false) {
+  const url = isEvenSemester
+    ? "https://result.lkouniv.ac.in/Results/EvenResult2024"
+    : "https://result.lkouniv.ac.in/Results/LU_OddResult";
   const headers = {
     "User-Agent": "Mozilla/5.0",
     "Content-Type": "application/x-www-form-urlencoded",
@@ -26,20 +28,44 @@ async function fetchResult(data) {
     ExamType: data.ExamType,
     SubjectId: data.SubjectId,
     Rollno: data.Rollno,
-    Dob1: data.Dob1,
-    hdntype: "Get",
+    Dob: isEvenSemester ? data.Dob : undefined, // Use Dob for even semester
+    Dob1: isEvenSemester ? undefined : data.Dob1, // Use Dob1 for odd semester
+    hdntype: isEvenSemester ? "" : "Get",
   };
 
   try {
-    // First request to get cookies
-    await axios.get(url, { headers });
+    console.log(`Fetching ${isEvenSemester ? "even" : "odd"} semester results...`);
+    console.log("Payload being sent:", payload);
 
-    // Second request to get results
+    // Validate payload for odd semester
+    if (!isEvenSemester && (!payload.Dob1 || payload.Dob1 === "undefined")) {
+      console.error("DOB1 is missing or undefined for odd semester request.");
+      return {
+        status: "error",
+        message: "DOB1 is required for odd semester result fetching.",
+      };
+    }
+
+    // Validate payload for even semester
+    if (isEvenSemester && (!payload.Dob || payload.Dob === "undefined")) {
+      console.error("DOB is missing or undefined for even semester request.");
+      return {
+        status: "error",
+        message: "DOB is required for even semester result fetching.",
+      };
+    }
+
+    console.log("Sending GET request to fetch cookies...");
+    await axios.get(url, { headers });
+    console.log("Cookies fetched successfully.");
+
+    console.log("Sending POST request with payload:", payload);
     const response = await axios.post(url, new URLSearchParams(payload), {
       headers,
     });
 
     if (response.status === 200) {
+      console.log("Response received successfully.");
       const $ = cheerio.load(response.data);
       const resultSection = $("#prodiv");
 
@@ -136,13 +162,23 @@ async function fetchResult(data) {
         };
       }
     } else {
+      console.error(`Unexpected HTTP status: ${response.status}`);
       return {
         status: "error",
-        message: `HTTP Error ${response.status}`,
+        message: `HTTP Error ${response.status}: ${response.statusText}`,
       };
     }
   } catch (error) {
-    console.error("Error fetching result:", error);
+    if (error.response) {
+      console.error(
+        `Server responded with status ${error.response.status}:`,
+        error.response.data
+      );
+    } else if (error.request) {
+      console.error("No response received from server:", error.request);
+    } else {
+      console.error("Error setting up the request:", error.message);
+    }
     return {
       status: "error",
       message: "Failed to fetch result. Please try again later.",
@@ -162,19 +198,24 @@ if (require.main === module) {
       rl.question("Enter ExamType (Regular/Back): ", (ExamType) => {
         rl.question("Enter SubjectId: ", (SubjectId) => {
           rl.question("Enter Rollno: ", (Rollno) => {
-            rl.question("Enter DOB (dd/mm/yyyy): ", async (Dob1) => {
-              const userData = {
-                CourseId,
-                Semester,
-                ExamType,
-                SubjectId,
-                Rollno,
-                Dob1,
-              };
+            rl.question("Enter DOB (dd/mm/yyyy): ", async (Dob) => {
+              rl.question("Is this for an even semester? (yes/no): ", async (isEven) => {
+                const isEvenSemester = isEven.toLowerCase() === "yes";
+                const userData = {
+                  CourseId,
+                  Semester,
+                  ExamType,
+                  SubjectId,
+                  Rollno,
+                  Dob: isEvenSemester ? Dob : undefined, // Assign Dob for even semester
+                  Dob1: isEvenSemester ? undefined : Dob, // Assign Dob1 for odd semester
+                };
 
-              const result = await fetchResult(userData);
-              console.log(JSON.stringify(result, null, 2));
-              rl.close();
+                console.log("Fetching result with user data:", userData);
+                const result = await fetchResult(userData, isEvenSemester);
+                console.log(JSON.stringify(result, null, 2));
+                rl.close();
+              });
             });
           });
         });
@@ -185,4 +226,3 @@ if (require.main === module) {
 
 // Export for use in controllers
 module.exports = fetchResult;
-
