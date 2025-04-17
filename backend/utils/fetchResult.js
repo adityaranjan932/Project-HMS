@@ -14,7 +14,8 @@ const axios = wrapper(
 );
 
 // Combined fetch result function
-async function fetchResult(data, isEvenSemester = false) {
+async function fetchResult(data) {
+  const isEvenSemester = parseInt(data.Semester) % 2 === 0; // Automatically determine even or odd semester
   const url = isEvenSemester
     ? "https://result.lkouniv.ac.in/Results/EvenResult2024"
     : "https://result.lkouniv.ac.in/Results/LU_OddResult";
@@ -28,9 +29,9 @@ async function fetchResult(data, isEvenSemester = false) {
     ExamType: data.ExamType,
     SubjectId: data.SubjectId,
     Rollno: data.Rollno,
-    Dob: isEvenSemester ? data.Dob : undefined, // Use Dob for even semester
-    Dob1: isEvenSemester ? undefined : data.Dob1, // Use Dob1 for odd semester
-    hdntype: isEvenSemester ? "" : "Get",
+    Dob: data.Dob1, // Use the same Dob for both even and odd semesters
+    Dob1: data.Dob1, // Use the same Dob for both even and odd semesters
+    hdntype: "Get",
   };
 
   try {
@@ -199,23 +200,19 @@ if (require.main === module) {
         rl.question("Enter SubjectId: ", (SubjectId) => {
           rl.question("Enter Rollno: ", (Rollno) => {
             rl.question("Enter DOB (dd/mm/yyyy): ", async (Dob) => {
-              rl.question("Is this for an even semester? (yes/no): ", async (isEven) => {
-                const isEvenSemester = isEven.toLowerCase() === "yes";
-                const userData = {
-                  CourseId,
-                  Semester,
-                  ExamType,
-                  SubjectId,
-                  Rollno,
-                  Dob: isEvenSemester ? Dob : undefined, // Assign Dob for even semester
-                  Dob1: isEvenSemester ? undefined : Dob, // Assign Dob1 for odd semester
-                };
+              const userData = {
+                CourseId,
+                Semester,
+                ExamType,
+                SubjectId,
+                Rollno,
+                Dob,
+              };
 
-                console.log("Fetching result with user data:", userData);
-                const result = await fetchResult(userData, isEvenSemester);
-                console.log(JSON.stringify(result, null, 2));
-                rl.close();
-              });
+              console.log("Fetching result with user data:", userData);
+              const result = await fetchResult(userData);
+              console.log(JSON.stringify(result, null, 2));
+              rl.close();
             });
           });
         });

@@ -48,6 +48,7 @@ const CourseRegistrationForm = ({
           ExamType: formData.examType,
           SubjectId: formData.subject,
           Rollno: formData.rollno,
+          Dob: formData.dateOfBirth,
           Dob1: formData.dateOfBirth,
         }
       );
@@ -220,14 +221,14 @@ const CourseRegistrationForm = ({
             required
           >
             <option value="">Select Semester</option>
-            <option value="1">Semester 1</option>
-            <option value="2">Semester 2</option>
-            <option value="3">Semester 3</option>
-            <option value="4">Semester 4</option>
-            <option value="5">Semester 5</option>
-            <option value="6">Semester 6</option>
-            <option value="7">Semester 7</option>
-            <option value="8">Semester 8</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
           </select>
         </div>
         <div className="col-span-2 sm:col-span-1">
