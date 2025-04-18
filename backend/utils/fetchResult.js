@@ -81,6 +81,8 @@ function extractStudentInfo($, resultSection) {
       if (key.includes("Name of Student")) studentInfo.Name = value;
       if (key.includes("Father's Name")) studentInfo.Father_Name = value;
       if (key.includes("Roll No.")) studentInfo.Roll_No = value;
+      if(key.includes("Name of Examination")) studentInfo.Course = value.slice(0,42);
+      if(key.includes("Mother's Name")) studentInfo.Mother_Name = value;
     }
   });
 
