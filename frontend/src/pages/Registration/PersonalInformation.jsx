@@ -14,8 +14,8 @@ const CourseRegistrationForm = ({
   const [studentDetails, setStudentDetails] = useState({
     name: "",
     fatherName: "",
-    cgpa: "",
-    sgpa: "",
+    sgpaOdd: "",
+    sgpaEven: "",
   });
 
   useEffect(() => {
@@ -54,25 +54,47 @@ const CourseRegistrationForm = ({
       );
 
       if (response.data.success) {
-        setIsEligible(true);
-        onEligibilityCheck(true);
-        setError(null);
+        const eligibility = response.data.data.hostel_eligibility;
 
-        // Extract student details from the response
-        const details = response.data.data.details;
-        const name =
-          details.find((item) => item.key === "Name of Student")?.value || "";
-        const fatherName =
-          details.find((item) => item.key === "Father's Name")?.value || "";
-        const cgpa = details.find((item) => item.key === "CGPA")?.value || "";
-        const sgpa = details.find((item) => item.key === "SGPA")?.value || "";
+        if (eligibility.eligible) {
+          setIsEligible(true);
+          onEligibilityCheck(true);
+          setError(null);
 
-        setStudentDetails({
-          name,
-          fatherName,
-          cgpa,
-          sgpa,
-        });
+          // Extract student details from the response
+          const previousOddResult =
+            response.data.data.previous_odd_result || {};
+          const previousEvenResult =
+            response.data.data.previous_even_result || {};
+
+          const name = previousOddResult.Name || previousEvenResult.Name || "";
+          const fatherName =
+            previousOddResult.Father_Name ||
+            previousEvenResult.Father_Name ||
+            "";
+          const sgpaOdd = previousOddResult.SGPA || "N/A";
+          const sgpaEven = previousEvenResult.SGPA || "N/A";
+
+          setStudentDetails({
+            name,
+            fatherName,
+            sgpaOdd,
+            sgpaEven,
+          });
+        } else {
+          setIsEligible(false);
+          onEligibilityCheck(false);
+          setError(
+            eligibility.message ||
+              "You are not eligible for hostel registration"
+          );
+          setStudentDetails({
+            name: "",
+            fatherName: "",
+            sgpaOdd: "",
+            sgpaEven: "",
+          });
+        }
       } else {
         setIsEligible(false);
         onEligibilityCheck(false);
@@ -83,8 +105,8 @@ const CourseRegistrationForm = ({
         setStudentDetails({
           name: "",
           fatherName: "",
-          cgpa: "",
-          sgpa: "",
+          sgpaOdd: "",
+          sgpaEven: "",
         });
       }
     } catch (err) {
@@ -98,8 +120,8 @@ const CourseRegistrationForm = ({
       setStudentDetails({
         name: "",
         fatherName: "",
-        cgpa: "",
-        sgpa: "",
+        sgpaOdd: "",
+        sgpaEven: "",
       });
       console.error("Eligibility check error:", err);
     } finally {
@@ -140,22 +162,22 @@ const CourseRegistrationForm = ({
           </div>
           <div className="col-span-2 sm:col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              CGPA
+              SGPA (Odd Semester)
             </label>
             <input
               type="text"
-              value={studentDetails.cgpa}
+              value={studentDetails.sgpaOdd}
               readOnly
               className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
             />
           </div>
           <div className="col-span-2 sm:col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              SGPA
+              SGPA (Even Semester)
             </label>
             <input
               type="text"
-              value={studentDetails.sgpa}
+              value={studentDetails.sgpaEven}
               readOnly
               className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
             />
@@ -211,7 +233,7 @@ const CourseRegistrationForm = ({
       <div className="grid grid-cols-2 gap-5">
         <div className="col-span-2 sm:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Semester *
+            Current Year *
           </label>
           <select
             name="semester"
@@ -220,15 +242,10 @@ const CourseRegistrationForm = ({
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
             required
           >
-            <option value="">Select Semester</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
+            <option value="">Select Year</option>
+            <option value="3">2nd year</option>
+            <option value="5">3rd year</option>
+            <option value="7">4th year</option>
           </select>
         </div>
         <div className="col-span-2 sm:col-span-1">

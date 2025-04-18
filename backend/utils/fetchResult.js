@@ -13,181 +13,164 @@ const axios = wrapper(
   })
 );
 
-// Combined fetch result function
-async function fetchResult(data) {
-  const isEvenSemester = parseInt(data.Semester) % 2 === 0; // Automatically determine even or odd semester
-  const url = isEvenSemester
-    ? "https://result.lkouniv.ac.in/Results/EvenResult2024"
-    : "https://result.lkouniv.ac.in/Results/LU_OddResult";
-  const headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
+// Function to fetch odd semester result
+async function fetchOddResult(data) {
+  const url = "https://result.lkouniv.ac.in/Results/LU_OddResult";
   const payload = {
     CourseId: data.CourseId,
     Semester: data.Semester,
     ExamType: data.ExamType,
     SubjectId: data.SubjectId,
     Rollno: data.Rollno,
-    Dob: data.Dob1, // Use the same Dob for both even and odd semesters
-    Dob1: data.Dob1, // Use the same Dob for both even and odd semesters
+    Dob1: data.Dob1,
     hdntype: "Get",
   };
-
+  const headers = { "User-Agent": "Mozilla/5.0" };
   try {
-    console.log(`Fetching ${isEvenSemester ? "even" : "odd"} semester results...`);
-    console.log("Payload being sent:", payload);
-
-    // Validate payload for odd semester
-    if (!isEvenSemester && (!payload.Dob1 || payload.Dob1 === "undefined")) {
-      console.error("DOB1 is missing or undefined for odd semester request.");
-      return {
-        status: "error",
-        message: "DOB1 is required for odd semester result fetching.",
-      };
-    }
-
-    // Validate payload for even semester
-    if (isEvenSemester && (!payload.Dob || payload.Dob === "undefined")) {
-      console.error("DOB is missing or undefined for even semester request.");
-      return {
-        status: "error",
-        message: "DOB is required for even semester result fetching.",
-      };
-    }
-
-    console.log("Sending GET request to fetch cookies...");
-    await axios.get(url, { headers });
-    console.log("Cookies fetched successfully.");
-
-    console.log("Sending POST request with payload:", payload);
-    const response = await axios.post(url, new URLSearchParams(payload), {
-      headers,
-    });
-
+    const response = await axios.post(url, new URLSearchParams(payload), { headers });
     if (response.status === 200) {
-      console.log("Response received successfully.");
       const $ = cheerio.load(response.data);
       const resultSection = $("#prodiv");
-
-      if (resultSection.length > 0) {
-        const resultArray = [];
-        const studentTable = resultSection.find("table").first();
-        studentTable.find("tr").each((i, row) => {
-          const cells = $(row).find("td");
-          const key = cells.eq(0).text().trim();
-          let value = cells.eq(1).text().trim();
-          if (
-            [
-              "Roll No.",
-              "Name of Student",
-              "Father's Name",
-              "Mother's Name",
-              "Name of Examination",
-            ].includes(key)
-          ) {
-            resultArray.push({ key, value });
-          }
-          if (i === 0) {
-            resultArray.push({
-              key: "Enrollment No.",
-              value: cells.eq(2).text().replace("Enrollment No.:", "").trim(),
-            });
-          }
-        });
-
-        const subjectTable = resultSection.find("table").eq(1);
-        const summaryRow = subjectTable.find("tr").last();
-        resultArray.push({
-          key: "SGPA",
-          value: summaryRow.find("td").eq(1).text().replace("SGPA:", "").trim(),
-        });
-        resultArray.push({
-          key: "Total Marks",
-          value: summaryRow
-            .find("td")
-            .eq(2)
-            .text()
-            .replace("Total Marks :", "")
-            .trim(),
-        });
-
-        const summaryText = resultSection.find("center").text().trim().split("\n");
-        resultArray.push({
-          key: "Result",
-          value: summaryText[0].replace("RESULT :", "").trim(),
-        });
-        resultArray.push({
-          key: "Promotion",
-          value: summaryText[2].replace("PROMOTION :", "").trim(),
-        });
-
-        // Check eligibility
-        const result = resultArray.find(item => item.key === "Result")?.value;
-        const totalMarksStr = resultArray.find(item => item.key === "Total Marks")?.value;
-
-        if (!result || !totalMarksStr) {
-          return {
-            status: "error",
-            message: "Incomplete result data. Cannot verify eligibility.",
-          };
-        }
-
-        const [obtained, total] = totalMarksStr.split("/").map(s => parseFloat(s.trim()));
-        const percentage = (obtained / total) * 100;
-
-        if (result !== "PASSED" || percentage < 50) {
-          return {
-            status: "error",
-            message: "You are not eligible for hostel registration (must be PASSED and ≥ 50% marks).",
-            data: {
-              result,
-              percentage: percentage.toFixed(2),
-            }
-          };
-        }
-
-        return {
-          status: "success",
-          message: "You are eligible for hostel registration.",
-          data: {
-            result,
-            percentage: percentage.toFixed(2),
-            details: resultArray
-          }
-        };
-      } else {
-        return {
-          status: "error",
-          message: "Result not found. Please verify the input details.",
-        };
+      if (resultSection.length) {
+        return extractStudentInfo($, resultSection);
       }
-    } else {
-      console.error(`Unexpected HTTP status: ${response.status}`);
-      return {
-        status: "error",
-        message: `HTTP Error ${response.status}: ${response.statusText}`,
-      };
     }
-  } catch (error) {
-    if (error.response) {
-      console.error(
-        `Server responded with status ${error.response.status}:`,
-        error.response.data
-      );
-    } else if (error.request) {
-      console.error("No response received from server:", error.request);
-    } else {
-      console.error("Error setting up the request:", error.message);
-    }
-    return {
-      status: "error",
-      message: "Failed to fetch result. Please try again later.",
-    };
+    return { status: "error", message: "Result not found or invalid input." };
+  } catch (e) {
+    return { status: "error", message: `Error fetching odd result: ${e.message}` };
   }
 }
 
-// Only run this part if the file is executed directly (for CLI testing)
+// Function to fetch even semester result
+async function fetchEvenResult(data) {
+  const url = "https://result.lkouniv.ac.in/Results/EvenResult2024";
+  const payload = {
+    CourseId: data.CourseId,
+    Semester: data.Semester,
+    ExamType: data.ExamType,
+    SubjectId: data.SubjectId,
+    Rollno: data.Rollno,
+    Dob: data.Dob1,
+    hdntype: "Get",
+  };
+  const headers = { "User-Agent": "Mozilla/5.0" };
+  try {
+    const response = await axios.post(url, new URLSearchParams(payload), { headers });
+    if (response.status === 200) {
+      const $ = cheerio.load(response.data);
+      const resultSection = $("#prodiv");
+      if (resultSection.length) {
+        return extractStudentInfo($, resultSection);
+      }
+    }
+    return { status: "error", message: "Result not found or invalid input." };
+  } catch (e) {
+    return { status: "error", message: `Error fetching even result: ${e.message}` };
+  }
+}
+
+// Function to extract student information from HTML
+function extractStudentInfo($, resultSection) {
+  const studentInfo = { status: "success" };
+  const studentTable = resultSection.find("table").first();
+  studentTable.find("tr").each((_, row) => {
+    const cells = $(row).find("td");
+    if (cells.length >= 2) {
+      const key = cells.eq(0).text().trim();
+      const value = cells.eq(1).text().trim();
+      if (key.includes("Name of Student")) studentInfo.Name = value;
+      if (key.includes("Father's Name")) studentInfo.Father_Name = value;
+      if (key.includes("Roll No.")) studentInfo.Roll_No = value;
+    }
+  });
+
+  const subjectTable = resultSection.find("table").eq(1);
+  const summaryRow = subjectTable.find("tr").last();
+  studentInfo.SGPA = summaryRow.find("td").eq(1).text().replace("SGPA:", "").trim();
+  studentInfo.Total_Marks = summaryRow.find("td").eq(2).text().replace("Total Marks :", "").trim();
+
+  // Calculate Percentage (assuming Total_Marks is in "obtained/max" format, e.g., "450/600")
+  const marks = studentInfo.Total_Marks.split("/");
+  if (marks.length === 2) {
+    const obtained = parseFloat(marks[0]);
+    const max = parseFloat(marks[1]);
+    studentInfo.Percentage = ((obtained / max) * 100).toFixed(2);
+  } else {
+    studentInfo.Percentage = "N/A";
+  }
+
+  const summaryText = resultSection.find("center").text().trim().split("\n");
+  studentInfo.Result = summaryText[0].replace("RESULT :", "").trim();
+  studentInfo.CGPA = summaryText[1].replace("CGPA :", "").trim();
+
+  return studentInfo;
+}
+
+// Function to check hostel eligibility
+function checkHostelEligibility(combinedResults) {
+  const oddResult = combinedResults.previous_odd_result;
+  const evenResult = combinedResults.previous_even_result;
+
+  if (oddResult.status !== "success" || evenResult.status !== "success") {
+    return {
+      eligible: false,
+      message: "Cannot determine eligibility due to missing or invalid semester results.",
+    };
+  }
+
+  const oddPercentage = parseFloat(oddResult.Percentage);
+  const evenPercentage = parseFloat(evenResult.Percentage);
+
+  if (isNaN(oddPercentage) || isNaN(evenPercentage)) {
+    return {
+      eligible: false,
+      message: "Cannot determine eligibility due to invalid percentage data.",
+    };
+  }
+
+  const eligible = oddPercentage >= 60 && evenPercentage >= 60;
+  return {
+    eligible,
+    message: eligible
+      ? "Eligible for hostel based on academic performance."
+      : "Not eligible for hostel. Minimum 60% required in both semesters.",
+  };
+}
+
+// Function to fetch combined results
+async function fetchCombinedResults(data) {
+  const currentSemester = parseInt(data.Semester);
+  if (isNaN(currentSemester) || currentSemester < 1 || currentSemester > 8) {
+    return { status: "error", message: "Invalid semester input. Must be between 1 and 8." };
+  }
+
+  const combinedResults = {
+    current_semester: currentSemester,
+    current_result: currentSemester % 2 === 0 ? await fetchEvenResult(data) : await fetchOddResult(data),
+  };
+
+  if (currentSemester > 2) {
+    const oddData = { ...data, Semester: (currentSemester - 2).toString() }; // Previous odd (e.g., Sem 3)
+    const evenData = { ...data, Semester: (currentSemester - 1).toString() }; // Previous even (e.g., Sem 4)
+
+    combinedResults.previous_odd_result = await fetchOddResult(oddData);
+    combinedResults.previous_even_result = await fetchEvenResult(evenData);
+
+    combinedResults.Previous_Odd_Semester = currentSemester - 2; // Label for Sem 3
+    combinedResults.Previous_Even_Semester = currentSemester - 1; // Label for Sem 4
+
+    combinedResults.hostel_eligibility = checkHostelEligibility(combinedResults);
+  } else {
+    combinedResults.hostel_eligibility = {
+      eligible: false,
+      message: "Eligibility check requires at least semester 3 results.",
+    };
+  }
+
+  return combinedResults;
+}
+
+// CLI testing
 if (require.main === module) {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -207,10 +190,11 @@ if (require.main === module) {
                 SubjectId,
                 Rollno,
                 Dob,
+                Dob1: Dob,
               };
 
-              console.log("Fetching result with user data:", userData);
-              const result = await fetchResult(userData);
+              console.log("Fetching combined results with user data:", userData);
+              const result = await fetchCombinedResults(userData);
               console.log(JSON.stringify(result, null, 2));
               rl.close();
             });
@@ -221,5 +205,9 @@ if (require.main === module) {
   });
 }
 
-// Export for use in controllers
-module.exports = fetchResult;
+module.exports = {
+  fetchOddResult,
+  fetchEvenResult,
+  fetchCombinedResults,
+  checkHostelEligibility,
+};

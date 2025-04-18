@@ -3,7 +3,12 @@ const OTP = require("../models/OTP");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const fetchResult = require("../utils/fetchResult");
+const {
+  fetchOddResult,
+  fetchEvenResult,
+  fetchCombinedResults,
+  checkHostelEligibility,
+} = require("../utils/fetchResult");
 const StudentProfile = require("../models/StudentProfile");
 
 require("dotenv").config();
@@ -63,46 +68,22 @@ exports.sendOTP = async (req, res) => {
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
   try {
-    const { CourseId, Semester, ExamType, SubjectId, Rollno, Dob1 } = req.body;
+    const data = req.body;
+    const combinedResults = await fetchCombinedResults(data);
 
-    // Validate required fields
-    if (!CourseId || !Semester || !ExamType || !SubjectId || !Rollno || !Dob1) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    if (combinedResults.status === "error") {
+      return res.status(400).json({ success: false, message: combinedResults.message });
     }
 
-    const resultData = await fetchResult({
-      CourseId,
-      Semester,
-      ExamType,
-      SubjectId,
-      Rollno,
-      Dob1,
-    });
-
-    if (resultData.status === "error") {
-      return res.status(400).json({
-        success: false,
-        message: resultData.message,
-        data: resultData.data || null
-      });
-    }
-
-    // If we reach here, the student is eligible
     return res.status(200).json({
       success: true,
-      message: resultData.message,
-      data: resultData.data
+      data: combinedResults,
     });
-
   } catch (error) {
     console.error("Eligibility check error:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error during eligibility check",
-      error: error.message
+      message: "An error occurred while checking eligibility.",
     });
   }
 };
