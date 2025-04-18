@@ -5,18 +5,17 @@ import EmailMobileVerification from "./EmailMobileVerification";
 import HostelSelection from "./HostelSelection";
 import Preview from "./Preview";
 import Submit from "./Submit";
-import Navbar from "../../components/Navbar/Navbar";
-import Footer from "../../components/Footer/Footer";
+
 import RegHeader from "./RegHeader";
 import RegFooter from "./RegFooter";
 
-
 const MultiStepForm = () => {
-  const [category, setCategory] = useState("");  // <-- new state
+  const [category, setCategory] = useState("");
   const [step, setStep] = useState(1);
   const [isEligible, setIsEligible] = useState(false);
   const [formData, setFormData] = useState({
     course: "",
+    courseName: "",
     semester: "",
     examType: "",
     rollno: "",
@@ -24,8 +23,9 @@ const MultiStepForm = () => {
     subject: "",
     studentName: "",
     fatherName: "",
-    cgpa: "",
-    sgpa: "",
+    motherName: "",
+    sgpaOdd: "",
+    sgpaEven: "",
     email: "",
     mobile: "",
     otp: "",
@@ -85,8 +85,10 @@ const MultiStepForm = () => {
         ...prevData,
         studentName: studentDetails.name,
         fatherName: studentDetails.fatherName,
-        cgpa: studentDetails.cgpa,
-        sgpa: studentDetails.sgpa,
+        sgpaOdd: studentDetails.sgpaOdd,
+        sgpaEven: studentDetails.sgpaEven,
+        motherName: studentDetails.motherName,
+        courseName: studentDetails.courseName,
       }));
     }
   };
@@ -105,13 +107,16 @@ const MultiStepForm = () => {
 
   return (
     <>
-     <RegHeader/>
+      <RegHeader />
       <div className="max-h-screen bg-stone-200 py-2 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-
         {!category && (
           <div className="mb-8 w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.01]">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Hostel Application</h2>
-            <p className="text-gray-500 text-center mb-6">Please select your application category</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+              Hostel Application
+            </h2>
+            <p className="text-gray-500 text-center mb-6">
+              Please select your application category
+            </p>
 
             <label className="block text-gray-700 text-lg font-semibold mb-2">
               Select Category
@@ -128,15 +133,13 @@ const MultiStepForm = () => {
           </div>
         )}
 
-
         {/* Conditionally Render Form if Re-allotment selected */}
         {category === "reallotment" && (
           <div className="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
-            
-             <div className="p-8">
+            <div className="p-8">
               <StepIndicator currentStep={step} />
 
-              <div className="mb-8 mt-6">
+              <div className="">
                 {step === 1 && (
                   <PersonalInformation
                     formData={formData}
@@ -196,11 +199,12 @@ const MultiStepForm = () => {
         {/* If other category selected or none */}
         {category && category !== "reallotment" && (
           <div className="text-red-600 text-lg font-semibold mt-6">
-            Hostel Registration is available only for <u>Re-allotment (Old)</u>.
+            Hostel Registration is available only for{" "}
+            <u>Re-allotment (Old)</u>.
           </div>
         )}
       </div>
-      <RegFooter/>
+      <RegFooter />
     </>
   );
 };

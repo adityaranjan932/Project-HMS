@@ -14,8 +14,10 @@ const CourseRegistrationForm = ({
   const [studentDetails, setStudentDetails] = useState({
     name: "",
     fatherName: "",
+    motherName: "",
     sgpaOdd: "",
     sgpaEven: "",
+    courseName: "",
   });
 
   useEffect(() => {
@@ -58,9 +60,7 @@ const CourseRegistrationForm = ({
 
         if (eligibility.eligible) {
           setIsEligible(true);
-          onEligibilityCheck(true);
-          setError(null);
-
+          
           // Extract student details from the response
           const previousOddResult =
             response.data.data.previous_odd_result || {};
@@ -72,18 +72,35 @@ const CourseRegistrationForm = ({
             previousOddResult.Father_Name ||
             previousEvenResult.Father_Name ||
             "";
+            const motherName=
+            previousOddResult.Mother_Name ||
+            previousEvenResult.Mother_Name ||
+            "";
+            const courseName =
+            previousOddResult.Course ||
+            previousEvenResult.Course||
+            "";
+
           const sgpaOdd = previousOddResult.SGPA || "N/A";
           const sgpaEven = previousEvenResult.SGPA || "N/A";
 
-          setStudentDetails({
+          const studentDetails = {
             name,
             fatherName,
+            motherName,
             sgpaOdd,
             sgpaEven,
-          });
+            courseName
+          };
+
+          setStudentDetails(studentDetails);
+          
+          // Pass both eligibility status and student details to parent
+          onEligibilityCheck(true, studentDetails);
+          setError(null);
         } else {
           setIsEligible(false);
-          onEligibilityCheck(false);
+          onEligibilityCheck(false, null);
           setError(
             eligibility.message ||
               "You are not eligible for hostel registration"
@@ -91,13 +108,15 @@ const CourseRegistrationForm = ({
           setStudentDetails({
             name: "",
             fatherName: "",
+            motherName: "",
             sgpaOdd: "",
             sgpaEven: "",
+            courseName: "",
           });
         }
       } else {
         setIsEligible(false);
-        onEligibilityCheck(false);
+        onEligibilityCheck(false, null);
         setError(
           response.data.message ||
             "You are not eligible for hostel registration"
@@ -105,13 +124,16 @@ const CourseRegistrationForm = ({
         setStudentDetails({
           name: "",
           fatherName: "",
+          motherName: "",
           sgpaOdd: "",
           sgpaEven: "",
+          courseName: "",
+
         });
       }
     } catch (err) {
       setIsEligible(false);
-      onEligibilityCheck(false);
+      onEligibilityCheck(false, null);
       setError(
         err.response?.data?.message ||
           err.message ||
@@ -120,8 +142,10 @@ const CourseRegistrationForm = ({
       setStudentDetails({
         name: "",
         fatherName: "",
+        motherName: "", 
         sgpaOdd: "",
         sgpaEven: "",
+        courseName: "",
       });
       console.error("Eligibility check error:", err);
     } finally {
@@ -156,6 +180,17 @@ const CourseRegistrationForm = ({
             <input
               type="text"
               value={studentDetails.fatherName}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+            />
+          </div>
+          <div className="col-span-2 sm:col-span-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mother's Name
+            </label>
+            <input
+              type="text"
+              value={studentDetails.motherName}
               readOnly
               className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
             />

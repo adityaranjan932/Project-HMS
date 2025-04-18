@@ -27,16 +27,18 @@ const Preview = ({ formData }) => (
         <div>{formData.studentName || "Not available"}</div>
         <div className="text-gray-600 font-medium">Father's Name:</div>
         <div>{formData.fatherName || "Not available"}</div>
+        <div className="text-gray-600 font-medium">Mother's Name:</div>
+        <div>{formData.motherName || "Not available"}</div>
         <div className="text-gray-600 font-medium">Roll Number:</div>
         <div>{formData.rollno || "Not provided"}</div>
         <div className="text-gray-600 font-medium">Course:</div>
-        <div>{formData.course || "Not provided"}</div>
+        <div>{formData.courseName|| "Not available"}</div>
         <div className="text-gray-600 font-medium">Semester:</div>
         <div>{formData.semester || "Not provided"}</div>
-        <div className="text-gray-600 font-medium">CGPA:</div>
-        <div>{formData.cgpa || "Not available"}</div>
-        <div className="text-gray-600 font-medium">SGPA:</div>
-        <div>{formData.sgpa || "Not available"}</div>
+        <div className="text-gray-600 font-medium">SGPA (Odd Semester):</div>
+        <div>{formData.sgpaOdd || "Not available"}</div>
+        <div className="text-gray-600 font-medium">SGPA (Even Semester):</div>
+        <div>{formData.sgpaEven || "Not available"}</div>
       </div>
     </div>
 
@@ -55,9 +57,9 @@ const Preview = ({ formData }) => (
       </h3>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="text-gray-600 font-medium">Email:</div>
-        <div>{formData.email}</div>
+        <div>{formData.email || "Not provided"}</div>
         <div className="text-gray-600 font-medium">Mobile:</div>
-        <div>{formData.mobile}</div>
+        <div>{formData.mobile || "Not provided"}</div>
       </div>
     </div>
 
@@ -80,7 +82,7 @@ const Preview = ({ formData }) => (
             ? "Boys Hostel"
             : formData.hostelType === "girls"
             ? "Girls Hostel"
-            : ""}
+            : "Not selected"}
         </div>
         <div className="text-gray-600 font-medium">Room Preference:</div>
         <div>
@@ -90,7 +92,7 @@ const Preview = ({ formData }) => (
             ? "Double Sharing"
             : formData.roomPreference === "triple"
             ? "Triple Sharing"
-            : ""}
+            : "Not selected"}
         </div>
         <div className="text-gray-600 font-medium">Meal Plan:</div>
         <div>
@@ -100,7 +102,7 @@ const Preview = ({ formData }) => (
             ? "Non-Vegetarian"
             : formData.mealPlan === "both"
             ? "Both Options"
-            : ""}
+            : "Not selected"}
         </div>
       </div>
     </div>
