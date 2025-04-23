@@ -7,7 +7,7 @@ import Preview from "./Preview";
 import Submit from "./Submit";
 
 import RegHeader from "./RegHeader";
-import RegFooter from "./RegFooter";
+import RegFooter from "../../components/Footer/RegFooter";
 
 const MultiStepForm = () => {
   const [category, setCategory] = useState("");
@@ -29,9 +29,8 @@ const MultiStepForm = () => {
     email: "",
     mobile: "",
     otp: "",
-    hostelType: "",
+    gender: "",
     roomPreference: "",
-    mealPlan: "",
   });
 
   const [stepCompletion, setStepCompletion] = useState({
@@ -55,7 +54,7 @@ const MultiStepForm = () => {
       case 2:
         return formData.email && formData.mobile && formData.otp;
       case 3:
-        return formData.hostelType && formData.roomPreference && formData.mealPlan;
+        return formData.gender && formData.roomPreference;
       case 4:
         return true;
       default:
@@ -108,7 +107,7 @@ const MultiStepForm = () => {
   return (
     <>
       <RegHeader />
-      <div className="max-h-screen bg-stone-200 py-2 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+      <div className="bg-stone-200 py-2 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center p-5">
         {!category && (
           <div className="mb-8 w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.01]">
             <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
@@ -135,7 +134,7 @@ const MultiStepForm = () => {
 
         {/* Conditionally Render Form if Re-allotment selected */}
         {category === "reallotment" && (
-          <div className="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
+          <div className="max-w-2xl w-full bg-white rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-[1.01]">
             <div className="p-8">
               <StepIndicator currentStep={step} />
 
@@ -174,10 +173,11 @@ const MultiStepForm = () => {
                 )}
                 {step < 5 ? (
                   <button
-                    className={`px-6 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto transform hover:-translate-y-1 ${stepCompletion[step]
+                    className={`px-6 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto transform hover:-translate-y-1 ${
+                      stepCompletion[step]
                         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                         : "bg-gray-400 cursor-not-allowed text-white"
-                      }`}
+                    }`}
                     onClick={nextStep}
                     disabled={!stepCompletion[step]}
                   >
@@ -199,8 +199,7 @@ const MultiStepForm = () => {
         {/* If other category selected or none */}
         {category && category !== "reallotment" && (
           <div className="text-red-600 text-lg font-semibold mt-6">
-            Hostel Registration is available only for{" "}
-            <u>Re-allotment (Old)</u>.
+            Hostel Registration is available only for <u>Re-allotment (Old)</u>.
           </div>
         )}
       </div>

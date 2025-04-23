@@ -32,7 +32,7 @@ const Preview = ({ formData }) => (
         <div className="text-gray-600 font-medium">Roll Number:</div>
         <div>{formData.rollno || "Not provided"}</div>
         <div className="text-gray-600 font-medium">Course:</div>
-        <div>{formData.courseName|| "Not available"}</div>
+        <div>{formData.courseName || "Not available"}</div>
         <div className="text-gray-600 font-medium">Semester:</div>
         <div>{formData.semester || "Not provided"}</div>
         <div className="text-gray-600 font-medium">SGPA (Odd Semester):</div>
@@ -76,12 +76,12 @@ const Preview = ({ formData }) => (
         Hostel Preferences
       </h3>
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="text-gray-600 font-medium">Hostel Type:</div>
+        <div className="text-gray-600 font-medium">Gender:</div>
         <div>
-          {formData.hostelType === "boys"
-            ? "Boys Hostel"
-            : formData.hostelType === "girls"
-            ? "Girls Hostel"
+          {formData.gender === "male"
+            ? "Male"
+            : formData.gender === "female"
+            ? "Female"
             : "Not selected"}
         </div>
         <div className="text-gray-600 font-medium">Room Preference:</div>
@@ -92,16 +92,6 @@ const Preview = ({ formData }) => (
             ? "Double Sharing"
             : formData.roomPreference === "triple"
             ? "Triple Sharing"
-            : "Not selected"}
-        </div>
-        <div className="text-gray-600 font-medium">Meal Plan:</div>
-        <div>
-          {formData.mealPlan === "veg"
-            ? "Vegetarian"
-            : formData.mealPlan === "nonveg"
-            ? "Non-Vegetarian"
-            : formData.mealPlan === "both"
-            ? "Both Options"
             : "Not selected"}
         </div>
       </div>

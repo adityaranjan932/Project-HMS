@@ -12,11 +12,11 @@ const Footer = () => {
           className="flex-shrink-0 w-full bg-gray-700 p-3 text-center lg:w-[300px] flex flex-col items-center mb-6 lg:mb-0"
         >
           <img
-            src="/university-logo.png"
+            src="/universitylogo.png"
             alt="University Logo"
             className="h-16 w-16 mb-2"
           />
-          <h1 className="text-3xl font-semibold">University of Lucknow</h1>
+          <h1 className="text-2xl font-semibold">University of Lucknow</h1>
           <p className="text-sm font-semibold">Hostel Management System</p>
         </a>
 
@@ -100,8 +100,8 @@ const Footer = () => {
 
       {/* Copyright Section */}
       <div className="bg-gray-800 py-3 text-center text-white">
-        &copy; {new Date().getFullYear()} University of Lucknow - Hostel Management System.
-        All rights reserved.
+        &copy; {new Date().getFullYear()} University of Lucknow - Hostel
+        Management System. All rights reserved.
       </div>
 
       {/* Technical Support Section */}
@@ -114,7 +114,8 @@ const Footer = () => {
           >
             Technical Support Team
           </a>
-        </strong>.
+        </strong>
+        .
       </div>
     </>
   );

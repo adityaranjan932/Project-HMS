@@ -5,9 +5,7 @@ const RegFooter = () => {
     <footer className="bg-gray-900 text-gray-300 text-sm">
       <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between border-t border-gray-700">
         {/* Left copyright */}
-        <div className="mb-2 md:mb-0">
-          © 2025 Lucknow University
-        </div>
+        <div className="mb-2 md:mb-0">© 2025 Lucknow University</div>
 
         {/* Center links */}
         <nav className="flex flex-wrap justify-center space-x-4 text-gray-400">
@@ -41,7 +39,7 @@ const RegFooter = () => {
         <div className="mt-2 md:mt-0 text-gray-400">
           Powered by -{" "}
           <a
-            href="https://www.sritechnocrat.com"
+            href="https://github.com/amansinghnishad/Project-HMS"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"

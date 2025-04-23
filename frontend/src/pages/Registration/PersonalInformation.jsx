@@ -60,7 +60,7 @@ const CourseRegistrationForm = ({
 
         if (eligibility.eligible) {
           setIsEligible(true);
-          
+
           // Extract student details from the response
           const previousOddResult =
             response.data.data.previous_odd_result || {};
@@ -72,14 +72,12 @@ const CourseRegistrationForm = ({
             previousOddResult.Father_Name ||
             previousEvenResult.Father_Name ||
             "";
-            const motherName=
+          const motherName =
             previousOddResult.Mother_Name ||
             previousEvenResult.Mother_Name ||
             "";
-            const courseName =
-            previousOddResult.Course ||
-            previousEvenResult.Course||
-            "";
+          const courseName =
+            previousOddResult.Course || previousEvenResult.Course || "";
 
           const sgpaOdd = previousOddResult.SGPA || "N/A";
           const sgpaEven = previousEvenResult.SGPA || "N/A";
@@ -90,11 +88,11 @@ const CourseRegistrationForm = ({
             motherName,
             sgpaOdd,
             sgpaEven,
-            courseName
+            courseName,
           };
 
           setStudentDetails(studentDetails);
-          
+
           // Pass both eligibility status and student details to parent
           onEligibilityCheck(true, studentDetails);
           setError(null);
@@ -128,7 +126,6 @@ const CourseRegistrationForm = ({
           sgpaOdd: "",
           sgpaEven: "",
           courseName: "",
-
         });
       }
     } catch (err) {
@@ -142,7 +139,7 @@ const CourseRegistrationForm = ({
       setStudentDetails({
         name: "",
         fatherName: "",
-        motherName: "", 
+        motherName: "",
         sgpaOdd: "",
         sgpaEven: "",
         courseName: "",
