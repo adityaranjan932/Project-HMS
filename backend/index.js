@@ -12,11 +12,12 @@ dataBase.connect();
 
 // CORS middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend URL
+    origin: ['http://localhost:5173', 'http://localhost:5174'], // allow both
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
 
 //middleware
 app.use(express.json());
