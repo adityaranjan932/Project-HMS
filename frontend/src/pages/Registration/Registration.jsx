@@ -5,18 +5,17 @@ import EmailMobileVerification from "./EmailMobileVerification";
 import HostelSelection from "./HostelSelection";
 import Preview from "./Preview";
 import Submit from "./Submit";
-import Navbar from "../../components/Navbar/Navbar";
-import Footer from "../../components/Footer/Footer";
-import RegHeader from "./RegHeader";
-import RegFooter from "./RegFooter";
 
+import RegHeader from "./RegHeader";
+import RegFooter from "../../components/Footer/RegFooter";
 
 const MultiStepForm = () => {
-  const [category, setCategory] = useState("");  // <-- new state
+  const [category, setCategory] = useState("");
   const [step, setStep] = useState(1);
   const [isEligible, setIsEligible] = useState(false);
   const [formData, setFormData] = useState({
     course: "",
+    courseName: "",
     semester: "",
     examType: "",
     rollno: "",
@@ -24,14 +23,14 @@ const MultiStepForm = () => {
     subject: "",
     studentName: "",
     fatherName: "",
-    cgpa: "",
-    sgpa: "",
+    motherName: "",
+    sgpaOdd: "",
+    sgpaEven: "",
     email: "",
     mobile: "",
     otp: "",
-    hostelType: "",
+    gender: "",
     roomPreference: "",
-    mealPlan: "",
   });
 
   const [stepCompletion, setStepCompletion] = useState({
@@ -55,7 +54,7 @@ const MultiStepForm = () => {
       case 2:
         return formData.email && formData.mobile && formData.otp;
       case 3:
-        return formData.hostelType && formData.roomPreference && formData.mealPlan;
+        return formData.gender && formData.roomPreference;
       case 4:
         return true;
       default:
@@ -85,8 +84,10 @@ const MultiStepForm = () => {
         ...prevData,
         studentName: studentDetails.name,
         fatherName: studentDetails.fatherName,
-        cgpa: studentDetails.cgpa,
-        sgpa: studentDetails.sgpa,
+        sgpaOdd: studentDetails.sgpaOdd,
+        sgpaEven: studentDetails.sgpaEven,
+        motherName: studentDetails.motherName,
+        courseName: studentDetails.courseName,
       }));
     }
   };
@@ -105,13 +106,16 @@ const MultiStepForm = () => {
 
   return (
     <>
-     <RegHeader/>
-      <div className="max-h-screen bg-stone-200 py-2 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-
+      <RegHeader />
+      <div className="bg-stone-200 py-2 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center p-5">
         {!category && (
           <div className="mb-8 w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.01]">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Hostel Application</h2>
-            <p className="text-gray-500 text-center mb-6">Please select your application category</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+              Hostel Application
+            </h2>
+            <p className="text-gray-500 text-center mb-6">
+              Please select your application category
+            </p>
 
             <label className="block text-gray-700 text-lg font-semibold mb-2">
               Select Category
@@ -128,15 +132,13 @@ const MultiStepForm = () => {
           </div>
         )}
 
-
         {/* Conditionally Render Form if Re-allotment selected */}
         {category === "reallotment" && (
-          <div className="max-w-2xl w-full bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
-            
-             <div className="p-8">
+          <div className="max-w-2xl w-full bg-white rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-[1.01]">
+            <div className="p-8">
               <StepIndicator currentStep={step} />
 
-              <div className="mb-8 mt-6">
+              <div className="">
                 {step === 1 && (
                   <PersonalInformation
                     formData={formData}
@@ -171,10 +173,11 @@ const MultiStepForm = () => {
                 )}
                 {step < 5 ? (
                   <button
-                    className={`px-6 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto transform hover:-translate-y-1 ${stepCompletion[step]
+                    className={`px-6 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto transform hover:-translate-y-1 ${
+                      stepCompletion[step]
                         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                         : "bg-gray-400 cursor-not-allowed text-white"
-                      }`}
+                    }`}
                     onClick={nextStep}
                     disabled={!stepCompletion[step]}
                   >
@@ -200,7 +203,7 @@ const MultiStepForm = () => {
           </div>
         )}
       </div>
-      <RegFooter/>
+      <RegFooter />
     </>
   );
 };

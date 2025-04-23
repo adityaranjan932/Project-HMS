@@ -20,30 +20,29 @@ const OTPSchema = new mongoose.Schema(
 // TTL (15 mins = 900 seconds) based on createdAt
 OTPSchema.index({ createdAt: 1 }, { expireAfterSeconds: 900 });
 
-//define a function to send the email
-async function sendVerificationEmail(email,otp){
-  try{
-      const mailResponse = await mailSender(
-          email,
-          "Verification mail from HMS",
-          otp
-
-      )
-      console.log("email sent Successfullt", mailResponse);
-
-  }
-  catch(error){
-      console.log("error occurred while sending email ", error);
-      throw(error);
-
+// Define a function to send the email
+async function sendVerificationEmail(email, otp) {
+  try {
+    const mailResponse = await mailSender(
+      email,
+      "Verification mail from HMS",
+      `Your OTP is: ${otp}`
+    );
+    console.log("Email sent successfully", mailResponse);
+  } catch (error) {
+    console.error("Error occurred while sending email:", error.message); // Log error message
+    throw error; // Ensure the error is propagated
   }
 }
-// define a pre save hook to send email before the document has been saved 
-  OTPSchema.pre("save",async function(next) {
-      await sendVerificationEmail(this.email, this.otp);
-      next();
 
-  });
+// Define a pre-save hook to send email before the document is saved
+OTPSchema.pre("save", async function (next) {
+  try {
+    await sendVerificationEmail(this.email, this.otp);
+  } catch (error) {
+    console.error("Error sending verification email:", error.message); // Log error message
+  }
+  next();
+});
 
-  
-module.exports = mongoose.model("OTP",OTPSchema);
+module.exports = mongoose.model("OTP", OTPSchema);

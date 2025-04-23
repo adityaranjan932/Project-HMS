@@ -51,6 +51,22 @@ const LoginComp = ({ onSubmit }) => {
           >
             Login
           </button>
+          <div className="text-center mt-4">
+            <a
+              href="/forgot-password"
+              className="text-blue-600 hover:underline text-sm sm:text-base"
+            >
+              Forgot Password?
+            </a>
+          </div>
+          <div className="text-center mt-2">
+            <a
+              href="/register"
+              className="text-blue-600 hover:underline text-sm sm:text-base"
+            >
+              Don't have an account? Register
+            </a>
+          </div>
         </form>
       </div>
     </div>

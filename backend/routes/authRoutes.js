@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
   sendOTP,
   checkHostelEligibility,
@@ -15,7 +14,7 @@ const {
 // =======================
 
 // Send OTP
-router.post("/send-otp", sendOTP);
+router.post("/send-otp", sendOTP); // Do not include /api/auth here
 
 // Check eligibility before signup
 router.post("/check-eligibility", checkHostelEligibility);
@@ -25,7 +24,6 @@ router.post("/signup", signUp);
 
 // Student login
 router.post("/login", login);
-
 
 // =======================
 // Provost Routes

@@ -1,24 +1,30 @@
 const nodemailer = require("nodemailer");
 
-const mailSender = async (email, title, body) => {
+const mailSender = async (to, subject, text) => {
   try {
-    let transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST, // Use MAIL_HOST from .env
+      service: "Gmail", // Optional, can be removed if host is specified
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: process.env.EMAIL_USER, // Ensure this is set in your .env file
+        pass: process.env.EMAIL_PASS, // Ensure this is set in your .env file
       },
     });
 
-    let info = await transporter.sendMail({
-      from: "Lucknow University ",
-      to: `${email}`,
-      subject: `${title}`,
-      html: `${body}`,
-    });
-    console.log(info);
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      text,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Mail sent:", info.response); // Log success response
+    return info;
   } catch (error) {
-    console.log(error.message);
+    console.error("Error in mailSender:", error.message); // Log error message
+    throw error;
   }
 };
+
 module.exports = mailSender;

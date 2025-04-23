@@ -18,6 +18,13 @@ exports.sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required to send OTP.",
+      });
+    }
+
     const checkUserPresent = await User.findOne({ email });
     if (checkUserPresent) {
       return res.status(401).json({
@@ -26,7 +33,7 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    // Optional: Delete old OTPs for same email
+    // Optional: Delete old OTPs for the same email
     await OTP.deleteMany({ email });
 
     let otp;
@@ -53,9 +60,9 @@ exports.sendOTP = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: `OTP sent successfully`,
-      otp, // remove in production
     });
   } catch (error) {
+    console.error("Error in sendOTP:", error.message); // Log error message
     return res.status(500).json({
       success: false,
       message: "Failed to send OTP",
