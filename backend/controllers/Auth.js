@@ -71,6 +71,45 @@ exports.sendOTP = async (req, res) => {
   }
 };
 
+// Verify OTP
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOTP || recentOTP.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP.",
+      });
+    }
+
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+  } catch (error) {
+    console.error("Error in verifyOtp:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while verifying OTP.",
+    });
+  }
+};
 
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
@@ -131,6 +170,14 @@ exports.signUp = async (req, res) => {
       });
     }
 
+    // Check if the OTP is expired
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -155,7 +202,6 @@ exports.signUp = async (req, res) => {
       admissionYear: new Date().getFullYear(),
     });
 
-
     return res.status(200).json({
       success: true,
       message: "Signup successful",
@@ -172,7 +218,6 @@ exports.signUp = async (req, res) => {
     });
   }
 };
-
 
 // Student Login
 exports.login = async (req, res) => {

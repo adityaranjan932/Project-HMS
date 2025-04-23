@@ -13,6 +13,7 @@ const MultiStepForm = () => {
   const [category, setCategory] = useState("");
   const [step, setStep] = useState(1);
   const [isEligible, setIsEligible] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [formData, setFormData] = useState({
     course: "",
     courseName: "",
@@ -29,6 +30,8 @@ const MultiStepForm = () => {
     email: "",
     mobile: "",
     otp: "",
+    password: "",
+    confirmPassword: "",
     gender: "",
     roomPreference: "",
   });
@@ -39,6 +42,10 @@ const MultiStepForm = () => {
     3: false,
     4: true,
   });
+
+  const handleOtpVerified = (verified) => {
+    setIsOtpVerified(verified);
+  };
 
   const isStepComplete = (stepNumber) => {
     switch (stepNumber) {
@@ -52,7 +59,14 @@ const MultiStepForm = () => {
           isEligible
         );
       case 2:
-        return formData.email && formData.mobile && formData.otp;
+        return (
+          formData.email &&
+          formData.mobile &&
+          formData.password &&
+          formData.confirmPassword &&
+          formData.password === formData.confirmPassword &&
+          isOtpVerified
+        );
       case 3:
         return formData.gender && formData.roomPreference;
       case 4:
@@ -67,7 +81,7 @@ const MultiStepForm = () => {
       ...prevCompletion,
       [step]: isStepComplete(step),
     }));
-  }, [formData, step, isEligible]);
+  }, [formData, step, isEligible, isOtpVerified]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,6 +164,7 @@ const MultiStepForm = () => {
                   <EmailMobileVerification
                     formData={formData}
                     handleChange={handleChange}
+                    onOtpVerified={handleOtpVerified}
                   />
                 )}
                 {step === 3 && (
