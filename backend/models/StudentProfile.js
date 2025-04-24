@@ -10,6 +10,14 @@ const StudentProfileSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  fatherName: {
+    type: String,
+    default: "",
+  },
+  motherName: {
+    type: String,
+    default: "",
+  },
   gender: {
     type: String,
     enum: ["male", "female", "other"],
@@ -19,7 +27,23 @@ const StudentProfileSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  courseName: {
+    type: String,
+    default: "",
+  },
   semester: {
+    type: Number,
+    default: 0,
+  },
+  rollNumber: {
+    type: String,
+    default: "",
+  },
+  sgpaOdd: {
+    type: Number,
+    default: 0,
+  },
+  sgpaEven: {
     type: Number,
     default: 0,
   },
@@ -31,10 +55,19 @@ const StudentProfileSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  roomPreference: {
+    type: String,
+    enum: ["single", "double", "triple"],
+    default: "double",
+  },
   admissionYear: {
     type: Number,
     default: new Date().getFullYear(),
   },
+  contactNumber: {
+    type: String,
+    default: "",
+  }
 });
 
 module.exports = mongoose.model("StudentProfile", StudentProfileSchema);

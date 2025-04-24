@@ -1,22 +1,110 @@
-import React from "react";
-import axios from "axios"; // Import axios for API calls
+import React, { useState } from "react";
+import axios from "axios";
 
-const EmailMobileVerification = ({ formData, handleChange }) => {
+const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
+  const [otpSent, setOtpSent] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [accountStatus, setAccountStatus] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isOtpVerifiedLocal, setIsOtpVerifiedLocal] = useState(false);
+
+  // Check email existence in database before allowing to proceed
+  const checkEmailExists = async () => {
+    if (!formData.email) {
+      alert("Please enter your email address first.");
+      return null;
+    }
+
+    try {
+      setIsCheckingEmail(true);
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/check-email",
+        { email: formData.email }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      if (error.response?.status === 409) {
+        setEmailExists(true);
+        setAccountStatus(error.response.data.status || "registered");
+        return error.response.data;
+      }
+      return null;
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
   const sendOtp = async () => {
     if (!formData.email) {
       alert("Please enter your email address before sending OTP.");
       return;
     }
 
+    // First check if this email is already registered
+    const emailCheck = await checkEmailExists();
+    if (emailCheck?.exists) {
+      setEmailExists(true);
+      alert(`This email is already registered. Please login instead.`);
+      return;
+    }
+
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/auth/send-otp", // Ensure this matches the backend route
+        "http://localhost:4000/api/auth/send-otp",
         { email: formData.email }
       );
-      alert(response.data.message); // Notify user of OTP sent
+      alert(response.data.message);
+      setOtpSent(true);
+      
+      // Store OTP expiration time if provided by the backend
+      if (response.data.expiresAt) {
+        localStorage.setItem('otpExpiresAt', response.data.expiresAt);
+      }
     } catch (error) {
-      console.error("Error in sendOtp:", error); // Log error for debugging
+      console.error("Error in sendOtp:", error);
       alert(error.response?.data?.message || "Failed to send OTP");
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (!formData.otp) {
+      alert("Please enter the OTP to verify.");
+      return;
+    }
+    try {
+      setIsVerifying(true);
+      // Only send user creation fields
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        otp: formData.otp,
+        mobile: formData.mobile,
+        studentName: formData.studentName || formData.name || '',
+        gender: formData.gender || '',
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/signup",
+        payload
+      );
+      if (response.data.success) {
+        alert("OTP verified and user registered successfully!");
+        setIsOtpVerifiedLocal(true);
+        onOtpVerified(true);
+      } else {
+        alert(response.data.message || "Invalid OTP or registration failed.");
+        setIsOtpVerifiedLocal(false);
+        onOtpVerified(false);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to verify OTP or register user");
+      setIsOtpVerifiedLocal(false);
+      onOtpVerified(false);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -43,6 +131,11 @@ const EmailMobileVerification = ({ formData, handleChange }) => {
           <p className="text-xs text-gray-500 mt-1">
             We'll send a verification code to this email
           </p>
+          {emailExists && (
+            <p className="text-xs text-red-500 mt-1">
+              This email is already registered. Please use a different email or login.
+            </p>
+          )}
         </div>
 
         <div>
@@ -67,6 +160,49 @@ const EmailMobileVerification = ({ formData, handleChange }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password *
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            required
+            placeholder="Enter your password"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Confirm Password *
+          </label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 border ${
+              formData.password &&
+              formData.confirmPassword &&
+              formData.password !== formData.confirmPassword
+                ? "border-red-500"
+                : "border-gray-300"
+            } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300`}
+            required
+            placeholder="Confirm your password"
+          />
+          {formData.password &&
+            formData.confirmPassword &&
+            formData.password !== formData.confirmPassword && (
+              <p className="text-sm text-red-500 mt-1">
+                Passwords do not match.
+              </p>
+            )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Verification OTP *
           </label>
           <div className="flex space-x-2">
@@ -79,13 +215,40 @@ const EmailMobileVerification = ({ formData, handleChange }) => {
               placeholder="Enter OTP"
               required
             />
-            <button
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              onClick={sendOtp} // Attach sendOtp function
-            >
-              Send OTP
-            </button>
+            {otpSent ? (
+              <button
+                className={`px-4 py-2 ${
+                  isVerifying
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700"
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                onClick={verifyOtp}
+                disabled={isVerifying}
+              >
+                {isVerifying ? "Verifying..." : "Verify OTP"}
+              </button>
+            ) : (
+              <button
+                className={`px-4 py-2 ${
+                  isCheckingEmail
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700"
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                onClick={sendOtp}
+                disabled={isCheckingEmail}
+              >
+                {isCheckingEmail ? "Sending..." : "Send OTP"}
+              </button>
+            )}
           </div>
+          {otpSent && (
+            <button
+              className="mt-2 text-sm text-indigo-600 hover:underline"
+              onClick={sendOtp}
+            >
+              Resend OTP
+            </button>
+          )}
         </div>
       </div>
 

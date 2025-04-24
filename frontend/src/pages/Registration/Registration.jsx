@@ -5,6 +5,7 @@ import EmailMobileVerification from "./EmailMobileVerification";
 import HostelSelection from "./HostelSelection";
 import Preview from "./Preview";
 import Submit from "./Submit";
+import axios from "axios";
 
 import RegHeader from "./RegHeader";
 import RegFooter from "../../components/Footer/RegFooter";
@@ -13,6 +14,7 @@ const MultiStepForm = () => {
   const [category, setCategory] = useState("");
   const [step, setStep] = useState(1);
   const [isEligible, setIsEligible] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [formData, setFormData] = useState({
     course: "",
     courseName: "",
@@ -29,6 +31,8 @@ const MultiStepForm = () => {
     email: "",
     mobile: "",
     otp: "",
+    password: "",
+    confirmPassword: "",
     gender: "",
     roomPreference: "",
   });
@@ -39,6 +43,10 @@ const MultiStepForm = () => {
     3: false,
     4: true,
   });
+
+  const handleOtpVerified = (verified) => {
+    setIsOtpVerified(verified);
+  };
 
   const isStepComplete = (stepNumber) => {
     switch (stepNumber) {
@@ -52,7 +60,14 @@ const MultiStepForm = () => {
           isEligible
         );
       case 2:
-        return formData.email && formData.mobile && formData.otp;
+        return (
+          formData.email &&
+          formData.mobile &&
+          formData.password &&
+          formData.confirmPassword &&
+          formData.password === formData.confirmPassword &&
+          isOtpVerified
+        );
       case 3:
         return formData.gender && formData.roomPreference;
       case 4:
@@ -67,7 +82,7 @@ const MultiStepForm = () => {
       ...prevCompletion,
       [step]: isStepComplete(step),
     }));
-  }, [formData, step, isEligible]);
+  }, [formData, step, isEligible, isOtpVerified]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,9 +107,27 @@ const MultiStepForm = () => {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (stepCompletion[step]) {
-      setStep((prevStep) => Math.min(prevStep + 1, 5));
+      if (step === 2) {
+        // On EmailMobileVerification step, do signup
+        try {
+          const response = await axios.post(
+            "http://localhost:4000/api/auth/signup",
+            formData
+          );
+          if (response.data.success) {
+            // Optionally store token/user here
+            setStep((prevStep) => Math.min(prevStep + 1, 5));
+          } else {
+            alert(response.data.message || "Registration failed.");
+          }
+        } catch (error) {
+          alert(error.response?.data?.message || "Registration failed.");
+        }
+      } else {
+        setStep((prevStep) => Math.min(prevStep + 1, 5));
+      }
     } else {
       alert("Please complete all required fields before proceeding.");
     }
@@ -150,6 +183,7 @@ const MultiStepForm = () => {
                   <EmailMobileVerification
                     formData={formData}
                     handleChange={handleChange}
+                    onOtpVerified={handleOtpVerified}
                   />
                 )}
                 {step === 3 && (
@@ -171,7 +205,7 @@ const MultiStepForm = () => {
                     Previous
                   </button>
                 )}
-                {step < 5 ? (
+                {step < 5 && (
                   <button
                     className={`px-6 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ml-auto transform hover:-translate-y-1 ${
                       stepCompletion[step]
@@ -183,14 +217,8 @@ const MultiStepForm = () => {
                   >
                     Next
                   </button>
-                ) : (
-                  <button
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 ml-auto transform hover:-translate-y-1"
-                    onClick={() => alert("Form submitted successfully!")}
-                  >
-                    Submit Application
-                  </button>
                 )}
+                {/* No submit button here for step 5; Submit.jsx handles it */}
               </div>
             </div>
           </div>

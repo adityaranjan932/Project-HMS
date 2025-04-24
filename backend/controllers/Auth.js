@@ -46,13 +46,19 @@ exports.sendOTP = async (req, res) => {
 				upperCaseAlphabets: false,
 			});
 		}
-		const otpPayload = { email, otp };
+		
+		// Calculate expiration time (15 minutes from now)
+		const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+		
+		const otpPayload = { email, otp, expiresAt };
 		const otpBody = await OTP.create(otpPayload);
 		console.log("OTP Body", otpBody);
+		
 		res.status(200).json({
 			success: true,
 			message: `OTP Sent Successfully`,
 			otp,
+			expiresAt: expiresAt
 		});
 	} catch (error) {
 		console.log(error.message);
@@ -60,6 +66,45 @@ exports.sendOTP = async (req, res) => {
 	}
 };
 
+// Verify OTP
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOTP || recentOTP.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP.",
+      });
+    }
+
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+  } catch (error) {
+    console.error("Error in verifyOtp:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while verifying OTP.",
+    });
+  }
+};
 
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
@@ -86,13 +131,34 @@ exports.checkHostelEligibility = async (req, res) => {
 
 exports.signUp = async (req, res) => {
   try {
-    const { email, password, confirmPassword, otp, name, gender } = req.body;
+    const { 
+      email,
+      password,
+      confirmPassword,
+      otp,
+      studentName,
+      fatherName,
+      motherName,
+      mobile,
+      rollno,
+      courseName,
+      course,
+      semester,
+      sgpaOdd,
+      sgpaEven,
+      gender,
+      roomPreference,
+      examType,
+      subject
+    } = req.body;
 
+    console.log("Signup request received with data:", { email, studentName, gender, mobile, otp });
+    
     // Validate required fields
-    if (!email || !password || !confirmPassword || !otp || !name || !gender) {
+    if (!email || !password || !otp || !mobile) {
       return res.status(400).json({
         success: false,
-        message: "All fields (email, password, confirmPassword, otp, name, gender) are required",
+        message: "Required fields are missing: email, password, otp, and mobile are required",
       });
     }
 
@@ -107,61 +173,104 @@ exports.signUp = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists. Please log in.",
+        message: "User already exists with this email. Please log in or use a different email.",
       });
     }
 
-    // Validate OTP
+    // Validate OTP before proceeding
     const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    if (!recentOTP || recentOTP.otp.toString() !== otp.toString()) {
+    
+    if (!recentOTP) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "No OTP found for this email. Please request a new OTP.",
+      });
+    }
+    
+    if (recentOTP.otp.toString() !== otp.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP. Please check and try again.",
+      });
+    }
+
+    // Check if the OTP is expired
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
       });
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
     const user = await User.create({
-      name,
+      name: studentName || "User",
       email,
       password: hashedPassword,
       role: "student",
-      gender,
-      isVerifiedLU: true,
+      gender: gender || "other",
+      mobile,
+      isVerifiedLU: true, // Since they verified with OTP and passed eligibility check
     });
 
-    // Create profile
+    // Create student profile with all collected information
     const profile = await StudentProfile.create({
       userId: user._id,
-      name,
-      gender,
-      department: "",
-      semester: 0,
-      isEligible: false,
+      name: studentName || user.name,
+      fatherName: fatherName || "",
+      motherName: motherName || "",
+      gender: gender || "other",
+      department: courseName || "",
+      courseName: courseName || "",
+      semester: parseInt(semester) || 0,
+      rollNumber: rollno || "",
+      sgpaOdd: parseFloat(sgpaOdd) || 0,
+      sgpaEven: parseFloat(sgpaEven) || 0,
+      roomPreference: roomPreference || "double",
+      isEligible: true, // They've passed eligibility check to get here
       admissionYear: new Date().getFullYear(),
+      contactNumber: mobile
     });
 
+    // Generate JWT token for authentication
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.role,
+        name: user.name
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
+    // Return success with user info and token
     return res.status(200).json({
       success: true,
-      message: "Signup successful",
-      user,
-      profile,
+      message: "Registration successful! Welcome to the hostel management system.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        gender: user.gender
+      },
+      token
     });
 
   } catch (error) {
     console.error("Signup Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Signup failed",
+      message: "Registration failed due to a server error. Please try again later.",
       error: error.message,
     });
   }
 };
-
 
 // Student Login
 exports.login = async (req, res) => {
@@ -304,5 +413,148 @@ exports.chiefProvostLogin = async (req, res) => {
       message: "Server error",
       error: err.message,
     });
+  }
+};
+
+// Check if email already exists in database
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+    
+    const user = await User.findOne({ email });
+    
+    if (user) {
+      // Email exists
+      return res.status(409).json({
+        exists: true,
+        message: "This email is already registered",
+        status: user.isVerifiedLU ? "active" : "pending",
+      });
+    }
+    
+    // Email does not exist
+    return res.status(200).json({
+      exists: false,
+      message: "Email is available for registration",
+    });
+    
+  } catch (error) {
+    console.error("Error in checkEmail:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error checking email availability",
+      error: error.message,
+    });
+  }
+};
+
+// Check verification status in database
+exports.verificationStatus = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+    
+    // Find the most recent OTP for this email
+    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    
+    if (!recentOTP) {
+      return res.status(200).json({
+        verified: false,
+        message: "No verification record found",
+      });
+    }
+    
+    // Check if it's expired
+    const isExpired = recentOTP.expiresAt < Date.now();
+    
+    return res.status(200).json({
+      verified: !isExpired,
+      message: isExpired 
+        ? "Verification expired, please request a new OTP" 
+        : "Verification is valid",
+      expiresAt: recentOTP.expiresAt,
+    });
+    
+  } catch (error) {
+    console.error("Error in verificationStatus:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error checking verification status",
+      error: error.message,
+    });
+  }
+};
+
+// Create or update StudentProfile for a registered user
+exports.createOrUpdateStudentProfile = async (req, res) => {
+  try {
+    const {
+      email, // use email to find user
+      studentName,
+      fatherName,
+      motherName,
+      gender,
+      department,
+      courseName,
+      semester,
+      rollno,
+      sgpaOdd,
+      sgpaEven,
+      roomPreference,
+      admissionYear,
+      contactNumber
+    } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Upsert StudentProfile
+    const profile = await StudentProfile.findOneAndUpdate(
+      { userId: user._id },
+      {
+        userId: user._id,
+        name: studentName || user.name,
+        fatherName: fatherName || "",
+        motherName: motherName || "",
+        gender: gender || user.gender,
+        department: department || courseName || "",
+        courseName: courseName || "",
+        semester: parseInt(semester) || 0,
+        rollNumber: rollno || "",
+        sgpaOdd: parseFloat(sgpaOdd) || 0,
+        sgpaEven: parseFloat(sgpaEven) || 0,
+        roomPreference: roomPreference || "double",
+        isEligible: true,
+        admissionYear: admissionYear || new Date().getFullYear(),
+        contactNumber: contactNumber || user.mobile
+      },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Student profile saved successfully.",
+      profile
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
