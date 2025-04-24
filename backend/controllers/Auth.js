@@ -15,60 +15,49 @@ require("dotenv").config();
 
 // Send OTP
 exports.sendOTP = async (req, res) => {
-  try {
-    const { email } = req.body;
+	try {
+		const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required to send OTP.",
-      });
-    }
+		// Check if user is already present
+		// Find user with provided email
+		const checkUserPresent = await User.findOne({ email });
+		// to be used in case of signup
 
-    const checkUserPresent = await User.findOne({ email });
-    if (checkUserPresent) {
-      return res.status(401).json({
-        success: false,
-        message: `User is already registered`,
-      });
-    }
+		// If user found with provided email
+		if (checkUserPresent) {
+			// Return 401 Unauthorized status code with error message
+			return res.status(401).json({
+				success: false,
+				message: `User is Already Registered`,
+			});
+		}
 
-    // Optional: Delete old OTPs for the same email
-    await OTP.deleteMany({ email });
-
-    let otp;
-    let existingOTP;
-
-    // Generate unique OTP
-    do {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-        lowerCaseAlphabets: false,
-        specialChars: false,
-      });
-      existingOTP = await OTP.findOne({ otp });
-    } while (existingOTP);
-
-    const otpPayload = {
-      email,
-      otp,
-      expiresAt: Date.now() + 10 * 60 * 1000, // expires in 10 minutes
-    };
-
-    await OTP.create(otpPayload);
-
-    return res.status(200).json({
-      success: true,
-      message: `OTP sent successfully`,
-    });
-  } catch (error) {
-    console.error("Error in sendOTP:", error.message); // Log error message
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send OTP",
-      error: error.message,
-    });
-  }
+		var otp = otpGenerator.generate(6, {
+			upperCaseAlphabets: false,
+			lowerCaseAlphabets: false,
+			specialChars: false,
+		});
+		const result = await OTP.findOne({ otp: otp });
+		console.log("Result is Generate OTP Func");
+		console.log("OTP", otp);
+		console.log("Result", result);
+		while (result) {
+			otp = otpGenerator.generate(6, {
+				upperCaseAlphabets: false,
+			});
+		}
+		const otpPayload = { email, otp };
+		const otpBody = await OTP.create(otpPayload);
+		console.log("OTP Body", otpBody);
+		res.status(200).json({
+			success: true,
+			message: `OTP Sent Successfully`,
+			otp,
+		});
+	} catch (error) {
+		console.log(error.message);
+		return res.status(500).json({ success: false, error: error.message });
+	}
 };
 
 
