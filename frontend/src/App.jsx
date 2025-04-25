@@ -20,6 +20,9 @@ import ProvostLogin from "./pages/Login/ProvostLogin";
 import OtherLogin from "./pages/Login/OtherLogin";
 import Home from "./pages/Home/Home";
 import MultiStepForm from "./pages/Registration/Registration";
+import StudentTable from "./pages/DatabasePage/StudentTable";
+import HostelAdminDashboard from "./pages/DatabasePage/HostelAdminDashboard";
+import HostelAllotment from "./pages/DatabasePage/HostelAllotment";
 
 
 const App = () => {
@@ -54,6 +57,13 @@ const App = () => {
         </Route>
 
         <Route path="/registration" element={<MultiStepForm/>} />
+
+      {/*Allotment Dashboard */}
+        <Route path="/allotment_dashboard" element={<HostelAdminDashboard/>}>
+        <Route path="students" element={<StudentTable/>} />
+        <Route path="alloted_hostels_list" element={<HostelAllotment/>} />
+        </Route>
+
 
       </Routes>
     </Router>
