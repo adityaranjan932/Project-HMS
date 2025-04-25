@@ -107,46 +107,6 @@ exports.verifyOtp = async (req, res) => {
 };
 
 
-// Verify OTP
-exports.verifyOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required.",
-      });
-    }
-
-    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    if (!recentOTP || recentOTP.otp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP.",
-      });
-    }
-
-    if (recentOTP.expiresAt < Date.now()) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP has expired.",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "OTP verified successfully.",
-    });
-  } catch (error) {
-    console.error("Error in verifyOtp:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while verifying OTP.",
-    });
-  }
-};
-
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
   try {
@@ -182,13 +142,14 @@ exports.signUp = async (req, res) => {
       gender
     } = req.body;
 
+    // Log incoming data for debugging
     console.log("Signup request received with data:", { email, studentName, gender, mobile, otp });
     
     // Validate required fields
-    if (!email || !password || !otp || !mobile) {
+    if (!email || !password || !confirmPassword || !otp || !mobile) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing: email, password, otp, and mobile are required",
+        message: "Required fields are missing: email, password, confirmPassword, otp, and mobile are required",
       });
     }
 
@@ -209,30 +170,18 @@ exports.signUp = async (req, res) => {
 
     // Validate OTP before proceeding
     const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    
     if (!recentOTP) {
       return res.status(400).json({
         success: false,
         message: "No OTP found for this email. Please request a new OTP.",
       });
     }
-    
     if (recentOTP.otp.toString() !== otp.toString()) {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP. Please check and try again.",
       });
     }
-
-    // Check if the OTP is expired
-    if (recentOTP.expiresAt < Date.now()) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP has expired. Please request a new one.",
-      });
-    }
-
-    // Check if the OTP is expired
     if (recentOTP.expiresAt < Date.now()) {
       return res.status(400).json({
         success: false,
@@ -267,17 +216,6 @@ exports.signUp = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Create profile
-    const profile = await StudentProfile.create({
-      userId: user._id,
-      name,
-      gender,
-      department: "",
-      semester: 0,
-      isEligible: false,
-      admissionYear: new Date().getFullYear(),
-    });
-
     return res.status(200).json({
       success: true,
       message: "Registration successful! Welcome to the hostel management system.",
@@ -290,8 +228,8 @@ exports.signUp = async (req, res) => {
       },
       token
     });
-
   } catch (error) {
+    // Log error for debugging
     console.error("Signup Error:", error);
     return res.status(500).json({
       success: false,
