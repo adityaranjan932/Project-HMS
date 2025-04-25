@@ -106,6 +106,47 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
+
+// Verify OTP
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    if (!recentOTP || recentOTP.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP.",
+      });
+    }
+
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+  } catch (error) {
+    console.error("Error in verifyOtp:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while verifying OTP.",
+    });
+  }
+};
+
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
   try {
@@ -191,6 +232,14 @@ exports.signUp = async (req, res) => {
       });
     }
 
+    // Check if the OTP is expired
+    if (recentOTP.expiresAt < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -217,6 +266,17 @@ exports.signUp = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    // Create profile
+    const profile = await StudentProfile.create({
+      userId: user._id,
+      name,
+      gender,
+      department: "",
+      semester: 0,
+      isEligible: false,
+      admissionYear: new Date().getFullYear(),
+    });
 
     return res.status(200).json({
       success: true,

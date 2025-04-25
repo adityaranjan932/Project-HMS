@@ -63,6 +63,11 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
         localStorage.setItem('otpExpiresAt', response.data.expiresAt);
       }
     } catch (error) {
+
+      alert(response.data.message);
+      setOtpSent(true);
+    } catch (error) {
+      console.error("Error in sendOtp:", error);
       alert(error.response?.data?.message || "Failed to send OTP");
     } finally {
       setIsCheckingEmail(false);
@@ -92,6 +97,38 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
     } catch (error) {
       alert(error.response?.data?.message || "Failed to verify OTP");
       setIsOtpVerifiedLocal(false);
+      onOtpVerified(false);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (!formData.otp) {
+      alert("Please enter the OTP to verify.");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      console.log("Verifying OTP with payload:", {
+        email: formData.email,
+        otp: formData.otp,
+      }); // Debugging
+      const response = await axios.post(
+        "http://localhost:4000/api/auth/verify-otp", // Ensure this matches the backend route
+        { email: formData.email, otp: formData.otp }
+      );
+      if (response.data.success) {
+        alert("OTP verified successfully!");
+        onOtpVerified(true);
+      } else {
+        alert("Invalid OTP. Please try again.");
+        onOtpVerified(false);
+      }
+    } catch (error) {
+      console.error("Error in verifyOtp:", error); // Log full error object
+      alert(error.response?.data?.message || "Failed to verify OTP");
       onOtpVerified(false);
     } finally {
       setIsVerifying(false);
@@ -207,17 +244,22 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               disabled={!otpSent}
             />
             {otpSent && !isOtpVerifiedLocal && !isVerifying ? (
+            {otpSent ? (
+
               <button
                 className={`px-4 py-2 ${
                   isVerifying
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700"
                 } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                    : "bg-indigo-600 hover:bg-indigo-700"
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                 onClick={verifyOtp}
                 disabled={isVerifying}
               >
                 {isVerifying ? "Verifying..." : "Verify OTP"}
               </button>
+
             ) : !otpSent ? (
               <button
                 className={`px-4 py-2 ${
@@ -225,6 +267,10 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-indigo-600 hover:bg-indigo-700"
                 } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+
+            ) : (
+              <button
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onClick={sendOtp}
               >
                 Send OTP
@@ -236,6 +282,13 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               className="mt-2 text-sm text-indigo-600 hover:underline"
               onClick={sendOtp}
               disabled={isCheckingEmail}
+
+            )}
+          </div>
+          {otpSent && (
+            <button
+              className="mt-2 text-sm text-indigo-600 hover:underline"
+              onClick={sendOtp}
             >
               Resend OTP
             </button>

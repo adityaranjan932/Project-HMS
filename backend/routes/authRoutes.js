@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const {
   sendOTP,
-  verifyOtp,
+
+  verifyOtp, // Import verifyOtp
   checkHostelEligibility,
   signUp,
   login,
@@ -28,6 +29,9 @@ router.post("/check-email", checkEmail);
 
 // Check verification status
 router.post("/verification-status", verificationStatus);
+
+// Verify OTP
+router.post("/verify-otp", verifyOtp); // Add this route
 
 // Check eligibility before signup
 router.post("/check-eligibility", checkHostelEligibility);
