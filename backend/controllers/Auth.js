@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const OTP = require("../models/OTP");
+const studentProfile = require("../models/StudentProfile");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -15,55 +16,55 @@ require("dotenv").config();
 
 // Send OTP
 exports.sendOTP = async (req, res) => {
-	try {
-		const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-		// Check if user is already present
-		// Find user with provided email
-		const checkUserPresent = await User.findOne({ email });
-		// to be used in case of signup
+    // Check if user is already present
+    // Find user with provided email
+    const checkUserPresent = await User.findOne({ email });
+    // to be used in case of signup
 
-		// If user found with provided email
-		if (checkUserPresent) {
-			// Return 401 Unauthorized status code with error message
-			return res.status(401).json({
-				success: false,
-				message: `User is Already Registered`,
-			});
-		}
+    // If user found with provided email
+    if (checkUserPresent) {
+      // Return 401 Unauthorized status code with error message
+      return res.status(401).json({
+        success: false,
+        message: `User is Already Registered`,
+      });
+    }
 
-		var otp = otpGenerator.generate(6, {
-			upperCaseAlphabets: false,
-			lowerCaseAlphabets: false,
-			specialChars: false,
-		});
-		const result = await OTP.findOne({ otp: otp });
-		console.log("Result is Generate OTP Func");
-		console.log("OTP", otp);
-		console.log("Result", result);
-		while (result) {
-			otp = otpGenerator.generate(6, {
-				upperCaseAlphabets: false,
-			});
-		}
-		
-		// Calculate expiration time (15 minutes from now)
-		const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-		
-		const otpPayload = { email, otp, expiresAt };
-		const otpBody = await OTP.create(otpPayload);
-		console.log("OTP Body", otpBody);
-		
-		res.status(200).json({
-			success: true,
-			message: `OTP Sent Successfully`,
-			otp,
-			expiresAt: expiresAt
-		});
-	} catch (error) {
-		console.log(error.message);
-		return res.status(500).json({ success: false, error: error.message });
-	}
+    var otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+    const result = await OTP.findOne({ otp: otp });
+    console.log("Result is Generate OTP Func");
+    console.log("OTP", otp);
+    console.log("Result", result);
+    while (result) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+      });
+    }
+
+    // Calculate expiration time (15 minutes from now)
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    const otpPayload = { email, otp, expiresAt };
+    const otpBody = await OTP.create(otpPayload);
+    console.log("OTP Body", otpBody);
+
+    res.status(200).json({
+      success: true,
+      message: `OTP Sent Successfully`,
+      otp,
+      expiresAt: expiresAt
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ success: false, error: error.message });
+  }
 };
 
 // Verify OTP
@@ -132,7 +133,7 @@ exports.checkHostelEligibility = async (req, res) => {
 
 exports.signUp = async (req, res) => {
   try {
-    const { 
+    const {
       email,
       password,
       confirmPassword,
@@ -144,7 +145,7 @@ exports.signUp = async (req, res) => {
 
     // Log incoming data for debugging
     console.log("Signup request received with data:", { email, studentName, gender, mobile, otp });
-    
+
     // Validate required fields
     if (!email || !password || !confirmPassword || !otp || !mobile) {
       return res.status(400).json({
@@ -206,9 +207,9 @@ exports.signUp = async (req, res) => {
 
     // Generate JWT token for authentication
     const token = jwt.sign(
-      { 
-        id: user._id, 
-        email: user.email, 
+      {
+        id: user._id,
+        email: user.email,
         role: user.role,
         name: user.name
       },
@@ -387,16 +388,16 @@ exports.chiefProvostLogin = async (req, res) => {
 exports.checkEmail = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email) {
       return res.status(400).json({
         success: false,
         message: "Email is required",
       });
     }
-    
+
     const user = await User.findOne({ email });
-    
+
     if (user) {
       // Email exists
       return res.status(409).json({
@@ -405,13 +406,13 @@ exports.checkEmail = async (req, res) => {
         status: user.isVerifiedLU ? "active" : "pending",
       });
     }
-    
+
     // Email does not exist
     return res.status(200).json({
       exists: false,
       message: "Email is available for registration",
     });
-    
+
   } catch (error) {
     console.error("Error in checkEmail:", error);
     return res.status(500).json({
@@ -426,35 +427,35 @@ exports.checkEmail = async (req, res) => {
 exports.verificationStatus = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email) {
       return res.status(400).json({
         success: false,
         message: "Email is required",
       });
     }
-    
+
     // Find the most recent OTP for this email
     const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    
+
     if (!recentOTP) {
       return res.status(200).json({
         verified: false,
         message: "No verification record found",
       });
     }
-    
+
     // Check if it's expired
     const isExpired = recentOTP.expiresAt < Date.now();
-    
+
     return res.status(200).json({
       verified: !isExpired,
-      message: isExpired 
-        ? "Verification expired, please request a new OTP" 
+      message: isExpired
+        ? "Verification expired, please request a new OTP"
         : "Verification is valid",
       expiresAt: recentOTP.expiresAt,
     });
-    
+
   } catch (error) {
     console.error("Error in verificationStatus:", error);
     return res.status(500).json({
@@ -525,3 +526,15 @@ exports.createOrUpdateStudentProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+//Fetch All Student Profiles
+exports.getAllStudentProfiles = async (req, res) => {
+  try {
+    const students = await studentProfile.find({});
+    res.json({ success: true, data: students })
+  }
+  catch (err) {
+    console.log(err);
+    res.json({ success: false, message: "Error" })
+  }
+}

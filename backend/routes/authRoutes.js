@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const {
   sendOTP,
-
   verifyOtp, // Import verifyOtp
   checkHostelEligibility,
   signUp,
@@ -11,7 +10,8 @@ const {
   chiefProvostLogin,
   checkEmail,
   verificationStatus,
-  createOrUpdateStudentProfile
+  createOrUpdateStudentProfile,
+  getAllStudentProfiles
 } = require("../controllers/Auth");
 
 // =======================
@@ -50,5 +50,8 @@ router.post("/login-provost", provostLogin);
 
 // Chief Provost login
 router.post("/login-chief-provost", chiefProvostLogin);
+
+// Get all student profiles
+router.get("/students", getAllStudentProfiles);
 
 module.exports = router;
