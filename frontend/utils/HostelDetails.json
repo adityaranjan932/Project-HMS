@@ -1,0 +1,106 @@
+[
+  {
+    "hostelId": "H001",
+    "HostelName": "Kautalya Hall",
+    "Total-Capacity": 195,
+    "No-of-rooms": {
+      "singleSeater": 15,
+      "doubleSeater": 30,
+      "tripleSeater": 40
+    },
+    "description": "A well-maintained hostel for male students with modern amenities.",
+    "facilities": ["gym", "wifi", "library", "indoor sports"],
+    "hostelFor": "male"
+  },
+  {
+    "hostelId": "H002",
+    "HostelName": "Homi Jehangir Bhabha Hall",
+    "Total-Capacity": 180,
+    "No-of-rooms": {
+      "singleSeater": 10,
+      "doubleSeater": 25,
+      "tripleSeater": 40
+    },
+    "description": "Spacious hostel for male students with excellent facilities.",
+    "facilities": ["wifi", "library", "indoor sports", "cafeteria"],
+    "hostelFor": "male"
+  },
+  {
+    "hostelId": "H003",
+    "HostelName": "Ganga Hostel",
+    "Total-Capacity": 290,
+    "No-of-rooms": {
+      "singleSeater": 20,
+      "doubleSeater": 40,
+      "tripleSeater": 50
+    },
+    "description": "Comfortable hostel for female students with a serene environment.",
+    "facilities": ["gym", "wifi", "library", "garden"],
+    "hostelFor": "female"
+  },
+  {
+    "hostelId": "H004",
+    "HostelName": "Lavanya Hostel",
+    "Total-Capacity": 300,
+    "No-of-rooms": {
+      "singleSeater": 25,
+      "doubleSeater": 45,
+      "tripleSeater": 55
+    },
+    "description": "Modern hostel for female students with top-notch facilities.",
+    "facilities": ["wifi", "library", "indoor sports", "laundry"],
+    "hostelFor": "female"
+  },
+  {
+    "hostelId": "H005",
+    "HostelName": "BR Ambedkar Hostel",
+    "Total-Capacity": 280,
+    "No-of-rooms": {
+      "singleSeater": 20,
+      "doubleSeater": 40,
+      "tripleSeater": 50
+    },
+    "description": "A premium hostel for female students with all essential amenities.",
+    "facilities": ["gym", "wifi", "library", "cafeteria"],
+    "hostelFor": "female"
+  },
+  {
+    "hostelId": "H006",
+    "HostelName": "Aryabhata Hall",
+    "Total-Capacity": 190,
+    "No-of-rooms": {
+      "singleSeater": 10,
+      "doubleSeater": 25,
+      "tripleSeater": 40
+    },
+    "description": "A vibrant hostel for male students with excellent infrastructure.",
+    "facilities": ["wifi", "library", "indoor sports", "study room"],
+    "hostelFor": "male"
+  },
+  {
+    "hostelId": "H007",
+    "HostelName": "Sarojini Naidu Hostel",
+    "Total-Capacity": 270,
+    "No-of-rooms": {
+      "singleSeater": 20,
+      "doubleSeater": 40,
+      "tripleSeater": 50
+    },
+    "description": "A peaceful hostel for female students with modern facilities.",
+    "facilities": ["gym", "wifi", "library", "garden"],
+    "hostelFor": "female"
+  },
+  {
+    "hostelId": "H008",
+    "HostelName": "Tagore Hall",
+    "Total-Capacity": 175,
+    "No-of-rooms": {
+      "singleSeater": 10,
+      "doubleSeater": 25,
+      "tripleSeater": 35
+    },
+    "description": "A well-equipped hostel for male students with a focus on comfort.",
+    "facilities": ["wifi", "library", "indoor sports", "cafeteria"],
+    "hostelFor": "male"
+  }
+]
