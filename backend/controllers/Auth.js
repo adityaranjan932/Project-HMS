@@ -137,19 +137,8 @@ exports.signUp = async (req, res) => {
       confirmPassword,
       otp,
       studentName,
-      fatherName,
-      motherName,
       mobile,
-      rollno,
-      courseName,
-      course,
-      semester,
-      sgpaOdd,
-      sgpaEven,
-      gender,
-      roomPreference,
-      examType,
-      subject
+      gender
     } = req.body;
 
     console.log("Signup request received with data:", { email, studentName, gender, mobile, otp });
@@ -206,7 +195,7 @@ exports.signUp = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Create user only (not student profile)
     const user = await User.create({
       name: studentName || "User",
       email,
@@ -214,26 +203,7 @@ exports.signUp = async (req, res) => {
       role: "student",
       gender: gender || "other",
       mobile,
-      isVerifiedLU: true, // Since they verified with OTP and passed eligibility check
-    });
-
-    // Create student profile with all collected information
-    const profile = await StudentProfile.create({
-      userId: user._id,
-      name: studentName || user.name,
-      fatherName: fatherName || "",
-      motherName: motherName || "",
-      gender: gender || "other",
-      department: courseName || "",
-      courseName: courseName || "",
-      semester: parseInt(semester) || 0,
-      rollNumber: rollno || "",
-      sgpaOdd: parseFloat(sgpaOdd) || 0,
-      sgpaEven: parseFloat(sgpaEven) || 0,
-      roomPreference: roomPreference || "double",
-      isEligible: true, // They've passed eligibility check to get here
-      admissionYear: new Date().getFullYear(),
-      contactNumber: mobile
+      isVerifiedLU: true,
     });
 
     // Generate JWT token for authentication
@@ -248,7 +218,6 @@ exports.signUp = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Return success with user info and token
     return res.status(200).json({
       success: true,
       message: "Registration successful! Welcome to the hostel management system.",

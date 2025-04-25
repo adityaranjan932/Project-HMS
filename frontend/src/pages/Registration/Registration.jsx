@@ -114,10 +114,17 @@ const MultiStepForm = () => {
         try {
           const response = await axios.post(
             "http://localhost:4000/api/auth/signup",
-            formData
+            {
+              email: formData.email,
+              password: formData.password,
+              confirmPassword: formData.confirmPassword,
+              otp: formData.otp,
+              mobile: formData.mobile,
+              studentName: formData.studentName || formData.name || '',
+              gender: formData.gender || '',
+            }
           );
           if (response.data.success) {
-            // Optionally store token/user here
             setStep((prevStep) => Math.min(prevStep + 1, 5));
           } else {
             alert(response.data.message || "Registration failed.");

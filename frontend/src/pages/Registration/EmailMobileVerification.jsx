@@ -76,16 +76,16 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
     }
     setIsVerifying(true);
     try {
-      const response = await axios.post(
+      const verifyRes = await axios.post(
         "http://localhost:4000/api/auth/verify-otp",
         { email: formData.email, otp: formData.otp }
       );
-      if (response.data.success) {
+      if (verifyRes.data.success) {
         alert("OTP verified successfully!");
         setIsOtpVerifiedLocal(true);
-        onOtpVerified(true);
+        onOtpVerified(true); // Enable Next button in parent
       } else {
-        alert(response.data.message || "Invalid OTP.");
+        alert("Invalid OTP. Please try again.");
         setIsOtpVerifiedLocal(false);
         onOtpVerified(false);
       }
@@ -206,19 +206,7 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               required
               disabled={!otpSent}
             />
-            {!otpSent ? (
-              <button
-                className={`px-4 py-2 ${
-                  isCheckingEmail
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-indigo-600 hover:bg-indigo-700"
-                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                onClick={sendOtp}
-                disabled={isCheckingEmail}
-              >
-                {isCheckingEmail ? "Sending..." : "Send OTP"}
-              </button>
-            ) : (
+            {otpSent && !isOtpVerifiedLocal && !isVerifying ? (
               <button
                 className={`px-4 py-2 ${
                   isVerifying
@@ -230,7 +218,18 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               >
                 {isVerifying ? "Verifying..." : "Verify OTP"}
               </button>
-            )}
+            ) : !otpSent ? (
+              <button
+                className={`px-4 py-2 ${
+                  isCheckingEmail
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700"
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                onClick={sendOtp}
+              >
+                Send OTP
+              </button>
+            ) : null}
           </div>
           {otpSent && !isOtpVerifiedLocal && (
             <button
