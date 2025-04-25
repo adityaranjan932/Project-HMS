@@ -143,5 +143,3 @@ For any queries or support, please contact:
 
 - **Email**: [hostel.management@lkouniv.ac.in](mailto:hostel.management@lkouniv.ac.in)
 - **Technical Support**: [Technical Support Team](mailto:techteam@lkouniv.ac.in)
-
----
