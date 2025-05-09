@@ -2,12 +2,16 @@ const nodemailer = require("nodemailer");
 
 const mailSender = async (to, subject, text) => {
   try {
+    // Debug: Check if env variables are loaded
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS is set:", !!process.env.EMAIL_PASS);
+
+    // Recommended Gmail transporter config
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST, // Use MAIL_HOST from .env
-      service: "Gmail", // Optional, can be removed if host is specified
+      service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER, // Ensure this is set in your .env file
-        pass: process.env.EMAIL_PASS, // Ensure this is set in your .env file
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -22,7 +26,7 @@ const mailSender = async (to, subject, text) => {
     console.log("Mail sent:", info.response); // Log success response
     return info;
   } catch (error) {
-    console.error("Error in mailSender:", error.message); // Log error message
+    console.error("Error in mailSender:", error); // Log full error
     throw error;
   }
 };

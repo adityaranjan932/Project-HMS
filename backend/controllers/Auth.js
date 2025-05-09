@@ -1,20 +1,18 @@
 const User = require("../models/User");
 const OTP = require("../models/OTP");
-const studentProfile = require("../models/StudentProfile");
+const registeredStudentProfile = require("../models/StudentProfile");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
-  fetchOddResult,
-  fetchEvenResult,
   fetchCombinedResults,
-  checkHostelEligibility,
 } = require("../utils/fetchResult");
-const StudentProfile = require("../models/StudentProfile");
+const RegisteredStudentProfile = require("../models/StudentProfile");
 
 require("dotenv").config();
 
 // Send OTP
+
 exports.sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -66,6 +64,7 @@ exports.sendOTP = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+// ************************************************************************************************
 
 // Verify OTP
 exports.verifyOtp = async (req, res) => {
@@ -107,6 +106,7 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
+// ************************************************************************************************
 
 // Check Hostel Eligibility
 exports.checkHostelEligibility = async (req, res) => {
@@ -131,26 +131,27 @@ exports.checkHostelEligibility = async (req, res) => {
   }
 };
 
-exports.signUp = async (req, res) => {
+// ************************************************************************************************
+
+// Email & OTP Verification (was signUp)
+exports.emailVerification = async (req, res) => {
   try {
     const {
       email,
       password,
       confirmPassword,
-      otp,
-      studentName,
-      mobile,
-      gender
+      otp
+      // studentName, mobile, gender removed as user creation is moved
     } = req.body;
 
     // Log incoming data for debugging
-    console.log("Signup request received with data:", { email, studentName, gender, mobile, otp });
+    console.log("Email verification request received with data:", { email, otp });
 
     // Validate required fields
-    if (!email || !password || !confirmPassword || !otp || !mobile) {
+    if (!email || !password || !confirmPassword || !otp) {
       return res.status(400).json({
         success: false,
-        message: "Required fields are missing: email, password, confirmPassword, otp, and mobile are required",
+        message: "Required fields are missing: email, password, confirmPassword, and otp are required",
       });
     }
 
@@ -161,15 +162,7 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists with this email. Please log in or use a different email.",
-      });
-    }
-
-    // Validate OTP before proceeding
+    // Validate OTP
     const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
     if (!recentOTP) {
       return res.status(400).json({
@@ -190,55 +183,27 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user only (not student profile)
-    const user = await User.create({
-      name: studentName || "User",
-      email,
-      password: hashedPassword,
-      role: "student",
-      gender: gender || "other",
-      mobile,
-      isVerifiedLU: true,
-    });
-
-    // Generate JWT token for authentication
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        name: user.name
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // OTP is valid. Do not create user here.
+    // User creation/update will happen in createOrUpdateRegisteredStudentProfile.
 
     return res.status(200).json({
       success: true,
-      message: "Registration successful! Welcome to the hostel management system.",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        gender: user.gender
-      },
-      token
+      message: "OTP verified successfully. Please complete your profile details.",
+      // No token or user data returned here
     });
+
   } catch (error) {
     // Log error for debugging
-    console.error("Signup Error:", error);
+    console.error("Email Verification Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Registration failed due to a server error. Please try again later.",
+      message: "An error occurred during OTP verification. Please try again later.",
       error: error.message,
     });
   }
 };
+
+// ************************************************************************************************
 
 // Student Login
 exports.login = async (req, res) => {
@@ -302,6 +267,8 @@ exports.login = async (req, res) => {
   }
 };
 
+// ************************************************************************************************
+
 // Provost Login
 exports.provostLogin = async (req, res) => {
   try {
@@ -342,6 +309,7 @@ exports.provostLogin = async (req, res) => {
     });
   }
 };
+// ************************************************************************************************
 
 // Chief Provost Login
 exports.chiefProvostLogin = async (req, res) => {
@@ -384,6 +352,8 @@ exports.chiefProvostLogin = async (req, res) => {
   }
 };
 
+// ************************************************************************************************
+
 // Check if email already exists in database
 exports.checkEmail = async (req, res) => {
   try {
@@ -422,6 +392,8 @@ exports.checkEmail = async (req, res) => {
     });
   }
 };
+
+// ************************************************************************************************
 
 // Check verification status in database
 exports.verificationStatus = async (req, res) => {
@@ -465,12 +437,14 @@ exports.verificationStatus = async (req, res) => {
     });
   }
 };
+// ************************************************************************************************
 
-// Create or update StudentProfile for a registered user
-exports.createOrUpdateStudentProfile = async (req, res) => {
+// Create or update RegisteredStudentProfile for a registered user
+exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
   try {
     const {
       email, // use email to find user
+      password, // required for user creation
       studentName,
       fatherName,
       motherName,
@@ -486,51 +460,84 @@ exports.createOrUpdateStudentProfile = async (req, res) => {
       contactNumber
     } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: "Email is required." });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
+    if (!email || !password || !studentName || !gender || !contactNumber || !department || !courseName || !semester || !rollno) {
+      return res.status(400).json({ success: false, message: "Required fields are missing. Please provide all required details." });
     }
 
-    // Upsert StudentProfile
-    const profile = await StudentProfile.findOneAndUpdate(
+    let user = await User.findOne({ email });
+    if (user && user.isVerifiedLU) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already registered and verified. Please login or contact support.",
+      });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    let responseMessage;
+
+    if (user) {
+      // User exists but not verified, update
+      user.password = hashedPassword;
+      user.name = studentName;
+      user.gender = gender;
+      user.mobile = contactNumber;
+      user.isVerifiedLU = true;
+      await user.save();
+      responseMessage = "User details updated and profile saved successfully.";
+    } else {
+      // User does not exist, create new user
+      user = await User.create({
+        name: studentName,
+        email,
+        password: hashedPassword,
+        role: "student",
+        gender: gender,
+        mobile: contactNumber,
+        isVerifiedLU: true,
+      });
+      responseMessage = "User created and profile saved successfully.";
+    }
+
+    // Upsert RegisteredStudentProfile
+    const profile = await RegisteredStudentProfile.findOneAndUpdate(
       { userId: user._id },
       {
         userId: user._id,
-        name: studentName || user.name,
+        name: studentName,
         fatherName: fatherName || "",
         motherName: motherName || "",
-        gender: gender || user.gender,
-        department: department || courseName || "",
-        courseName: courseName || "",
+        gender: gender,
+        department: department,
+        courseName: courseName,
         semester: parseInt(semester) || 0,
-        rollNumber: rollno || "",
+        rollNumber: rollno,
         sgpaOdd: parseFloat(sgpaOdd) || 0,
         sgpaEven: parseFloat(sgpaEven) || 0,
         roomPreference: roomPreference || "double",
         isEligible: true,
         admissionYear: admissionYear || new Date().getFullYear(),
-        contactNumber: contactNumber || user.mobile
+        contactNumber: contactNumber
       },
-      { new: true, upsert: true }
+      { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
     return res.status(200).json({
       success: true,
-      message: "Student profile saved successfully.",
+      message: responseMessage,
       profile
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Create/Update Profile Error:", error);
+    return res.status(500).json({ success: false, message: "Server error during profile creation/update: " + error.message });
   }
 };
 
+// ************************************************************************************************
 //Fetch All Student Profiles
-exports.getAllStudentProfiles = async (req, res) => {
+exports.getAllRegisteredStudentProfiles = async (req, res) => {
   try {
-    const students = await studentProfile.find({});
+    const students = await registeredStudentProfile.find({});
     res.json({ success: true, data: students })
   }
   catch (err) {

@@ -110,10 +110,10 @@ const MultiStepForm = () => {
   const nextStep = async () => {
     if (stepCompletion[step]) {
       if (step === 2) {
-        // On EmailMobileVerification step, do signup
+        // On EmailMobileVerification step, do email verification
         try {
           const response = await axios.post(
-            "http://localhost:4000/api/auth/signup",
+            "http://localhost:4000/api/auth/email-verification",
             {
               email: formData.email,
               password: formData.password,

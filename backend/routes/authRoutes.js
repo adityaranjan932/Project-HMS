@@ -4,14 +4,14 @@ const {
   sendOTP,
   verifyOtp, // Import verifyOtp
   checkHostelEligibility,
-  signUp,
+  emailVerification, // Renamed from signUp
   login,
   provostLogin,
   chiefProvostLogin,
   checkEmail,
   verificationStatus,
-  createOrUpdateStudentProfile,
-  getAllStudentProfiles
+  createOrUpdateRegisteredStudentProfile,
+  getAllRegisteredStudentProfiles
 } = require("../controllers/Auth");
 
 // =======================
@@ -37,13 +37,13 @@ router.post("/verify-otp", verifyOtp); // Add this route
 router.post("/check-eligibility", checkHostelEligibility);
 
 // Student signup (after eligibility check)
-router.post("/signup", signUp);
+router.post("/email-verification", emailVerification);
 
 // Student login
 router.post("/login", login);
 
 // Create or update student profile (after user registration)
-router.post("/student-profile", createOrUpdateStudentProfile);
+router.post("/registered-student-profile", createOrUpdateRegisteredStudentProfile);
 
 // Provost login
 router.post("/login-provost", provostLogin);
@@ -52,6 +52,6 @@ router.post("/login-provost", provostLogin);
 router.post("/login-chief-provost", chiefProvostLogin);
 
 // Get all student profiles
-router.get("/students", getAllStudentProfiles);
+router.get("/registered-students", getAllRegisteredStudentProfiles);
 
 module.exports = router;

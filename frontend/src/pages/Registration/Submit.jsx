@@ -22,7 +22,7 @@ const Submit = ({ formData }) => {
     try {
       // Send all profile details to backend (not user creation)
       const response = await axios.post(
-        "http://localhost:4000/api/auth/student-profile",
+        "http://localhost:4000/api/auth/registered-student-profile",
         {
           email: formData.email,
           studentName: formData.studentName,
@@ -38,19 +38,28 @@ const Submit = ({ formData }) => {
           roomPreference: formData.roomPreference,
           admissionYear: new Date().getFullYear(),
           contactNumber: formData.mobile,
+          password: formData.password, // Ensure password is sent for user creation
         }
       );
       if (response.data.success) {
-        alert("Application submitted");
+        alert("Application submitted successfully!");
         setSuccess(true);
         setTimeout(() => {
           navigate("/login/student-login");
         }, 2000);
+      } else if (response.data.message && response.data.message.includes("already registered")) {
+        setError("A user with this email already exists. Please login or use a different email.");
+      } else if (response.data.message) {
+        setError(response.data.message);
       } else {
         setError("Registration failed. Please try again.");
       }
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      if (err.response && err.response.data && err.response.data.message) {
+        setError("Registration failed: " + err.response.data.message);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
