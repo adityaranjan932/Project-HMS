@@ -70,4 +70,4 @@ const StudentProfileSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("StudentProfile", StudentProfileSchema);
+module.exports = mongoose.model("RegisteredStudentProfile", StudentProfileSchema);
