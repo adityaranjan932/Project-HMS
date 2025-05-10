@@ -1,8 +1,8 @@
 {
-      "rewrites": [
-        {
-          "source": "/api/:path*",
-          "destination": "YOUR_RENDER_BACKEND_URL/:path*"
-        }
-      ]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://project-hms-backend.onrender.com/:path*"
     }
+  ]
+}
