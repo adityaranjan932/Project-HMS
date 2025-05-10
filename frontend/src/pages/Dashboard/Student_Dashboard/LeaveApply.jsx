@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { apiConnector } from "../../../services/apiconnector";
 
 const LeaveApply = () => {
   const [formData, setFormData] = useState({
@@ -17,8 +17,9 @@ const LeaveApply = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/leave/submit",
+      const response = await apiConnector(
+        "POST",
+        "/leave/submit",
         formData
       );
       alert(response.data.message);

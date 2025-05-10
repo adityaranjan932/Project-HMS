@@ -1,7 +1,7 @@
 import React from "react";
 import LoginComp from "../../components/LoginComp/LoginComp";
 import Navbar from "../../components/Navbar/Navbar";
-import axios from "axios";
+import { apiConnector } from "../../services/apiconnector";
 import { useNavigate } from "react-router-dom";
 
 const StudentLogin = () => {
@@ -9,10 +9,14 @@ const StudentLogin = () => {
 
   const handleSubmit = async ({ email, password }) => {
     try {
-      const response = await axios.post("http://localhost:4000/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await apiConnector(
+        "POST",
+        "/auth/login",
+        {
+          email,
+          password,
+        }
+      );
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));

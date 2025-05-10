@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { apiConnector } from "../../../services/apiconnector";
 
 const StudentQueries = () => {
   const [queries, setQueries] = useState([]);
@@ -9,9 +9,7 @@ const StudentQueries = () => {
   useEffect(() => {
     const fetchMaintenanceRequests = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:4000/api/service-requests/my"
-        );
+        const response = await apiConnector("GET", "/service-requests/my");
         setQueries(response.data);
         setLoading(false);
       } catch (err) {
