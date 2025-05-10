@@ -1,14 +1,14 @@
 import { apiConnector } from "./apiconnector";
 
 // API endpoints
-export const SEND_OTP_API = "/auth/send-otp";
-export const VERIFY_OTP_API = "/auth/verify-otp";
-export const EMAIL_VERIFICATION_API = "/auth/email-verification";
-export const LOGIN_API = "/auth/login";
-export const REGISTERED_STUDENT_PROFILE_API = "/auth/registered-student-profile";
-export const CHECK_EMAIL_API = "/auth/check-email";
-export const CHECK_ELIGIBILITY_API = "/auth/check-eligibility";
-export const GET_REGISTERED_STUDENTS_API = "/auth/registered-students";
+export const SEND_OTP_API = "/api/auth/send-otp";
+export const VERIFY_OTP_API = "/api/auth/verify-otp";
+export const EMAIL_VERIFICATION_API = "/api/auth/email-verification";
+export const LOGIN_API = "/api/auth/login";
+export const REGISTERED_STUDENT_PROFILE_API = "/api/auth/registered-student-profile";
+export const CHECK_EMAIL_API = "/api/auth/check-email";
+export const CHECK_ELIGIBILITY_API = "/api/auth/check-eligibility";
+export const GET_REGISTERED_STUDENTS_API = "/api/auth/registered-students";
 
 // Send OTP
 export async function sendOtp(email) {

@@ -11,7 +11,8 @@ app.use(
     origin: process.env.CORS_ORIGIN,
     credentials: true,
   })
-); app.use(express.json());
+);
+app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes); // Prepend /api/auth to all routes in authRoutes
