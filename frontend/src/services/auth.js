@@ -42,6 +42,7 @@ export async function checkEmail(email) {
 
 // Check eligibility
 export async function checkEligibility(data) {
+  console.log('[Auth Service] CHECK_ELIGIBILITY_API path being sent:', CHECK_ELIGIBILITY_API);
   return apiConnector("POST", CHECK_ELIGIBILITY_API, data);
 }
 
