@@ -42,9 +42,11 @@ export async function checkEmail(email) {
 
 // Check eligibility
 export async function checkEligibility(data) {
-  console.log('[Auth Service] CHECK_ELIGIBILITY_API path being sent (intended):', CHECK_ELIGIBILITY_API);
-  // Directly use the correct path string for this specific call to bypass potential constant resolution issues in deployment
-  return apiConnector("POST", "/api/auth/check-eligibility", data);
+  const hardcodedPath = "/api/auth/check-eligibility-V2"; // INTENTIONALLY CHANGED FOR TESTING
+  console.log('[Auth Service] TOP OF checkEligibility FUNCTION - Vercel Deployment Test - May 10 2025');
+  console.log('[Auth Service] Using hardcoded path for this call:', hardcodedPath);
+  console.log('[Auth Service] CHECK_ELIGIBILITY_API constant value (for reference):', CHECK_ELIGIBILITY_API);
+  return apiConnector("POST", hardcodedPath, data);
 }
 
 // Get all registered students
