@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { apiConnector } from "../../services/apiconnector";
 import { useNavigate } from "react-router-dom";
 
 const Submit = ({ formData }) => {
@@ -21,8 +21,9 @@ const Submit = ({ formData }) => {
     setError(null);
     try {
       // Send all profile details to backend (not user creation)
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/registered-student-profile",
+      const response = await apiConnector(
+        "POST",
+        "/auth/registered-student-profile",
         {
           email: formData.email,
           studentName: formData.studentName,

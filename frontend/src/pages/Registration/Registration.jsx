@@ -5,7 +5,7 @@ import EmailMobileVerification from "./EmailMobileVerification";
 import HostelSelection from "./HostelSelection";
 import Preview from "./Preview";
 import Submit from "./Submit";
-import axios from "axios";
+import { apiConnector } from "../../services/apiconnector";
 
 import RegHeader from "./RegHeader";
 import RegFooter from "../../components/Footer/RegFooter";
@@ -112,8 +112,9 @@ const MultiStepForm = () => {
       if (step === 2) {
         // On EmailMobileVerification step, do email verification
         try {
-          const response = await axios.post(
-            "http://localhost:4000/api/auth/email-verification",
+          const response = await apiConnector(
+            "POST",
+            "/auth/email-verification",
             {
               email: formData.email,
               password: formData.password,

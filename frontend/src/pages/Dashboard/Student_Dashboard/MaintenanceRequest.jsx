@@ -1,5 +1,6 @@
 // components/MaintenanceRequest.js
 import React, { useState, useEffect } from "react";
+import { apiConnector } from "../../../services/apiconnector";
 
 const MaintenanceRequest = () => {
   const [requestType, setRequestType] = useState("");
@@ -14,16 +15,13 @@ const MaintenanceRequest = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token"); // Assuming token is stored after login
-        const response = await fetch(
-          "http://localhost:4000/api/service-requests/my", // Updated endpoint
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await apiConnector(
+          "GET",
+          "/service-requests/my",
+          null,
+          { Authorization: `Bearer ${token}` }
         );
-        if (!response.ok) throw new Error("Failed to fetch requests");
-        const data = await response.json();
+        const data = response.data;
         setRequests(data);
       } catch (err) {
         setError(err.message);
@@ -40,19 +38,13 @@ const MaintenanceRequest = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:4000/api/service-requests", // Updated endpoint
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ requestType, description }),
-        }
+      const response = await apiConnector(
+        "POST",
+        "/service-requests",
+        { requestType, description },
+        { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
       );
-      if (!response.ok) throw new Error("Failed to submit request");
-      const newRequest = await response.json();
+      const newRequest = response.data;
       setRequests([newRequest, ...requests]); // Add new request to list
       setRequestType(""); // Reset form
       setDescription("");

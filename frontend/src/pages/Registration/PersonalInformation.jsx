@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import coursesData from "../../../utils/courseNameData.json";
-import axios from "axios";
+import { apiConnector } from "../../services/apiconnector";
 
 const CourseRegistrationForm = ({
   formData,
@@ -42,17 +42,20 @@ const CourseRegistrationForm = ({
         return;
       }
 
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/check-eligibility",
-        {
-          CourseId: formData.course,
-          Semester: formData.semester,
-          ExamType: formData.examType,
-          SubjectId: formData.subject,
-          Rollno: formData.rollno,
-          Dob: formData.dateOfBirth,
-          Dob1: formData.dateOfBirth,
-        }
+      const data = {
+        CourseId: formData.course,
+        Semester: formData.semester,
+        ExamType: formData.examType,
+        SubjectId: formData.subject,
+        Rollno: formData.rollno,
+        Dob: formData.dateOfBirth,
+        Dob1: formData.dateOfBirth,
+      };
+
+      const response = await apiConnector(
+        "POST",
+        "/auth/check-eligibility",
+        data
       );
 
       if (response.data.success) {

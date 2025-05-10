@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
+import { apiConnector } from '../../services/apiconnector';
 
 function StudentTable() {
   const [students, setStudents] = useState([]);
@@ -12,7 +11,10 @@ function StudentTable() {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:4000/api/auth/students');
+        const response = await apiConnector(
+          'GET',
+          '/auth/registered-students'
+        );
 
         if (response.data.success) {
           setStudents(response.data.data);

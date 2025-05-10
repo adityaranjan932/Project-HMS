@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { apiConnector } from "../../services/apiconnector";
 
 const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
   const [otpSent, setOtpSent] = useState(false);
@@ -18,8 +18,9 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
 
     try {
       setIsCheckingEmail(true);
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/check-email",
+      const response = await apiConnector(
+        "POST",
+        "/auth/check-email",
         { email: formData.email }
       );
       return response.data;
@@ -52,8 +53,9 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
         return;
       }
       // Send OTP
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/send-otp",
+      const response = await apiConnector(
+        "POST",
+        "/auth/send-otp",
         { email: formData.email }
       );
       setOtpSent(true);
@@ -76,8 +78,9 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
     }
     setIsVerifying(true);
     try {
-      const verifyRes = await axios.post(
-        "http://localhost:4000/api/auth/verify-otp",
+      const verifyRes = await apiConnector(
+        "POST",
+        "/auth/verify-otp",
         { email: formData.email, otp: formData.otp }
       );
       if (verifyRes.data.success) {
