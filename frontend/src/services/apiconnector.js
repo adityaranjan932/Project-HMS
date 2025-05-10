@@ -1,16 +1,10 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-export const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
-    withCredentials: true, // for sending/receiving cookies
-});
-
-export const apiConnector = (method, url, bodyData, headers, params) => {
-    return axiosInstance({
+export const apiConnector = async (method, url, bodyData, headers, params) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL; // Get base URL from env
+    return axios({
         method: `${method}`,
-        url: `${url}`,
+        url: `${baseURL}${url}`, // Prepend base URL
         data: bodyData ? bodyData : null,
         headers: headers ? headers : null,
         params: params ? params : null,
