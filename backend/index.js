@@ -1,14 +1,12 @@
 require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const authRoutes = require("./routes/authRoutes");
-const feedbackRoutes = require("./routes/feedbackRoutes");
-const leaveRoutes = require("./routes/leaveRoutes");
-const maintenanceRoutes = require("./routes/maintenanceRoutes");
-const dataBase = require("./config/dataBase");
-
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 4000; // Ensure this matches the frontend's API URL
+const cors = require('cors');
+const authRoutes = require('./routes/authRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
+const leaveRoutes = require('./routes/leaveRoutes');
+const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const dataBase = require("./config/dataBase");
 
 dataBase.connect();
 
@@ -22,9 +20,12 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
+
+//middleware
 app.use(express.json());
 
-// default route
+//default routes 
 app.get('/', (req, res) => {
     return res.json({
         success: true,
@@ -49,7 +50,9 @@ app.use((err, req, res, next) => {
     res.status(500).json({ success: false, message: "Internal server error" });
 });
 
-// Start the server
+// Define PORT
+const PORT = process.env.PORT || 4000;
+
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
 });
