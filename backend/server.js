@@ -10,13 +10,14 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,Authorization"
   })
 );
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authRoutes); // Prepend /api/auth to all routes in authRoutes
-
+app.use("/api/auth", authRoutes);
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
