@@ -41,9 +41,13 @@ export async function checkEmail(email) {
 }
 
 // Check eligibility
-export async function checkEligibility(data) {
-  console.log('[Auth Service] CHECK_ELIGIBILITY_API path being sent:', CHECK_ELIGIBILITY_API);
-  return apiConnector("POST", CHECK_ELIGIBILITY_API, data);
+export async function checkEligibility(data, debug_param_for_vercel_may_11_2025 = "test") {
+  console.log('[Auth Service] VERY UNIQUE LOG - INSIDE checkEligibility - Vercel Deployment Test - May 11, 2025');
+  console.log('[Auth Service] Debug param value:', debug_param_for_vercel_may_11_2025);
+  console.log('[Auth Service] CHECK_ELIGIBILITY_API constant value (for reference):', CHECK_ELIGIBILITY_API);
+  const intendedPath = "/api/auth/check-eligibility";
+  console.log('[Auth Service] Intended path for apiConnector:', intendedPath);
+  return apiConnector("POST", intendedPath, data);
 }
 
 // Get all registered students
