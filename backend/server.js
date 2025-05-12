@@ -14,15 +14,6 @@ dataBase.connect();
 
 // CORS middleware
 app.use(cors({
-
-    origin: [
-        'http://localhost:5173', // local frontend
-        'https://project-hms-frontend-l3vz.onrender.com' // deployed frontend
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-
   origin: [
     'http://localhost:5173', // local frontend
     'https://project-hms-frontend-l3vz.onrender.com' // deployed frontend
@@ -35,10 +26,6 @@ app.use(express.json());
 
 // default route
 app.get('/', (req, res) => {
-    return res.json({
-        success: true,
-        message: "your server is running",
-    });
   return res.json({
     success: true,
     message: "your server is running",
@@ -53,21 +40,16 @@ app.use('/api/service-requests', maintenanceRoutes); // Add maintenance routes
 
 // 404 handler
 app.use((req, res, next) => {
-    res.status(404).json({ success: false, message: "Route not found" });
   res.status(404).json({ success: false, message: "Route not found" });
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ success: false, message: "Internal server error" });
   console.error(err.stack);
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`server is running on port ${PORT}`);
-});
   console.log(`server is running on port ${PORT}`);
 });
