@@ -136,11 +136,5 @@ The **Hostel Management System (HMS)** is a comprehensive solution designed to s
 
 ---
 
-## Contact
 
-For any queries or support, please contact:
 
-- **Email**: hostel.management@lkouniv.ac.in
-- **Technical Support**: [Technical Support Team](mailto:techteam@lkouniv.ac.in)
-
----
