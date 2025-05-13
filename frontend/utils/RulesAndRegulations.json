@@ -1,0 +1,105 @@
+[
+  {
+    "id": "anti-ragging",
+    "name": "Anti-Ragging Policy",
+    "description": "Ragging in any form is strictly prohibited within and outside the hostel premises. This includes any act of physical or mental abuse, humiliation, or harassment of new students. Any student found involved in ragging will be subject to severe disciplinary action, including expulsion from the hostel and the university, and legal proceedings as per the law.",
+    "details": [
+      "Zero tolerance for ragging.",
+      "Immediate reporting of any ragging incident is mandatory.",
+      "Anti-ragging committee contact details are displayed on notice boards.",
+      "Awareness programs are conducted regularly."
+    ],
+    "imageUrl": "/images/rules/anti-ragging.jpg"
+  },
+  {
+    "id": "hostel-timings",
+    "name": "Hostel Timings & Entry/Exit",
+    "description": "Residents are expected to adhere to the prescribed hostel timings. The main gates will be closed at the specified time, and late entries will be recorded. Prior permission is required for staying out late or night outs.",
+    "details": [
+      "Hostel entry/exit timings: 6:00 AM - 10:00 PM (Sunday-Thursday), 6:00 AM - 11:00 PM (Friday-Saturday).",
+      "All residents must be inside the hostel by the closing time.",
+      "Late entry without prior permission may lead to disciplinary action.",
+      "Night out permission must be obtained from the warden at least 24 hours in advance.",
+      "Biometric attendance is mandatory for entry and exit."
+    ],
+    "imageUrl": "/images/rules/hostel-timings.jpg"
+  },
+  {
+    "id": "guest-policy",
+    "name": "Guest & Visitor Policy",
+    "description": "Guests and visitors are allowed only in designated areas (e.g., visitor's lounge) during specified hours. Overnight stay of guests in student rooms is strictly prohibited. Residents are responsible for the conduct of their guests.",
+    "details": [
+      "Visiting hours for guests: 4:00 PM - 7:00 PM on weekdays, 10:00 AM - 7:00 PM on weekends/holidays.",
+      "All guests must register at the hostel entrance with valid ID proof.",
+      "Guests are not permitted in residential blocks or student rooms.",
+      "Female guests are not allowed in boys' hostels and vice-versa, except for parents/guardians in designated areas with permission.",
+      "Residents will be held accountable for any misconduct by their guests."
+    ],
+    "imageUrl": "/images/rules/guest-policy.jpg"
+  },
+  {
+    "id": "mess-rules",
+    "name": "Mess Rules & Etiquette",
+    "description": "Residents are expected to maintain discipline and decorum in the mess. Wastage of food is strongly discouraged. Mess timings must be strictly followed.",
+    "details": [
+      "Mess timings will be displayed on the notice board.",
+      "Entry into the mess will be permitted only with a valid mess card/ID.",
+      "Food should be consumed within the dining hall. Taking food/utensils outside the mess is not allowed.",
+      "Maintain cleanliness and hygiene in the dining area.",
+      "Suggestions and complaints regarding mess food or services should be registered in the mess register or with the mess committee."
+    ],
+    "imageUrl": "/images/rules/mess-rules.jpg"
+  },
+  {
+    "id": "room-upkeep",
+    "name": "Room Allotment & Upkeep",
+    "description": "Rooms are allotted by the hostel administration and are not interchangeable without permission. Residents are responsible for the cleanliness and maintenance of their rooms and hostel property. Any damage to hostel property will be charged to the resident(s) responsible.",
+    "details": [
+      "Keep rooms clean and tidy at all times.",
+      "Use of personal electrical appliances (heaters, irons, etc.) is restricted and requires prior permission.",
+      "Do not deface walls, furniture, or fixtures.",
+      "Report any maintenance issues (electrical, plumbing, carpentry) to the hostel office promptly.",
+      "Hostel authorities may inspect rooms at any time for cleanliness and safety."
+    ],
+    "imageUrl": "/images/rules/room-upkeep.jpg"
+  },
+  {
+    "id": "common-areas",
+    "name": "Use of Common Areas & Facilities",
+    "description": "Common areas such as TV rooms, reading rooms, sports facilities, and laundry areas should be used responsibly. Maintain silence in reading rooms and study areas. Vandalism or misuse of common facilities will lead to disciplinary action.",
+    "details": [
+      "Timings for common facilities will be displayed.",
+      "Ensure common areas are kept clean and tidy after use.",
+      "Do not remove or damage any items from common areas.",
+      "Follow specific rules applicable to each facility (e.g., gym, reading room).",
+      "Report any misuse or damage of common facilities to the hostel authorities."
+    ],
+    "imageUrl": "/images/rules/common-areas.jpg"
+  },
+  {
+    "id": "prohibited-items",
+    "name": "Prohibited Items & Activities",
+    "description": "Possession or use of alcohol, tobacco products, narcotic drugs, and lethal weapons is strictly prohibited in the hostel premises. Gambling, fighting, and any form of disruptive behavior are not allowed.",
+    "details": [
+      "Strictly no smoking, consumption of alcohol, or use of illicit drugs.",
+      "No unauthorized gatherings or parties in rooms or common areas.",
+      "Playing loud music or creating disturbances is not permitted, especially during study hours (8:00 PM - 8:00 AM).",
+      "Cooking in rooms is generally not allowed, except for making tea/coffee with authorized appliances.",
+      "Pets are not allowed in the hostel."
+    ],
+    "imageUrl": "/images/rules/prohibited-items.jpg"
+  },
+  {
+    "id": "disciplinary-actions",
+    "name": "Disciplinary Actions",
+    "description": "Violation of hostel rules and regulations will result in disciplinary action, which may include warnings, fines, suspension from the hostel, or expulsion from the university, depending on the severity of the offense. The decision of the hostel authorities will be final.",
+    "details": [
+      "A disciplinary committee will investigate reported violations.",
+      "Students will be given an opportunity to present their case.",
+      "Repeated offenses will lead to stricter penalties.",
+      "Damage to hostel property will be recovered from the responsible student(s).",
+      "The university reserves the right to amend rules as deemed necessary."
+    ],
+    "imageUrl": "/images/rules/disciplinary-actions.jpg"
+  }
+]

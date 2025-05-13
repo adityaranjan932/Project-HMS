@@ -23,13 +23,15 @@ import MultiStepForm from "./pages/Registration/Registration";
 import StudentTable from "./pages/DatabasePage/StudentTable";
 import HostelAdminDashboard from "./pages/DatabasePage/HostelAdminDashboard";
 import HostelAllotment from "./pages/DatabasePage/HostelAllotment";
-
+import HostelDetailsPage from "./pages/HostelDetails/HostelDetailsPage";
+import FacilityDetailsPage from "./pages/Facilities/FacilityDetailsPage";
+import RuleDetailsPage from "./pages/Rules/RuleDetailsPage"; // Added import
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home/>} />
+        <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/login/student-login" element={<StudentLogin />} />
@@ -39,7 +41,10 @@ const App = () => {
         />
         <Route path="/login/provost-login" element={<ProvostLogin />} />
         <Route path="/login/other-login" element={<OtherLogin />} />
-
+        <Route path="/hostel/:hostelId" element={<HostelDetailsPage />} />
+        <Route path="/facility/:facilityId" element={<FacilityDetailsPage />} />
+        <Route path="/rules/:ruleId" element={<RuleDetailsPage />} />{" "}
+        {/* Added route */}
         {/* Student Dashboard Routes */}
         <Route path="/student-login" element={<Adminbar />}>
           <Route path="maintenance-request" element={<MaintenanceRequest />} />
@@ -47,7 +52,6 @@ const App = () => {
           <Route path="leave-apply" element={<LeaveApply />} />
           <Route path="fees-payment" element={<FeesPayment />} />
         </Route>
-
         {/* Provost Dashboard Routes */}
         <Route path="/provost-login" element={<ProvostAdminbar />}>
           <Route path="view-profiles" element={<ViewProfiles />} />
@@ -55,16 +59,12 @@ const App = () => {
           <Route path="student-queries" element={<StudentQueries />} />
           <Route path="public-notice" element={<PublicNotice />} />
         </Route>
-
-        <Route path="/registration" element={<MultiStepForm/>} />
-
-      {/*Allotment Dashboard */}
-        <Route path="/allotment_dashboard" element={<HostelAdminDashboard/>}>
-        <Route path="students" element={<StudentTable/>} />
-        <Route path="alloted_hostels_list" element={<HostelAllotment/>} />
+        <Route path="/registration" element={<MultiStepForm />} />
+        {/*Allotment Dashboard */}
+        <Route path="/allotment_dashboard" element={<HostelAdminDashboard />}>
+          <Route path="students" element={<StudentTable />} />
+          <Route path="alloted_hostels_list" element={<HostelAllotment />} />
         </Route>
-
-
       </Routes>
     </Router>
   );

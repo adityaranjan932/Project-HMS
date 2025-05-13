@@ -1,0 +1,80 @@
+[
+  {
+    "id": "mess-canteen",
+    "name": "Mess & Canteen",
+    "description": "Information about hostel mess facilities, menu, timings, and canteen services.",
+    "imageUrl": "/images/facilities/mess_canteen.jpg",
+    "details": {
+      "messTimings": {
+        "breakfast": "7:00 AM - 9:00 AM",
+        "lunch": "12:00 PM - 2:00 PM",
+        "dinner": "7:00 PM - 9:00 PM"
+      },
+      "canteenTimings": "9:00 AM - 10:00 PM",
+      "menuHighlights": [
+        "Weekly rotating menu",
+        "Special meals on weekends",
+        "Hygienic preparation"
+      ],
+      "paymentOptions": ["Monthly mess bill", "Pay-per-meal (canteen)"]
+    }
+  },
+  {
+    "id": "laundry-services",
+    "name": "Laundry Services",
+    "description": "Details about on-campus laundry services, including token system, timings, and charges.",
+    "imageUrl": "/images/facilities/laundry.jpg",
+    "details": {
+      "serviceHours": "8:00 AM - 8:00 PM (Monday to Saturday)",
+      "tokenSystem": "Tokens available at hostel reception",
+      "charges": "Nominal charges per load (wash & dry)",
+      "ironingServices": "Available at select locations"
+    }
+  },
+  {
+    "id": "sports-gym",
+    "name": "Sports & Gym",
+    "description": "Overview of available sports facilities (indoor/outdoor) and gymnasium equipment and timings.",
+    "imageUrl": "/images/facilities/sports_gym.jpg",
+    "details": {
+      "outdoorSports": [
+        "Cricket ground",
+        "Football field",
+        "Basketball court",
+        "Volleyball court"
+      ],
+      "indoorSports": ["Badminton", "Table Tennis", "Chess", "Carrom"],
+      "gymTimings": "6:00 AM - 9:00 AM & 5:00 PM - 8:00 PM",
+      "gymEquipment": [
+        "Treadmills",
+        "Ellipticals",
+        "Weight training machines",
+        "Free weights"
+      ]
+    }
+  },
+  {
+    "id": "reading-room",
+    "name": "Reading Room",
+    "description": "Information about reading room facilities, study environment, and operating hours.",
+    "imageUrl": "/images/facilities/reading_room.jpg",
+    "details": {
+      "operatingHours": "Open 24/7 (during academic sessions)",
+      "capacity": "Seats 100 students",
+      "environment": "Quiet and conducive for study",
+      "resources": ["Newspapers", "Magazines (limited)", "Wi-Fi access"]
+    }
+  },
+  {
+    "id": "wifi-information",
+    "name": "Wi-Fi Information",
+    "description": "Guidelines and support for accessing the campus Wi-Fi network.",
+    "imageUrl": "/images/facilities/wifi.jpg",
+    "details": {
+      "networkName": "UniversityHostelWiFi",
+      "accessInstructions": "Login with student ID and password. First-time users need to register their device.",
+      "coverage": "Available in all hostel rooms and common areas",
+      "supportContact": "IT Helpdesk - ithelp@lkouniv.ac.in, Ext: 123"
+    }
+  }
+]
