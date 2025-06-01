@@ -9,6 +9,7 @@ import {
   FaBars,
   FaTimes,
   FaSignOutAlt,
+  FaDatabase
 } from "react-icons/fa";
 
 const ProvostAdminbar = () => {
@@ -42,9 +43,8 @@ const ProvostAdminbar = () => {
 
       {/* Sidebar */}
       <nav
-        className={`${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40`}
+        className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40`}
       >
         <div className="p-6 text-center">
           <h2 className="text-2xl font-bold text-white md:ml-0 ml-8">
@@ -70,11 +70,10 @@ const ProvostAdminbar = () => {
           <li>
             <Link
               to="/provost-login/view-profiles"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
-                isActive("/view-profiles")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/view-profiles")
                   ? "bg-teal-700 text-white font-medium shadow-md"
                   : "text-teal-100 hover:bg-teal-700/50"
-              }`}
+                }`}
             >
               <FaSearch className="mr-3" />
               View Student Profiles
@@ -83,11 +82,10 @@ const ProvostAdminbar = () => {
           <li>
             <Link
               to="/provost-login/student-notice"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
-                isActive("/student-notice")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/student-notice")
                   ? "bg-teal-700 text-white font-medium shadow-md"
                   : "text-teal-100 hover:bg-teal-700/50"
-              }`}
+                }`}
             >
               <FaBell className="mr-3" />
               Student Notice
@@ -96,11 +94,10 @@ const ProvostAdminbar = () => {
           <li>
             <Link
               to="/provost-login/student-queries"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
-                isActive("/student-queries")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/student-queries")
                   ? "bg-teal-700 text-white font-medium shadow-md"
                   : "text-teal-100 hover:bg-teal-700/50"
-              }`}
+                }`}
             >
               <FaClipboardList className="mr-3" />
               Student Queries
@@ -109,16 +106,29 @@ const ProvostAdminbar = () => {
           <li>
             <Link
               to="/provost-login/public-notice"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
-                isActive("/public-notice")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/public-notice")
                   ? "bg-teal-700 text-white font-medium shadow-md"
                   : "text-teal-100 hover:bg-teal-700/50"
-              }`}
+                }`}
             >
               <FaBullhorn className="mr-3" />
               Public Notice
             </Link>
           </li>
+
+          <li>
+            <Link
+              to="/provost-login/allotment-data"
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/public-notice")
+                  ? "bg-teal-700 text-white font-medium shadow-md"
+                  : "text-teal-100 hover:bg-teal-700/50"
+                }`}
+            >
+              <FaDatabase className="mr-3" />
+              Allotment Data
+            </Link>
+          </li>
+
         </ul>
 
         <div className="absolute bottom-0 w-full p-4">

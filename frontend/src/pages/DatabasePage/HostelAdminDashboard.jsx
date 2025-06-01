@@ -5,9 +5,10 @@ import TopNavbar from '../../components/Navbar/TopNavbar';
 function HostelAdminDashboard() {
   return (
     <>
-      <TopNavbar />
+      {/* <TopNavbar /> */}
+
       <div className="max-h-screen bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold mb-6 ">Hostel Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-6 ">Allotment Data</h1>
         <nav className="mb-4">
           <ul className="flex space-x-4">
             <li>

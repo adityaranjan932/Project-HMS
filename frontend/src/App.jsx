@@ -59,13 +59,13 @@ const App = () => {
           <Route path="student-notice" element={<StudentNotice />} />
           <Route path="student-queries" element={<StudentQueries />} />
           <Route path="public-notice" element={<PublicNotice />} />
+          <Route path="allotment-data" element={<HostelAdminDashboard />} >
+            <Route path="students" element={<StudentTable />} />
+            <Route path="alloted_hostels_list" element={<HostelAllotment />} />
+          </Route>
         </Route>
         <Route path="/registration" element={<MultiStepForm />} />
-        {/*Allotment Dashboard */}
-        <Route path="/allotment_dashboard" element={<HostelAdminDashboard />}>
-          <Route path="students" element={<StudentTable />} />
-          <Route path="alloted_hostels_list" element={<HostelAllotment />} />
-        </Route>
+       
       </Routes>
     </Router>
   );
