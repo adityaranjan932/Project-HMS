@@ -1,23 +1,30 @@
 import React from "react";
 import Footer from "../../components/Footer/Footer";
 import Navbar from "../../components/Navbar/Navbar";
+import CarouselSlider from '../../components/Slider/CarouselSlider';
+
 import { Link } from "react-router-dom";
 
 
 const Home = () => {
+
+const animationOrder = ["left", "up", "down", "right"];
+
   return (
     <>
-     <Navbar/>
+      <Navbar />
       <div className="bg-gray-100 min-h-screen">
         {/* Hero Section */}
-        <div className="bg-blue-300 text-white py-16 px-6 text-center">
-          <h1 className="text-4xl font-bold mb-4">Welcome to the Hostel Management System</h1>
-          <p className="text-lg max-w-3xl mx-auto">
+        <div className="bg-[#F4F4F4	] text-white py-4 px-6 text-center">
+          <h1 className="text-3xl font-bold mb-4 text-black">Welcome to the Hostel Management System</h1>
+          <p className="text-lg max-w-full mx-auto text-gray-800">
             The official platform for managing hostel accommodations, facilities, and services
             at the University of Lucknow. Explore our hostels, access online services, and stay
             updated with the latest information.
           </p>
         </div>
+
+        <CarouselSlider />
 
         {/* Features Section */}
         <div className="py-16 px-6">
@@ -85,6 +92,8 @@ const Home = () => {
           </div>
         </div>
 
+
+
         {/* Testimonials Section */}
         <div className="bg-gray-200 py-16 px-6">
           <h2 className="text-3xl font-bold text-center mb-8">What Our Students Say</h2>
@@ -135,7 +144,7 @@ const Home = () => {
         </footer>
       </div>
 
-      <Footer/>
+      <Footer />
     </>
   );
 };
