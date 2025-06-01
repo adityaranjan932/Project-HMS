@@ -43,6 +43,16 @@ export async function login({ email, password }) {
   return apiConnector("POST", LOGIN_API, { email, password });
 }
 
+// Provost Login
+export async function provostLogin({ email, password }) {
+  // Assuming you have a PROVOST_LOGIN_API endpoint defined
+  // If not, you might need to create one or use a generic login endpoint
+  // that differentiates users by role on the backend.
+  // For now, let's assume an endpoint like "/api/auth/provost-login"
+  const PROVOST_LOGIN_API = "/api/auth/provost-login"; 
+  return apiConnector("POST", PROVOST_LOGIN_API, { email, password });
+}
+
 // Register Student Profile (final step)
 export async function registerStudentProfile(profileData) {
   return apiConnector("POST", "/api/auth/registered-student-profile", profileData);
