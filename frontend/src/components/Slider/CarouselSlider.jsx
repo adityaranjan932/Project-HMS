@@ -7,10 +7,10 @@ import "swiper/css/pagination";
 import "./index.css"
 
 // Import your images
-import i001 from "/Img1.jpg";
-import i002 from "/Img2.jpg";
-import i003 from "/Img3.jpg";
-import i004 from "/Img4.jpg";
+import i001 from "/img1.jpg"; // Changed to lowercase
+import i002 from "/img2.jpg"; // Changed to lowercase
+import i003 from "/img3.jpg"; // Changed to lowercase
+import i004 from "/img4.jpg"; // Changed to lowercase
 import i005 from "/Img5.jpg";
 import i006 from "/Img6.jpg";
 // ... import the rest of your images

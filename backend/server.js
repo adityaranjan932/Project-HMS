@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const leaveRoutes = require("./routes/leaveRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const allotmentRoutes = require("./routes/allotmentRoutes"); // Added allotment routes
 const dataBase = require("./config/dataBase");
 
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/leave', leaveRoutes);
 app.use('/api/service-requests', maintenanceRoutes); // Add maintenance routes
+app.use('/api/allotment', allotmentRoutes); // Added allotment routes
 
 // 404 handler
 app.use((req, res, next) => {

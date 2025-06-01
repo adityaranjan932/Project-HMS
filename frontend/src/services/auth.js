@@ -17,6 +17,12 @@ export const UPDATE_USER_ROLE_API = "/api/auth/updateUserRole";
 export const DELETE_USER_API = "/api/auth/deleteUser";
 export const GET_ACTIVITY_LOGS_API = "/api/auth/getActivityLogs";
 
+// Allotment APIs
+// Removed leading /api as it's part of VITE_API_BASE_URL
+export const ALLOT_ROOMS_API = "/allotment/allot-rooms";
+export const GET_ROOM_AVAILABILITY_API = "/allotment/availability";
+export const GET_ALLOTTED_STUDENTS_LIST_API = "/allotment/allotted-students";
+
 // Send OTP
 export async function sendOtp(email) {
   return apiConnector("POST", SEND_OTP_API, { email });
@@ -35,6 +41,16 @@ export async function emailVerification({ email, password, confirmPassword, otp 
 // Student Login
 export async function login({ email, password }) {
   return apiConnector("POST", LOGIN_API, { email, password });
+}
+
+// Provost Login
+export async function provostLogin({ email, password }) {
+  // Assuming you have a PROVOST_LOGIN_API endpoint defined
+  // If not, you might need to create one or use a generic login endpoint
+  // that differentiates users by role on the backend.
+  // For now, let's assume an endpoint like "/api/auth/provost-login"
+  const PROVOST_LOGIN_API = "/api/auth/provost-login"; 
+  return apiConnector("POST", PROVOST_LOGIN_API, { email, password });
 }
 
 // Register Student Profile (final step)
@@ -73,4 +89,68 @@ export async function checkEligibility(data) {
 // Get all registered students
 export async function getRegisteredStudents() {
   return apiConnector("GET", "/api/auth/registered-students");
+}
+
+// --- Allotment Service Functions ---
+
+// Trigger room allotment process
+export async function allotHostelRooms() {
+  const toastId = toast.loading("Processing allotment...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", ALLOT_ROOMS_API);
+    console.log("ALLOT_ROOMS_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Allot Rooms");
+    }
+    result = response?.data;
+    toast.success(response?.data?.message || "Allotment Process Completed!");
+  } catch (error) {
+    console.log("ALLOT_ROOMS_API ERROR............", error);
+    toast.error(error.response?.data?.message || error.message || "Allotment Process Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get room availability
+export async function getRoomAvailability() {
+  const toastId = toast.loading("Fetching room availability...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", GET_ROOM_AVAILABILITY_API);
+    console.log("GET_ROOM_AVAILABILITY_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error("Could Not Fetch Room Availability");
+    }
+    result = response?.data;
+    // No toast success message here, as this might be called in the background
+  } catch (error) {
+    console.log("GET_ROOM_AVAILABILITY_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Room Availability");
+    result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get list of all allotted students
+export async function getAllottedStudentsList() {
+  const toastId = toast.loading("Fetching allotted students list...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", GET_ALLOTTED_STUDENTS_LIST_API);
+    console.log("GET_ALLOTTED_STUDENTS_LIST_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error("Could Not Fetch Allotted Students List");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_ALLOTTED_STUDENTS_LIST_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Allotted Students");
+    result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
 }
