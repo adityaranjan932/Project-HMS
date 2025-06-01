@@ -23,7 +23,6 @@ const animationOrder = ["left", "up", "down", "right"];
             updated with the latest information.
           </p>
         </div>
-
         <CarouselSlider />
 
         {/* Features Section */}
