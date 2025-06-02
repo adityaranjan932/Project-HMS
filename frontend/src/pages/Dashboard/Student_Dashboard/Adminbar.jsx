@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FaWrench, FaCommentAlt, FaCalendarAlt, FaCreditCard, FaUserCircle, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { logout } from '../../../services/auth';
+import { toast } from 'react-hot-toast';
 
 const Adminbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,11 +15,29 @@ const Adminbar = () => {
   const isActive = (path) => {
     return location.pathname.includes(path);
   };
-
-  const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logging out...");
-    // navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      if (token) {
+        const result = await logout(token);
+        if (result && result.success) {
+          // Navigate to login page after successful logout
+          navigate('/login');
+        }
+      } else {
+        // If no token found, still clear storage and redirect
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+        toast.success("Logged out successfully!");
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error during logout");
+    }
   };
 
   return (

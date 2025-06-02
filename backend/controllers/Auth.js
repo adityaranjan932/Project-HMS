@@ -633,3 +633,236 @@ exports.getAllRegisteredStudentProfiles = async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching student profiles", error: err.message });
   }
 };
+
+// ************************************************************************************************
+// Logout functionality for both students and provosts
+exports.logout = async (req, res) => {
+  try {
+    // Since JWT tokens are stateless, we don't need to do anything on the server
+    // The client will remove the token from localStorage/sessionStorage
+    // We can optionally log the logout activity for audit purposes
+    
+    const { id: userId, email, role } = req.user || {}; // Get user info from auth middleware
+    
+    // Optional: Log the logout activity
+    console.log(`User ${userId} (${email}) with role ${role} logged out at ${new Date().toISOString()}`);
+    
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error during logout",
+      error: error.message
+    });
+  }
+};
+
+// ************************************************************************************************
+// Reset Password functionality for students only
+exports.sendResetPasswordOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if user exists and is a student
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this email address"
+      });
+    }
+
+    // Check if user is a student
+    if (user.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        message: "Password reset is only available for students"
+      });
+    }
+
+    // Generate OTP
+    let otp;
+    let otpExists = true;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (otpExists && attempts < maxAttempts) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
+      });
+      const existingOtp = await OTP.findOne({ otp });
+      if (!existingOtp) {
+        otpExists = false;
+      }
+      attempts++;
+    }
+
+    if (otpExists) {
+      return res.status(500).json({
+        success: false,
+        message: "Could not generate a unique OTP. Please try again later."
+      });
+    }
+
+    // Save OTP to database
+    const otpPayload = { email, otp };
+    const otpBody = await OTP.create(otpPayload);
+
+    return res.status(200).json({
+      success: true,
+      message: "Reset password OTP sent successfully to your email",
+      otp: otp // Remove this in production
+    });
+
+  } catch (error) {
+    console.error("Error sending reset password OTP:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error sending reset password OTP",
+      error: error.message
+    });
+  }
+};
+
+// Verify Reset Password OTP
+exports.verifyResetPasswordOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required"
+      });
+    }
+
+    // Check if user exists and is a student
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this email address"
+      });
+    }
+
+    if (user.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        message: "Password reset is only available for students"
+      });
+    }
+
+    // Verify OTP
+    const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+    
+    if (recentOtp.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found. Please request a new OTP."
+      });
+    }
+
+    if (recentOtp[0].otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully. You can now reset your password."
+    });
+
+  } catch (error) {
+    console.error("Error verifying reset password OTP:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error verifying OTP",
+      error: error.message
+    });
+  }
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword, confirmPassword } = req.body;
+
+    if (!email || !otp || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match"
+      });
+    }
+
+    // Password validation
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long"
+      });
+    }
+
+    // Check if user exists and is a student
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found with this email address"
+      });
+    }
+
+    if (user.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        message: "Password reset is only available for students"
+      });
+    }
+
+    // Verify OTP one more time
+    const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+    
+    if (recentOtp.length === 0 || recentOtp[0].otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP"
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user password
+    await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    // Delete used OTP
+    await OTP.deleteMany({ email });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now login with your new password."
+    });
+
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error resetting password",
+      error: error.message
+    });
+  }
+};
