@@ -44,7 +44,7 @@ const ProvostAdminbar = () => {
       {/* Sidebar */}
       <nav
         className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40`}
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40 flex flex-col`} // Added flex flex-col
       >
         <div className="p-6 text-center">
           <h2 className="text-2xl font-bold text-white md:ml-0 ml-8">
@@ -66,7 +66,7 @@ const ProvostAdminbar = () => {
           </p>
         </div>
 
-        <ul className="mt-8 space-y-1 px-3">
+        <ul className="mt-8 space-y-1 px-3 flex-grow overflow-y-auto"> {/* Added flex-grow overflow-y-auto */}
           <li>
             <Link
               to="/provost-login/view-profiles"
@@ -119,7 +119,7 @@ const ProvostAdminbar = () => {
           <li>
             <Link
               to="/provost-login/allotment-data"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/public-notice")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/allotment-data") // Corrected isActive check
                   ? "bg-teal-700 text-white font-medium shadow-md"
                   : "text-teal-100 hover:bg-teal-700/50"
                 }`}
@@ -131,7 +131,8 @@ const ProvostAdminbar = () => {
 
         </ul>
 
-        <div className="absolute bottom-0 w-full p-4">
+        {/* Removed absolute bottom-0 w-full from the div below */}
+        <div className="p-4"> 
           <div className="bg-teal-700/30 rounded-lg p-4 text-teal-200 text-sm">
             <p className="font-medium mb-1">Need help?</p>
             <p>Contact IT support at it@university.edu</p>
@@ -200,14 +201,14 @@ const ProvostAdminbar = () => {
         </header>
 
         {/* Content */}
-        <main className="flex-grow p-6 overflow-auto bg-gray-50">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <main className="flex-grow p-6 lg:p-8 xl:p-10 overflow-auto bg-gray-50"> {/* Added more padding for different screen sizes */}
+          <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-200 min-h-[calc(100vh-180px)]"> {/* Increased shadow, padding and ensured min height */}
             <Outlet />
           </div>
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-600">
+        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-600 mt-auto"> {/* Ensured footer is at the bottom */}
           © 2025 University Provost Portal • All rights reserved
         </footer>
       </div>

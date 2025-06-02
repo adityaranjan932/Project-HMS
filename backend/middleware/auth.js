@@ -89,3 +89,21 @@ exports.isChiefProvost = async (req, res, next) => {
     });
   }
 };
+
+// Middleware for Provost or Admin
+exports.isProvostOrAdmin = async (req, res, next) => {
+  try {
+    if (req.user.role !== "provost" && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Provosts or Admins only.",
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "User role can't be verified",
+    });
+  }
+};

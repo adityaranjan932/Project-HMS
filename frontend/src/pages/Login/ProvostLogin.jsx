@@ -20,9 +20,8 @@ const ProvostLogin = () => {
         localStorage.setItem("user", JSON.stringify({ role: response.data.role, email: credentials.email })); // Store basic user info
 
         toast.success(response.data.message || "Login successful!");
-        // Redirect to the hostel allotment page or provost dashboard
-        // Make sure the route /hostel-allotment is protected and requires provost role
-        navigate("/hostel-allotment"); 
+        // Redirect to the provost dashboard
+        navigate("/provost-login"); 
       } else {
         toast.error(response?.data?.message || "Login failed. Please check your credentials.");
       }
