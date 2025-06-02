@@ -108,19 +108,19 @@ const MaintenanceRequest = () => {
       const token = localStorage.getItem("token");
       const payload = { requestType, description };
       if (photoDataUrl) {
-        payload.photo = photoDataUrl; 
+        payload.photo = photoDataUrl;
       }
       const response = await apiConnector(
         "POST",
         "/service-requests",
-        payload, 
+        payload,
         { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
       );
       const newRequest = response.data;
       setRequests([newRequest, ...requests]);
       setRequestType("");
       setDescription("");
-      setPhotoDataUrl(null); 
+      setPhotoDataUrl(null);
       setCameraError(null);
     } catch (err) {
       setError(err.message || "Failed to submit request. Please try again.");
@@ -172,14 +172,14 @@ const MaintenanceRequest = () => {
                 className="absolute top-1/2 right-3 transform -translate-y-1/2 flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-full hover:bg-green-600 transition duration-300"
                 // Removed mx-auto, changed w-12 h-12 to w-10 h-10 for a slightly smaller button to fit better
               >
-                <FaCamera size={18} /> 
+                <FaCamera size={18} />
               </button>
             )}
           </div>
         </div>
 
         {/* Camera and Photo Section - This part remains below the description field */}
-        <div className="space-y-4 mt-4"> 
+        <div className="space-y-4 mt-4">
           {/* Added mt-4 to give some space if camera/preview opens directly after description */}
           {isCameraOpen && stream && (
             <div className="border p-4 rounded-lg bg-gray-50">
@@ -212,7 +212,9 @@ const MaintenanceRequest = () => {
           )}
 
           {cameraError && (
-            <p className="text-red-500 text-sm mt-1 text-center">{cameraError}</p>
+            <p className="text-red-500 text-sm mt-1 text-center">
+              {cameraError}
+            </p>
           )}
 
           {photoDataUrl && (
