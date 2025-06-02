@@ -18,12 +18,13 @@ export const DELETE_USER_API = "/api/auth/deleteUser";
 export const GET_ACTIVITY_LOGS_API = "/api/auth/getActivityLogs";
 
 // Allotment APIs
-// Removed leading /api as it's part of VITE_API_BASE_URL
+// No /api prefix here if VITE_API_BASE_URL includes it
 export const ALLOT_ROOMS_API = "/allotment/allot-rooms";
 export const GET_ROOM_AVAILABILITY_API = "/allotment/availability";
 export const GET_ALLOTTED_STUDENTS_LIST_API = "/allotment/allotted-students";
 
-// Payment APIs (assuming VITE_API_BASE_URL includes /api)
+// Payment APIs
+// No /api prefix here if VITE_API_BASE_URL includes it
 export const CREATE_HOSTEL_FEE_ORDER_API = "/payment/create-hostel-fee-order";
 export const CREATE_MESS_FEE_ORDER_API = "/payment/create-mess-fee-order";
 export const VERIFY_PAYMENT_API = "/payment/verify-payment";

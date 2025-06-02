@@ -7,6 +7,7 @@ const {
   fetchCombinedResults,
 } = require("../utils/fetchResult");
 const RegisteredStudentProfile = require("../models/RegisteredStudentProfile");
+const AllottedStudent = require("../models/AllottedStudent"); // Added AllottedStudent model
 
 require("dotenv").config();
 
@@ -237,6 +238,15 @@ exports.login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Incorrect password",
+      });
+    }
+
+    // Check if the student has been allotted a room
+    const allotmentRecord = await AllottedStudent.findOne({ userId: user._id });
+    if (!allotmentRecord) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. You have not been allotted a room yet. Please complete the allotment process.",
       });
     }
 
