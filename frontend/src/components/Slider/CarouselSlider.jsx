@@ -11,18 +11,58 @@ import NoticeBoard from "./NoticeBoard"; // Added import
 // Import your images
 import i001 from "/img1.jpg";
 import i002 from "/img2.jpg";
+import i2 from "/VC.jpg"; 
 import i003 from "/img3.jpg";
 import i004 from "/img4.jpg";
 import i005 from "/Img5.jpg";
 import i006 from "/Img6.jpg";
+import i007 from "/C1.jpeg";
+import i008 from "/C2.jpg";
+import i009 from "/C3.jpeg";
+import i010 from "/C4.jpeg";
+import i011 from "/C5.jpeg";
+import i012 from "/C6.jpeg";
+import i013 from "/C7.jpeg";
+import i014 from "/C8.jpeg";
+import i015 from "/C9.jpeg";
+import i016 from "/C10.jpeg";
+import i017 from "/C11.jpeg";
+import i018 from "/C12.jpeg";
+import i019 from "/C13.jpeg";
+import i020 from "/C14.jpeg";
+import i021 from "/C15.jpeg";
+import i022 from "/C16.jpeg";
+import i023 from "/C17.jpeg";
+import i024 from "/C18.jpeg";
+import i025 from "/C19.jpeg";  
+
 
 const images = [
-  { src: i001, alt: "Image 1" },
-  { src: i002, alt: "Image 2" },
-  { src: i003, alt: "Image 3" },
-  { src: i004, alt: "Image 4" },
-  { src: i005, alt: "Image 5" },
-  { src: i006, alt: "Image 6" },
+  // { src: i001, alt: "Image 1" },
+  // { src: i002, alt: "Image 2" },
+  // { src: i003, alt: "Image 3" },
+  // { src: i004, alt: "Image 4" },
+  // { src: i005, alt: "Image 5" },
+  // { src: i006, alt: "Image 6" },
+  { src: i007, alt: "Image 7" },
+  { src: i008, alt: "Image 8" },
+  { src: i009, alt: "Image 9" },
+  { src: i010, alt: "Image 10" },
+  { src: i011, alt: "Image 11" },
+  { src: i012, alt: "Image 12" },
+  { src: i013, alt: "Image 13" },
+  { src: i014, alt: "Image 14" },
+  { src: i015, alt: "Image 15" },
+  { src: i016, alt: "Image 16" },
+  { src: i017, alt: "Image 17" },
+  { src: i018, alt: "Image 18" },
+  { src: i019, alt: "Image 19" },
+  { src: i020, alt: "Image 20" },
+  { src: i021, alt: "Image 21" },
+  { src: i022, alt: "Image 22" },
+  { src: i023, alt: "Image 23" },
+  { src: i024, alt: "Image 24" },
+  { src: i025, alt: "Image 25" },
 ];
 
 // Placeholder data for professors - IMPORTANT: Replace imgSrc with actual image paths
@@ -30,14 +70,24 @@ const professors = [
   {
     name: "Prof. Alok Kumar Rai",
     title: "Vice-Chancellor, University of Lucknow",
-    imgSrc: "/placeholder-vc.jpg",
+    imgSrc: i2,
     profileLink: "#",
     messageLink: "#",
   },
+
+  {
+    name: "Prof. V. K. Sharma",
+    title: "Dean Students' Welfare, University of Lucknow",
+    imgSrc: i001,
+    profileLink: "#",
+    messageLink: "#",
+  },
+
+
   {
     name: "Prof. Anoop Kumar Singh",
     title: "Chief Provost, University of Lucknow",
-    imgSrc: "/placeholder-chiefProvost.jpg",
+    imgSrc: i002,
     profileLink: "#",
     messageLink: "#",
   },
@@ -49,9 +99,10 @@ const CarouselSlider = () => {
       <div className="mx-auto px-2 w-full">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column: Professor Cards */}
-          <div className="w-full lg:w-2/12 flex flex-col space-y-6">
+          <div className="w-full lg:w-2/12 flex flex-col space-y-6 ">
             {professors.map((prof) => (
               <ProfessorCard
+                className="object-cover"
                 key={prof.name}
                 name={prof.name}
                 title={prof.title}
@@ -63,7 +114,7 @@ const CarouselSlider = () => {
           </div>
 
           {/* Center Column: Swiper */}
-          <div className="w-full lg:w-8/12">
+          <div className=" w-full lg:w-8/12  ">
             <Swiper
               modules={[Autoplay, Navigation, Pagination]}
               slidesPerView={1}
@@ -78,7 +129,7 @@ const CarouselSlider = () => {
                   <img
                     src={img.src}
                     alt={img.alt}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-lg shadow-md"
                   />
                 </SwiperSlide>
               ))}

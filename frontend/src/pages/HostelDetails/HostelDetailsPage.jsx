@@ -85,14 +85,14 @@ const HostelDetailsPage = () => {
                   <span className="capitalize font-medium ml-1">
                     {hostel.hostelFor}
                   </span>{" "}
-                  Students
+                  -Students
                 </p>
                 <p className="flex items-center">
                   <FiHome className="mr-3 text-red-600 text-lg" /> Capacity:{" "}
                   <span className="font-medium ml-1">
                     {hostel["Total-Capacity"]}
                   </span>{" "}
-                  Students
+                  
                 </p>
               </div>
             </div>
