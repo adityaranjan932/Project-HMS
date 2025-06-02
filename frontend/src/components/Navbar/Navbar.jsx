@@ -165,7 +165,7 @@ const Navbar = () => {
   return (
     <>
       <TopNavbar />
-      <nav className="bg-[#89ABE3] text-white shadow-md">
+      <nav className="bg-red-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -202,7 +202,7 @@ const Navbar = () => {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="absolute left-0 mt-2 w-56 bg-white text-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+                            className="absolute left-0 mt-2 w-56 bg-red-900 text-white rounded-md shadow-lg ring-1  z-50"
                           >
                             <DropdownContent
                               item={item}
@@ -223,7 +223,6 @@ const Navbar = () => {
                       <div className="flex items-center space-x-1">
                         {item.icon && item.icon}
                         <span>{item.name}</span>{" "}
-                        {/* Display name alongside icon */}
                       </div>
                     </Link>
                   )}
@@ -287,7 +286,7 @@ const Navbar = () => {
                           className={`w-full flex justify-between items-center px-4 py-2 rounded-md ${
                             activeMobileSubmenu === item.name
                               ? "bg-red-600"
-                              : ""
+                              : "hover:bg-red-600"
                           }`}
                         >
                           {item.name}

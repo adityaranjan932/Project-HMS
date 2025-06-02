@@ -27,7 +27,7 @@ const DropdownContent = ({
     const linkClasses = `block py-1 text-sm ${
       isMobile
         ? "hover:bg-red-700 rounded-md pl-2"
-        : "hover:bg-gray-100 rounded-md px-2"
+        : "hover:bg-red-700 hover:text-white rounded-md px-2" // Changed hover:bg-gray-100 to hover:bg-red-700 and ensured text remains white
     }`;
 
     return (
@@ -90,7 +90,9 @@ const DropdownContent = ({
               rel="noopener noreferrer"
               onClick={handleLinkClick}
               className={`block px-4 py-2 text-sm ${
-                isMobile ? "hover:bg-red-700 rounded-md" : "hover:bg-gray-100"
+                isMobile
+                  ? "hover:bg-red-700 rounded-md"
+                  : "hover:bg-red-700 hover:text-white"
               }`}
             >
               {isMobile ? "- " : ""}
@@ -100,11 +102,13 @@ const DropdownContent = ({
         }
         return (
           <Link
-            key={subItem.id || i}
-            to={subItem.to || "#"}
+            key={subItem.name || i}
+            to={subItem.to}
             onClick={handleLinkClick}
             className={`block px-4 py-2 text-sm ${
-              isMobile ? "hover:bg-red-700 rounded-md" : "hover:bg-gray-100"
+              isMobile
+                ? "hover:bg-red-700 rounded-md"
+                : "hover:bg-red-700 hover:text-white" // Changed hover:bg-gray-100 to hover:bg-red-700 and ensured text remains white
             }`}
           >
             {isMobile ? "- " : ""}

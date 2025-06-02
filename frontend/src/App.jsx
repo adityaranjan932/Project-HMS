@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-
 import Adminbar from "./pages/Dashboard/Student_Dashboard/Adminbar";
 import MaintenanceRequest from "./pages/Dashboard/Student_Dashboard/MaintenanceRequest";
 import Feedback from "./pages/Dashboard/Student_Dashboard/Feedback";
@@ -26,7 +25,8 @@ import HostelAdminDashboard from "./pages/DatabasePage/HostelAdminDashboard";
 import HostelAllotment from "./pages/DatabasePage/HostelAllotment";
 import HostelDetailsPage from "./pages/HostelDetails/HostelDetailsPage";
 import FacilityDetailsPage from "./pages/Facilities/FacilityDetailsPage";
-import RuleDetailsPage from "./pages/Rules/RuleDetailsPage"; // Added import
+import RuleDetailsPage from "./pages/Rules/RuleDetailsPage";
+import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoute";
 
 const App = () => {
   return (
@@ -47,25 +47,34 @@ const App = () => {
         <Route path="/rules/:ruleId" element={<RuleDetailsPage />} />{" "}
         {/* Added route */}
         {/* Student Dashboard Routes */}
-        <Route path="/student-login" element={<Adminbar />}>
-          <Route path="maintenance-request" element={<MaintenanceRequest />} />
-          <Route path="feedback" element={<Feedback />} />
-          <Route path="leave-apply" element={<LeaveApply />} />
-          <Route path="fees-payment" element={<FeesPayment />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/student-login" element={<Adminbar />}>
+            <Route
+              path="maintenance-request"
+              element={<MaintenanceRequest />}
+            />
+            <Route path="feedback" element={<Feedback />} />
+            <Route path="leave-apply" element={<LeaveApply />} />
+            <Route path="fees-payment" element={<FeesPayment />} />
+          </Route>
         </Route>
         {/* Provost Dashboard Routes */}
-        <Route path="/provost-login" element={<ProvostAdminbar />}>
-          <Route path="view-profiles" element={<ViewProfiles />} />
-          <Route path="student-notice" element={<StudentNotice />} />
-          <Route path="student-queries" element={<StudentQueries />} />
-          <Route path="public-notice" element={<PublicNotice />} />
-          <Route path="allotment-data" element={<HostelAdminDashboard />} >
-            <Route path="students" element={<StudentTable />} />
-            <Route path="alloted_hostels_list" element={<HostelAllotment />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/provost-login" element={<ProvostAdminbar />}>
+            <Route path="view-profiles" element={<ViewProfiles />} />
+            <Route path="student-notice" element={<StudentNotice />} />
+            <Route path="student-queries" element={<StudentQueries />} />
+            <Route path="public-notice" element={<PublicNotice />} />
+            <Route path="allotment-data" element={<HostelAdminDashboard />}>
+              <Route path="students" element={<StudentTable />} />
+              <Route
+                path="alloted_hostels_list"
+                element={<HostelAllotment />}
+              />
+            </Route>
           </Route>
         </Route>
         <Route path="/registration" element={<MultiStepForm />} />
-       
       </Routes>
     </Router>
   );
