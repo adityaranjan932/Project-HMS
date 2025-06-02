@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 const {
   fetchCombinedResults,
 } = require("../utils/fetchResult");
-const RegisteredStudentProfile = require("../models/StudentProfile");
+const RegisteredStudentProfile = require("../models/RegisteredStudentProfile");
+const AllottedStudent = require("../models/AllottedStudent"); // Added AllottedStudent model
 
 require("dotenv").config();
 
@@ -240,6 +241,15 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if the student has been allotted a room
+    const allotmentRecord = await AllottedStudent.findOne({ userId: user._id });
+    if (!allotmentRecord) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. You have not been allotted a room yet. Please complete the allotment process.",
+      });
+    }
+
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -453,7 +463,7 @@ exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
     const {
       email,
       password,
-      studentName,
+      studentName, // This should be `name` to match User model if it's the primary name field
       fatherName,
       motherName,
       gender,
@@ -468,6 +478,7 @@ exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
       contactNumber
     } = req.body;
 
+    // Basic validation
     if (!email || !password || !studentName || !gender || !contactNumber || !department || !courseName || !semester || !rollno) {
       return res.status(400).json({ success: false, message: "Required fields are missing. Please provide all required details." });
     }
@@ -477,124 +488,136 @@ exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
     // Check for existing roll number uniqueness
     if (rollno) { 
         const existingProfileWithRollNo = await RegisteredStudentProfile.findOne({ rollNumber: rollno });
-
-        // If a profile with this roll number exists AND 
-        // (either it's a new user registration attempt (user is null) OR 
-        // it's an existing user but the roll number belongs to a different user's profile)
-        // then it's a conflict.
         if (existingProfileWithRollNo && (!user || existingProfileWithRollNo.userId.toString() !== user._id.toString())) {
             return res.status(409).json({
                 success: false,
                 message: `Roll number '${rollno}' is already registered. Please use a different roll number.`,
             });
         }
-        // If user exists and existingProfileWithRollNo.userId matches user._id,
-        // it means the user is likely updating their own profile with their own roll number, which is fine.
     }
 
-    // Logic to handle existing verified users trying to re-register profile
-    if (user && user.isVerifiedLU) {
-      const existingProfile = await RegisteredStudentProfile.findOne({ userId: user._id });
-      if (existingProfile) {
-        return res.status(409).json({
-          success: false,
-          message: "This email is already registered and has a complete profile. Please login or contact support.",
-        });
-      }
-      // If user is verified but no profile exists (e.g., incomplete previous registration), allow profile creation/update.
+    // Hashing the password
+    let hashedPassword;
+    try {
+      hashedPassword = await bcrypt.hash(password, 10);
+    } catch (hashError) {
+      console.error("Password Hashing Error:", hashError);
+      return res.status(500).json({
+        success: false,
+        message: "Error processing password. Please try again.",
+      });
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    let responseMessage;
-
-    // Prepare user data, assuming User model might have firstName, lastName
-    const nameParts = studentName.split(' ');
-    const firstName = nameParts[0] || studentName;
-    const lastName = nameParts.slice(1).join(' ') || '';
-
-    if (user) {
-      // User exists (could be unverified, or verified but without a profile), update their details
-      user.password = hashedPassword;
-      // Update name fields based on your User model structure
-      if (user.hasOwnProperty('firstName') && user.hasOwnProperty('lastName')) {
-        user.firstName = firstName;
-        user.lastName = lastName;
-      } else if (user.hasOwnProperty('name')) {
-        user.name = studentName; // If User model has a single 'name' field
-      }
-      user.gender = gender;
-      user.mobile = contactNumber;
-      user.isVerifiedLU = true; // Mark/re-mark as verified
-      await user.save();
-      responseMessage = "User details updated and profile saved successfully.";
-    } else {
-      // User does not exist, create new user
-      let newUserFields = {
+    // If user does not exist, create a new user
+    if (!user) {
+      user = new User({
+        name: studentName, // Assuming studentName is the main name for the User model
         email,
         password: hashedPassword,
-        role: "student",
-        gender: gender,
-        mobile: contactNumber,
-        isVerifiedLU: true, // New user is created as verified through this flow
-      };
-      // Add name fields based on your User model structure
-      // A more robust way to check if fields exist in the schema:
-      if (User.schema.paths.hasOwnProperty('firstName') && User.schema.paths.hasOwnProperty('lastName')) {
-        newUserFields.firstName = firstName;
-        newUserFields.lastName = lastName;
-      } else if (User.schema.paths.hasOwnProperty('name')) {
-        newUserFields.name = studentName; // If User model has a single 'name' field
+        role: 'student', // Default role for new registrations via this route
+        gender, // Assuming gender is also part of the User model
+        mobile: contactNumber, // Assuming contactNumber maps to mobile in User model
+        isVerifiedLU: true, // Mark as verified since they are completing profile
+      });
+    } else {
+      // If user exists but is not verified or password needs update (e.g. forgot password flow later)
+      // For now, we assume if user exists, they are proceeding after email/OTP verification
+      // and we might want to update their password if they are setting it for the first time here.
+      if (!user.isVerifiedLU) { // If they were in a pending state
+        user.password = hashedPassword; // Set/update password
+        user.isVerifiedLU = true; // Mark as verified
       }
-      user = await User.create(newUserFields);
-      responseMessage = "User created and profile saved successfully.";
+      // Update other user fields if necessary, e.g., name, gender, mobile
+      user.name = studentName;
+      user.gender = gender;
+      user.mobile = contactNumber;
     }
+    // Save the user (either new or updated)
+    await user.save();
 
-    // Upsert RegisteredStudentProfile
-    const profile = await RegisteredStudentProfile.findOneAndUpdate(
-      { userId: user._id },
-      {
+    // Now, create or update the student profile
+    let studentProfile = await RegisteredStudentProfile.findOne({ userId: user._id });
+
+    if (!studentProfile) {
+      studentProfile = new RegisteredStudentProfile({
         userId: user._id,
-        name: studentName, // Full name for the student profile
-        fatherName: fatherName || "",
-        motherName: motherName || "",
-        gender: gender,
-        department: department,
-        courseName: courseName,
-        semester: parseInt(semester) || 0,
-        rollNumber: rollno,
-        sgpaOdd: parseFloat(sgpaOdd) || 0,
-        sgpaEven: parseFloat(sgpaEven) || 0,
-        roomPreference: roomPreference || "double",
-        isEligible: true, // Consider if eligibility should be determined by another logic or passed in request
-        admissionYear: admissionYear || new Date().getFullYear(),
-        contactNumber: contactNumber
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
-
-    // Prepare user data for response, ensuring name is correctly formatted
-    let responseUserName = studentName; // Default to full studentName
-    if (user.firstName && user.lastName) {
-        responseUserName = `${user.firstName} ${user.lastName}`;
-    } else if (user.name) {
-        responseUserName = user.name;
+        email: user.email, // Store email in profile for convenience
+        name: studentName,
+        fatherName,
+        motherName,
+        gender,
+        department,
+        courseName,
+        semester,
+        rollNumber: rollno, // Ensure field name matches schema (rollNumber vs rollno)
+        sgpaOdd,
+        sgpaEven,
+        roomPreference,
+        admissionYear,
+        contactNumber,
+        isEligible: true, // Explicitly set isEligible to true for new profiles
+        // hostelFeePaid: false, // Default values if needed
+        // messFeePaid: false,
+      });
+    } else {
+      // Update existing profile
+      studentProfile.name = studentName;
+      studentProfile.fatherName = fatherName;
+      studentProfile.motherName = motherName;
+      studentProfile.gender = gender;
+      studentProfile.department = department;
+      studentProfile.courseName = courseName;
+      studentProfile.semester = semester;
+      studentProfile.rollNumber = rollno;
+      studentProfile.sgpaOdd = sgpaOdd;
+      studentProfile.sgpaEven = sgpaEven;
+      studentProfile.roomPreference = roomPreference;
+      studentProfile.admissionYear = admissionYear;
+      studentProfile.contactNumber = contactNumber;
+      studentProfile.isEligible = true; // Ensure isEligible is true on update as well
     }
+
+    await studentProfile.save();
+
+    // CRITICAL STEP: Link the studentProfile to the User model
+    user.studentProfile = studentProfile._id;
+    await user.save();
+
+    // Create token for immediate login after registration (optional)
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     return res.status(200).json({
       success: true,
-      message: responseMessage,
-      profile,
-      user: { // Optionally return some user info
+      message: "Student profile registered/updated successfully!",
+      token,
+      user: {
         id: user._id,
+        name: user.name,
         email: user.email,
-        name: responseUserName,
-        role: user.role
-      }
+        role: user.role,
+        studentProfileId: studentProfile._id // Send profile ID back
+      },
     });
+
   } catch (error) {
-    console.error("Create/Update Profile Error:", error);
-    return res.status(500).json({ success: false, message: "Server error during profile creation/update: " + error.message });
+    console.error("Error in createOrUpdateRegisteredStudentProfile:", error);
+    // Check for duplicate key errors (e.g., if rollNumber is unique and there's a conflict)
+    if (error.code === 11000) {
+        return res.status(409).json({
+            success: false,
+            message: `Registration failed. A student with similar unique details (e.g., roll number) might already exist.`,
+            error: error.message
+        });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Server error during profile registration/update.",
+      error: error.message,
+    });
   }
 };
 

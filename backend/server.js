@@ -6,6 +6,7 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 const leaveRoutes = require("./routes/leaveRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const allotmentRoutes = require("./routes/allotmentRoutes"); // Added allotment routes
+const paymentRoutes = require("./routes/paymentRoutes"); // Added payment routes
 const dataBase = require("./config/dataBase");
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/leave', leaveRoutes);
 app.use('/api/service-requests', maintenanceRoutes); // Add maintenance routes
 app.use('/api/allotment', allotmentRoutes); // Added allotment routes
+app.use("/api/payment", paymentRoutes); // Added payment routes
 
 // 404 handler
 app.use((req, res, next) => {

@@ -18,10 +18,17 @@ export const DELETE_USER_API = "/api/auth/deleteUser";
 export const GET_ACTIVITY_LOGS_API = "/api/auth/getActivityLogs";
 
 // Allotment APIs
-// Removed leading /api as it's part of VITE_API_BASE_URL
+// No /api prefix here if VITE_API_BASE_URL includes it
 export const ALLOT_ROOMS_API = "/allotment/allot-rooms";
 export const GET_ROOM_AVAILABILITY_API = "/allotment/availability";
 export const GET_ALLOTTED_STUDENTS_LIST_API = "/allotment/allotted-students";
+
+// Payment APIs
+// No /api prefix here if VITE_API_BASE_URL includes it
+export const CREATE_HOSTEL_FEE_ORDER_API = "/payment/create-hostel-fee-order";
+export const CREATE_MESS_FEE_ORDER_API = "/payment/create-mess-fee-order";
+export const VERIFY_PAYMENT_API = "/payment/verify-payment";
+export const GET_MY_PAYMENT_HISTORY_API = "/payment/my-history";
 
 // Send OTP
 export async function sendOtp(email) {
@@ -49,7 +56,7 @@ export async function provostLogin({ email, password }) {
   // If not, you might need to create one or use a generic login endpoint
   // that differentiates users by role on the backend.
   // For now, let's assume an endpoint like "/api/auth/provost-login"
-  const PROVOST_LOGIN_API = "/api/auth/provost-login"; 
+  const PROVOST_LOGIN_API = "/auth/login-provost"; // Removed leading /api
   return apiConnector("POST", PROVOST_LOGIN_API, { email, password });
 }
 
@@ -149,6 +156,100 @@ export async function getAllottedStudentsList() {
   } catch (error) {
     console.log("GET_ALLOTTED_STUDENTS_LIST_API ERROR............", error);
     toast.error(error.response?.data?.message || "Failed to Fetch Allotted Students");
+    result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// --- Payment Service Functions ---
+
+// Create Hostel Fee Order
+export async function createHostelFeeOrder(token) {
+  const toastId = toast.loading("Creating hostel fee order...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", CREATE_HOSTEL_FEE_ORDER_API, null, {
+      Authorization: `Bearer ${token}`,
+    });
+    console.log("CREATE_HOSTEL_FEE_ORDER_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Create Hostel Fee Order");
+    }
+    result = response?.data;
+    toast.success("Hostel fee order created!");
+  } catch (error) {
+    console.log("CREATE_HOSTEL_FEE_ORDER_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Hostel Fee Order Creation Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Create Mess Fee Order
+export async function createMessFeeOrder(data, token) { // data should contain { semester: "odd" / "even" }
+  const toastId = toast.loading("Creating mess fee order...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", CREATE_MESS_FEE_ORDER_API, data, {
+      Authorization: `Bearer ${token}`,
+    });
+    console.log("CREATE_MESS_FEE_ORDER_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Create Mess Fee Order");
+    }
+    result = response?.data;
+    toast.success("Mess fee order created!");
+  } catch (error) {
+    console.log("CREATE_MESS_FEE_ORDER_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Mess Fee Order Creation Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Verify Payment
+export async function verifyPayment(data, token) {
+  const toastId = toast.loading("Verifying payment...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", VERIFY_PAYMENT_API, data, {
+      Authorization: `Bearer ${token}`,
+    });
+    console.log("VERIFY_PAYMENT_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Payment Verification Failed");
+    }
+    result = response?.data;
+    toast.success("Payment Verified Successfully!");
+  } catch (error) {
+    console.log("VERIFY_PAYMENT_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Payment Verification Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get Student's Payment History
+export async function getMyPaymentHistory(token) {
+  const toastId = toast.loading("Fetching payment history...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", GET_MY_PAYMENT_HISTORY_API, null, {
+      Authorization: `Bearer ${token}`,
+    });
+    console.log("GET_MY_PAYMENT_HISTORY_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error("Could Not Fetch Payment History");
+    }
+    result = response?.data;
+    // No success toast here, let the component handle display
+  } catch (error) {
+    console.log("GET_MY_PAYMENT_HISTORY_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Payment History");
     result = error.response?.data;
   }
   toast.dismiss(toastId);

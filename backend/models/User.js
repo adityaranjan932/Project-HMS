@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
   isVerifiedLU: { type: Boolean, default: false }, // University of Lucknow verified
+  studentProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'RegisteredStudentProfile'
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);
