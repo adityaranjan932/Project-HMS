@@ -33,6 +33,14 @@ export const CREATE_MESS_FEE_ORDER_API = "/payment/create-mess-fee-order";
 export const VERIFY_PAYMENT_API = "/payment/verify-payment";
 export const GET_MY_PAYMENT_HISTORY_API = "/payment/my-history";
 
+// Notice APIs
+export const SEND_NOTICE_API = "/notices/send";
+export const GET_SENT_NOTICES_API = "/notices/sent";
+export const GET_RECEIVED_NOTICES_API = "/notices/received";
+export const MARK_NOTICE_READ_API = "/notices";
+export const GET_NOTICE_STATS_API = "/notices/stats";
+export const GET_ALL_NOTICES_API = "/notices/all";
+
 // Send OTP
 export async function sendOtp(email) {
   return apiConnector("POST", SEND_OTP_API, { email });
@@ -76,13 +84,13 @@ export async function logout(token) {
       throw new Error("Could Not Logout");
     }
     result = response?.data;
-    
+
     // Clear localStorage/sessionStorage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
-    
+
     toast.success("Logged out successfully!");
   } catch (error) {
     console.log("LOGOUT_API ERROR............", error);
@@ -190,6 +198,26 @@ export async function getAllottedStudentsList() {
     console.log("GET_ALLOTTED_STUDENTS_LIST_API ERROR............", error);
     toast.error(error.response?.data?.message || "Failed to Fetch Allotted Students");
     result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get all allotted students (for provosts)
+export async function getAllAllottedStudents() {
+  const toastId = toast.loading("Fetching students...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", GET_ALLOTTED_STUDENTS_LIST_API);
+    console.log("GET_ALLOTTED_STUDENTS_LIST_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Allotted Students");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_ALLOTTED_STUDENTS_LIST_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Students");
+    result = error.response?.data || { success: false, message: error.message };
   }
   toast.dismiss(toastId);
   return result;
@@ -338,11 +366,11 @@ export async function resetPassword(email, otp, newPassword, confirmPassword) {
   const toastId = toast.loading("Resetting password...");
   let result = null;
   try {
-    const response = await apiConnector("POST", RESET_PASSWORD_API, { 
-      email, 
-      otp, 
-      newPassword, 
-      confirmPassword 
+    const response = await apiConnector("POST", RESET_PASSWORD_API, {
+      email,
+      otp,
+      newPassword,
+      confirmPassword
     });
     console.log("RESET_PASSWORD_API RESPONSE............", response);
     if (!response?.data?.success) {
@@ -353,6 +381,106 @@ export async function resetPassword(email, otp, newPassword, confirmPassword) {
   } catch (error) {
     console.log("RESET_PASSWORD_API ERROR............", error);
     toast.error(error.response?.data?.message || "Password Reset Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// --- Notice Service Functions ---
+
+// Send notice to a student
+export async function sendNotice(noticeData) {
+  const toastId = toast.loading("Sending notice...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", SEND_NOTICE_API, noticeData);
+    console.log("SEND_NOTICE_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Send Notice");
+    }
+    result = response?.data;
+    toast.success("Notice sent successfully!");
+  } catch (error) {
+    console.log("SEND_NOTICE_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Send Notice");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get sent notices (for provosts)
+export async function getSentNotices(page = 1, limit = 20) {
+  const toastId = toast.loading("Fetching sent notices...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", `${GET_SENT_NOTICES_API}?page=${page}&limit=${limit}`);
+    console.log("GET_SENT_NOTICES_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Sent Notices");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_SENT_NOTICES_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Sent Notices");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get received notices (for students)
+export async function getReceivedNotices(page = 1, limit = 20) {
+  const toastId = toast.loading("Fetching notices...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", `${GET_RECEIVED_NOTICES_API}?page=${page}&limit=${limit}`);
+    console.log("GET_RECEIVED_NOTICES_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Notices");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_RECEIVED_NOTICES_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Notices");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Mark notice as read
+export async function markNoticeAsRead(noticeId) {
+  let result = null;
+  try {
+    const response = await apiConnector("PATCH", `${MARK_NOTICE_READ_API}/${noticeId}/read`);
+    console.log("MARK_NOTICE_READ_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Mark Notice as Read");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("MARK_NOTICE_READ_API ERROR............", error);
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  return result;
+}
+
+// Get notice statistics
+export async function getNoticeStats() {
+  const toastId = toast.loading("Fetching notice statistics...");
+  let result = null;
+  try {
+    const response = await apiConnector("GET", GET_NOTICE_STATS_API);
+    console.log("GET_NOTICE_STATS_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Notice Stats");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_NOTICE_STATS_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Fetch Notice Statistics");
     result = error.response?.data || { success: false, message: error.message };
   }
   toast.dismiss(toastId);

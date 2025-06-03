@@ -10,7 +10,7 @@ router.post("/", auth, submitMaintenanceRequest);
 // Get maintenance requests for the logged-in user
 router.get("/my", auth, getUserMaintenanceRequests);
 
-// Get all maintenance requests (for Provost)
-router.get("/", auth, isProvost, getAllMaintenanceRequests);
+// Get all maintenance requests (for provost)
+router.get("/all", auth, isProvost, getAllMaintenanceRequests);
 
 module.exports = router;

@@ -11,8 +11,7 @@ router.post('/allot-rooms', allotmentController.allotRooms); // Temporarily unpr
 // router.get('/availability', auth, isProvost, allotmentController.getRoomAvailability); // Temporarily unprotected
 router.get('/availability', allotmentController.getRoomAvailability); // Temporarily unprotected
 
-// GET /api/v1/allotment/allotted-students - New route to get all allotted students
-// router.get('/allotted-students', auth, isProvost, allotmentController.getAllAllottedStudents); // Temporarily unprotected
-router.get('/allotted-students', allotmentController.getAllAllottedStudents); // Temporarily unprotected
+// GET /api/v1/allotment/allotted-students - Route to get all allotted students (Provost only)
+router.get('/allotted-students', auth, isProvost, allotmentController.getAllAllottedStudents);
 
 module.exports = router;

@@ -31,4 +31,17 @@ const getLeaveRequests = async (req, res) => {
   }
 };
 
-module.exports = { submitLeaveRequest, getLeaveRequests };
+// Get all leave requests for provost (with user details populated)
+const getAllLeaveRequests = async (req, res) => {
+  try {
+    const leaveRequests = await LeaveRequest.find()
+      .populate("studentId", "name email rollNumber roomNumber firstName")
+      .sort({ createdAt: -1 });
+    res.status(200).json(leaveRequests);
+  } catch (error) {
+    console.error("Error fetching all leave requests:", error);
+    res.status(500).json({ error: "An error occurred while retrieving leave requests." });
+  }
+};
+
+module.exports = { submitLeaveRequest, getLeaveRequests, getAllLeaveRequests };

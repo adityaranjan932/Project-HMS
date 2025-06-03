@@ -39,7 +39,7 @@ exports.getUserMaintenanceRequests = async (req, res) => {
 // Get all maintenance requests (for Provost)
 exports.getAllMaintenanceRequests = async (req, res) => {
   try {
-    const requests = await MaintenanceRequest.find().populate('userId', 'name email rollNumber roomNumber'); // Populate user details
+    const requests = await MaintenanceRequest.find().populate('userId', 'name email rollNumber roomNumber firstName'); // Populate user details
     res.status(200).json(requests);
   } catch (error) {
     console.error("Error fetching all maintenance requests:", error); // Log the error

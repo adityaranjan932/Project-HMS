@@ -294,32 +294,57 @@ exports.provostLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("Provost Login Attempt:");
+    console.log("Received email:", email);
+    console.log("Expected email:", process.env.PROVOST_EMAIL);
+    console.log("Email match:", email === process.env.PROVOST_EMAIL);
+
     if (email !== process.env.PROVOST_EMAIL) {
+      console.log("Email validation failed");
       return res.status(401).json({
         success: false,
         message: "Invalid provost email.",
       });
     }
 
+    console.log("Checking password...");
     const isPasswordValid = await bcrypt.compare(password, process.env.PROVOST_PASSWORD_HASH);
+    console.log("Password valid:", isPasswordValid);
+
     if (!isPasswordValid) {
+      console.log("Password validation failed");
       return res.status(401).json({
         success: false,
         message: "Invalid provost password.",
       });
+    } console.log("Login successful, generating token...");
+
+    // Create or find the provost user in the database
+    let provostUser = await User.findOne({ email });
+    if (!provostUser) {
+      // Create a provost user if it doesn't exist
+      provostUser = await User.create({
+        email,
+        role: "provost",
+        name: "Provost", // Default name, can be updated later
+      });
     }
 
     const token = jwt.sign(
-      { email, role: "provost" },
+      { id: provostUser._id, email, role: "provost" },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
-    );
-
-    return res.status(200).json({
+    ); return res.status(200).json({
       success: true,
       message: "Provost logged in successfully.",
       token,
       role: "provost",
+      user: {
+        id: provostUser._id,
+        email: provostUser.email,
+        name: provostUser.name,
+        role: provostUser.role
+      }
     });
   } catch (err) {
     console.error("Provost Login Error:", err);
@@ -342,9 +367,7 @@ exports.chiefProvostLogin = async (req, res) => {
         success: false,
         message: "Invalid chief provost email.",
       });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, process.env.CHIEF_PROVOST_PASSWORD_HASH);
+    } const isPasswordValid = await bcrypt.compare(password, process.env.CHIEF_PROVOST_PASSWORD_HASH);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -352,8 +375,19 @@ exports.chiefProvostLogin = async (req, res) => {
       });
     }
 
+    // Create or find the chief provost user in the database
+    let chiefProvostUser = await User.findOne({ email });
+    if (!chiefProvostUser) {
+      // Create a chief provost user if it doesn't exist
+      chiefProvostUser = await User.create({
+        email,
+        role: "chiefProvost",
+        name: "Chief Provost", // Default name, can be updated later
+      });
+    }
+
     const token = jwt.sign(
-      { email, role: "chief-provost" },
+      { id: chiefProvostUser._id, email, role: "chiefProvost" },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
@@ -362,7 +396,13 @@ exports.chiefProvostLogin = async (req, res) => {
       success: true,
       message: "Chief Provost logged in successfully.",
       token,
-      role: "chief-provost",
+      role: "chiefProvost",
+      user: {
+        id: chiefProvostUser._id,
+        email: chiefProvostUser.email,
+        name: chiefProvostUser.name,
+        role: chiefProvostUser.role
+      }
     });
   } catch (err) {
     console.error("Chief Provost Login Error:", err);
@@ -486,14 +526,14 @@ exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
     let user = await User.findOne({ email });
 
     // Check for existing roll number uniqueness
-    if (rollno) { 
-        const existingProfileWithRollNo = await RegisteredStudentProfile.findOne({ rollNumber: rollno });
-        if (existingProfileWithRollNo && (!user || existingProfileWithRollNo.userId.toString() !== user._id.toString())) {
-            return res.status(409).json({
-                success: false,
-                message: `Roll number '${rollno}' is already registered. Please use a different roll number.`,
-            });
-        }
+    if (rollno) {
+      const existingProfileWithRollNo = await RegisteredStudentProfile.findOne({ rollNumber: rollno });
+      if (existingProfileWithRollNo && (!user || existingProfileWithRollNo.userId.toString() !== user._id.toString())) {
+        return res.status(409).json({
+          success: false,
+          message: `Roll number '${rollno}' is already registered. Please use a different roll number.`,
+        });
+      }
     }
 
     // Hashing the password
@@ -607,11 +647,11 @@ exports.createOrUpdateRegisteredStudentProfile = async (req, res) => {
     console.error("Error in createOrUpdateRegisteredStudentProfile:", error);
     // Check for duplicate key errors (e.g., if rollNumber is unique and there's a conflict)
     if (error.code === 11000) {
-        return res.status(409).json({
-            success: false,
-            message: `Registration failed. A student with similar unique details (e.g., roll number) might already exist.`,
-            error: error.message
-        });
+      return res.status(409).json({
+        success: false,
+        message: `Registration failed. A student with similar unique details (e.g., roll number) might already exist.`,
+        error: error.message
+      });
     }
     return res.status(500).json({
       success: false,
@@ -641,12 +681,12 @@ exports.logout = async (req, res) => {
     // Since JWT tokens are stateless, we don't need to do anything on the server
     // The client will remove the token from localStorage/sessionStorage
     // We can optionally log the logout activity for audit purposes
-    
+
     const { id: userId, email, role } = req.user || {}; // Get user info from auth middleware
-    
+
     // Optional: Log the logout activity
     console.log(`User ${userId} (${email}) with role ${role} logged out at ${new Date().toISOString()}`);
-    
+
     return res.status(200).json({
       success: true,
       message: "Logged out successfully"
@@ -760,7 +800,7 @@ exports.verifyResetPasswordOTP = async (req, res) => {
 
     // Verify OTP
     const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-    
+
     if (recentOtp.length === 0) {
       return res.status(400).json({
         success: false,
@@ -835,7 +875,7 @@ exports.resetPassword = async (req, res) => {
 
     // Verify OTP one more time
     const recentOtp = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-    
+
     if (recentOtp.length === 0 || recentOtp[0].otp !== otp) {
       return res.status(400).json({
         success: false,

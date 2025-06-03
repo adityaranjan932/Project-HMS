@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import LoginComp from "../../components/LoginComp/LoginComp";
 import Navbar from "../../components/Navbar/Navbar";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
@@ -7,8 +7,10 @@ import { provostLogin } from "../../services/auth"; // Import the new provostLog
 
 const ProvostLogin = () => {
   const navigate = useNavigate(); // Initialize useNavigate
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (credentials) => {
+    setIsLoading(true);
     const toastId = toast.loading("Logging in...");
     try {
       const response = await provostLogin(credentials); // Call the service
@@ -17,17 +19,28 @@ const ProvostLogin = () => {
       if (response && response.data && response.data.success) {
         // Store token and user info in localStorage
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify({ role: response.data.role, email: credentials.email })); // Store basic user info
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ role: response.data.role, email: credentials.email })
+        ); // Store basic user info
 
         toast.success(response.data.message || "Login successful!");
         // Redirect to the provost dashboard
-        navigate("/provost-login"); 
+        navigate("/provost-login");
       } else {
-        toast.error(response?.data?.message || "Login failed. Please check your credentials.");
+        toast.error(
+          response?.data?.message ||
+            "Login failed. Please check your credentials."
+        );
       }
     } catch (error) {
       console.error("Provost Login Error:", error);
-      toast.error(error.response?.data?.message || "An error occurred during login. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "An error occurred during login. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
     toast.dismiss(toastId);
   };
@@ -36,7 +49,7 @@ const ProvostLogin = () => {
     <div>
       <Navbar />
       {/* Pass the API endpoint path if your LoginComp expects it, otherwise it's not needed if handleSubmit handles the API call */}
-      <LoginComp onSubmit={handleSubmit} />
+      <LoginComp onSubmit={handleSubmit} isLoading={isLoading} />
     </div>
   );
 };

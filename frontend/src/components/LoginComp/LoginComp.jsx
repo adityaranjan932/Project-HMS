@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaSpinner } from "react-icons/fa";
 import ForgotPassword from "./ForgotPassword";
 
-const LoginComp = ({ onSubmit }) => {
+const LoginComp = ({ onSubmit, isLoading }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -59,13 +59,22 @@ const LoginComp = ({ onSubmit }) => {
               className="w-full outline-none text-base sm:text-lg placeholder-gray-400 focus:placeholder-gray-300"
               required
             />
-          </div>
+          </div>{" "}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition text-base sm:text-lg font-semibold"
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition text-base sm:text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            Login
-          </button>          <div className="text-center mt-4">
+            {isLoading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
+          <div className="text-center mt-4">
             <button
               onClick={handleForgotPasswordClick}
               className="text-blue-600 hover:underline text-sm sm:text-base"

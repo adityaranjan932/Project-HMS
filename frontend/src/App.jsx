@@ -6,6 +6,7 @@ import MaintenanceRequest from "./pages/Dashboard/Student_Dashboard/MaintenanceR
 import Feedback from "./pages/Dashboard/Student_Dashboard/Feedback";
 import LeaveApply from "./pages/Dashboard/Student_Dashboard/LeaveApply";
 import FeesPayment from "./pages/Dashboard/Student_Dashboard/FeesPayment";
+import StudentNotices from "./pages/Dashboard/Student_Dashboard/StudentNotices";
 import ProvostAdminbar from "./pages/Dashboard/Provost_Dashboard/ProvostAdminbar";
 import ViewProfiles from "./pages/Dashboard/Provost_Dashboard/ViewProfiles";
 import StudentNotice from "./pages/Dashboard/Provost_Dashboard/StudentNotice";
@@ -46,7 +47,7 @@ const App = () => {
         <Route path="/facility/:facilityId" element={<FacilityDetailsPage />} />
         <Route path="/rules/:ruleId" element={<RuleDetailsPage />} />{" "}
         {/* Added route */}
-        {/* Student Dashboard Routes */}
+        {/* Student Dashboard Routes */}{" "}
         <Route element={<ProtectedRoute />}>
           <Route path="/student-login" element={<Adminbar />}>
             <Route
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="feedback" element={<Feedback />} />
             <Route path="leave-apply" element={<LeaveApply />} />
             <Route path="fees-payment" element={<FeesPayment />} />
+            <Route path="notices" element={<StudentNotices />} />
           </Route>
         </Route>
         {/* Provost Dashboard Routes */}

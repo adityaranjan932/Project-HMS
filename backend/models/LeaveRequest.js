@@ -6,6 +6,6 @@ const LeaveRequestSchema = new mongoose.Schema({
   fromDate: Date,
   toDate: Date,
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("LeaveRequest", LeaveRequestSchema);
