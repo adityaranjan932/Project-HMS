@@ -11,8 +11,15 @@ const {
   checkEmail,
   verificationStatus,
   createOrUpdateRegisteredStudentProfile,
-  getAllRegisteredStudentProfiles
+  getAllRegisteredStudentProfiles,
+  logout,
+  sendResetPasswordOTP,
+  verifyResetPasswordOTP,
+  resetPassword
 } = require("../controllers/Auth");
+
+// Import auth middleware
+const { auth } = require("../middleware/auth");
 
 // =======================
 // Student Routes
@@ -53,5 +60,21 @@ router.post("/login-chief-provost", chiefProvostLogin);
 
 // Get all student profiles
 router.get("/registered-students", getAllRegisteredStudentProfiles);
+
+// Logout route for both students and provosts (requires authentication)
+router.post("/logout", auth, logout);
+
+// =======================
+// Reset Password Routes (Students Only)
+// =======================
+
+// Send reset password OTP
+router.post("/send-reset-password-otp", sendResetPasswordOTP);
+
+// Verify reset password OTP
+router.post("/verify-reset-password-otp", verifyResetPasswordOTP);
+
+// Reset password
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

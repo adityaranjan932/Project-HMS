@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaBell,
@@ -11,22 +11,42 @@ import {
   FaSignOutAlt,
   FaDatabase
 } from "react-icons/fa";
+import { logout } from '../../../services/auth';
+import { toast } from 'react-hot-toast';
 
-const ProvostAdminbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Check if a link is active
   const isActive = (path) => {
     return location.pathname.includes(path);
   };
-
-  const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logging out...");
-    // navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      if (token) {
+        const result = await logout(token);
+        if (result && result.success) {
+          // Navigate to login page after successful logout
+          navigate('/login');
+        }
+      } else {
+        // If no token found, still clear storage and redirect
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+        toast.success("Logged out successfully!");
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error during logout");
+    }
   };
 
   return (

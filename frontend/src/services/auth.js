@@ -1,21 +1,24 @@
 import { apiConnector } from "./apiconnector";
 import { toast } from "react-hot-toast";
 
-// API endpoints - Standardized for Vercel deployment with /api prefix
-export const SEND_OTP_API = "/api/auth/send-otp";
-export const SIGNUP_API = "/api/auth/signup";
-export const LOGIN_API = "/api/auth/login";
-export const FORGOT_PASSWORD_API = "/api/auth/forgot-password";
-export const RESET_PASSWORD_API = "/api/auth/reset-password";
-export const CHECK_ELIGIBILITY_API = "/api/auth/check-eligibility";
-export const GET_ALL_REGISTERED_STUDENTS_API = "/api/auth/getAllRegisteredStudents";
-export const GET_STUDENT_DETAILS_API = "/api/auth/getStudentDetails";
-export const UPDATE_STUDENT_PROFILE_API = "/api/auth/updateStudentProfile";
-export const GET_ALL_USERS_API = "/api/auth/getAllUsers";
-export const GET_USER_DETAILS_API = "/api/auth/getUserDetails";
-export const UPDATE_USER_ROLE_API = "/api/auth/updateUserRole";
-export const DELETE_USER_API = "/api/auth/deleteUser";
-export const GET_ACTIVITY_LOGS_API = "/api/auth/getActivityLogs";
+// API endpoints - Base URL already includes /api prefix (http://localhost:4000/api)
+export const SEND_OTP_API = "/auth/send-otp";
+export const SIGNUP_API = "/auth/signup";
+export const LOGIN_API = "/auth/login";
+export const LOGOUT_API = "/auth/logout";
+export const FORGOT_PASSWORD_API = "/auth/forgot-password";
+export const RESET_PASSWORD_API = "/auth/reset-password";
+export const SEND_RESET_PASSWORD_OTP_API = "/auth/send-reset-password-otp";
+export const VERIFY_RESET_PASSWORD_OTP_API = "/auth/verify-reset-password-otp";
+export const CHECK_ELIGIBILITY_API = "/auth/check-eligibility";
+export const GET_ALL_REGISTERED_STUDENTS_API = "/auth/getAllRegisteredStudents";
+export const GET_STUDENT_DETAILS_API = "/auth/getStudentDetails";
+export const UPDATE_STUDENT_PROFILE_API = "/auth/updateStudentProfile";
+export const GET_ALL_USERS_API = "/auth/getAllUsers";
+export const GET_USER_DETAILS_API = "/auth/getUserDetails";
+export const UPDATE_USER_ROLE_API = "/auth/updateUserRole";
+export const DELETE_USER_API = "/auth/deleteUser";
+export const GET_ACTIVITY_LOGS_API = "/auth/getActivityLogs";
 
 // Allotment APIs
 // No /api prefix here if VITE_API_BASE_URL includes it
@@ -37,12 +40,12 @@ export async function sendOtp(email) {
 
 // Verify OTP
 export async function verifyOtp(email, otp) {
-  return apiConnector("POST", "/api/auth/verify-otp", { email, otp });
+  return apiConnector("POST", "/auth/verify-otp", { email, otp });
 }
 
 // Email & Password Verification (step 2)
 export async function emailVerification({ email, password, confirmPassword, otp }) {
-  return apiConnector("POST", "/api/auth/email-verification", { email, password, confirmPassword, otp });
+  return apiConnector("POST", "/auth/email-verification", { email, password, confirmPassword, otp });
 }
 
 // Student Login
@@ -60,14 +63,44 @@ export async function provostLogin({ email, password }) {
   return apiConnector("POST", PROVOST_LOGIN_API, { email, password });
 }
 
+// Logout function for both students and provosts
+export async function logout(token) {
+  const toastId = toast.loading("Logging out...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", LOGOUT_API, {}, {
+      Authorization: `Bearer ${token}`,
+    });
+    console.log("LOGOUT_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error("Could Not Logout");
+    }
+    result = response?.data;
+    
+    // Clear localStorage/sessionStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    
+    toast.success("Logged out successfully!");
+  } catch (error) {
+    console.log("LOGOUT_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Logout Failed");
+    result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
 // Register Student Profile (final step)
 export async function registerStudentProfile(profileData) {
-  return apiConnector("POST", "/api/auth/registered-student-profile", profileData);
+  return apiConnector("POST", "/auth/registered-student-profile", profileData);
 }
 
 // Check if email exists
 export async function checkEmail(email) {
-  return apiConnector("POST", "/api/auth/check-email", { email });
+  return apiConnector("POST", "/auth/check-email", { email });
 }
 
 // Check eligibility
@@ -95,7 +128,7 @@ export async function checkEligibility(data) {
 
 // Get all registered students
 export async function getRegisteredStudents() {
-  return apiConnector("GET", "/api/auth/registered-students");
+  return apiConnector("GET", "/auth/registered-students");
 }
 
 // --- Allotment Service Functions ---
@@ -251,6 +284,76 @@ export async function getMyPaymentHistory(token) {
     console.log("GET_MY_PAYMENT_HISTORY_API ERROR............", error);
     toast.error(error.response?.data?.message || "Failed to Fetch Payment History");
     result = error.response?.data;
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// --- Reset Password Service Functions ---
+
+// Send Reset Password OTP
+export async function sendResetPasswordOTP(email) {
+  const toastId = toast.loading("Sending OTP...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", SEND_RESET_PASSWORD_OTP_API, { email });
+    console.log("SEND_RESET_PASSWORD_OTP_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Send Reset Password OTP");
+    }
+    result = response?.data;
+    toast.success("Reset password OTP sent to your email!");
+  } catch (error) {
+    console.log("SEND_RESET_PASSWORD_OTP_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Send Reset Password OTP");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Verify Reset Password OTP
+export async function verifyResetPasswordOTP(email, otp) {
+  const toastId = toast.loading("Verifying OTP...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", VERIFY_RESET_PASSWORD_OTP_API, { email, otp });
+    console.log("VERIFY_RESET_PASSWORD_OTP_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Invalid OTP");
+    }
+    result = response?.data;
+    toast.success("OTP verified successfully!");
+  } catch (error) {
+    console.log("VERIFY_RESET_PASSWORD_OTP_API ERROR............", error);
+    toast.error(error.response?.data?.message || "OTP Verification Failed");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Reset Password
+export async function resetPassword(email, otp, newPassword, confirmPassword) {
+  const toastId = toast.loading("Resetting password...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", RESET_PASSWORD_API, { 
+      email, 
+      otp, 
+      newPassword, 
+      confirmPassword 
+    });
+    console.log("RESET_PASSWORD_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Reset Password");
+    }
+    result = response?.data;
+    toast.success("Password reset successfully! You can now login with your new password.");
+  } catch (error) {
+    console.log("RESET_PASSWORD_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Password Reset Failed");
+    result = error.response?.data || { success: false, message: error.message };
   }
   toast.dismiss(toastId);
   return result;

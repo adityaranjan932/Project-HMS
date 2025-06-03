@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import ForgotPassword from "./ForgotPassword";
 
 const LoginComp = ({ onSubmit }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Email:", email, "Password:", password);
@@ -13,6 +14,20 @@ const LoginComp = ({ onSubmit }) => {
       onSubmit({ email, password });
     }
   };
+
+  const handleForgotPasswordClick = (e) => {
+    e.preventDefault();
+    setShowForgotPassword(true);
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+  };
+
+  // Show Forgot Password component if requested
+  if (showForgotPassword) {
+    return <ForgotPassword onBackToLogin={handleBackToLogin} />;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-6 sm:px-8 lg:px-10">
@@ -50,14 +65,13 @@ const LoginComp = ({ onSubmit }) => {
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition text-base sm:text-lg font-semibold"
           >
             Login
-          </button>
-          <div className="text-center mt-4">
-            <a
-              href="/forgot-password"
+          </button>          <div className="text-center mt-4">
+            <button
+              onClick={handleForgotPasswordClick}
               className="text-blue-600 hover:underline text-sm sm:text-base"
             >
               Forgot Password?
-            </a>
+            </button>
           </div>
           <div className="text-center mt-2">
             <a
