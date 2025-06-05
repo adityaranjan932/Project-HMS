@@ -42,9 +42,10 @@ const CourseRegistrationForm = ({
         return;
       }
 
+      // Pass year as per backend expectation
       const data = {
         CourseId: formData.course,
-        Semester: formData.semester,
+        year: formData.semester, // Pass year, not Semester
         ExamType: formData.examType,
         SubjectId: formData.subject,
         Rollno: formData.rollno,
@@ -59,31 +60,20 @@ const CourseRegistrationForm = ({
       );
 
       if (response.data.success) {
-        const eligibility = response.data.data.hostel_eligibility;
+        const resData = response.data.data;
+        const eligibility = resData.hostel_eligibility;
 
         if (eligibility.eligible) {
           setIsEligible(true);
 
-          // Extract student details from the response
-          const previousOddResult =
-            response.data.data.previous_odd_result || {};
-          const previousEvenResult =
-            response.data.data.previous_even_result || {};
+          // Extract student details from the new backend structure
+          const name = resData.Name || "";
+          const fatherName = resData.Father_Name || "";
+          const motherName = resData.Mother_Name || "";
+          const courseName = resData.Course || "";
 
-          const name = previousOddResult.Name || previousEvenResult.Name || "";
-          const fatherName =
-            previousOddResult.Father_Name ||
-            previousEvenResult.Father_Name ||
-            "";
-          const motherName =
-            previousOddResult.Mother_Name ||
-            previousEvenResult.Mother_Name ||
-            "";
-          const courseName =
-            previousOddResult.Course || previousEvenResult.Course || "";
-
-          const sgpaOdd = previousOddResult.SGPA || "N/A";
-          const sgpaEven = previousEvenResult.SGPA || "N/A";
+          const sgpaOdd = resData.odd_semester_result?.SGPA || "N/A";
+          const sgpaEven = resData.even_semester_result?.SGPA || "N/A";
 
           const studentDetails = {
             name,
@@ -278,9 +268,9 @@ const CourseRegistrationForm = ({
             required
           >
             <option value="">Select Year</option>
-            <option value="3">2nd year</option>
-            <option value="5">3rd year</option>
-            <option value="7">4th year</option>
+            <option value="2">2nd year</option>
+            <option value="3">3rd year</option>
+            <option value="4">4th year</option>
           </select>
         </div>
         <div className="col-span-2 sm:col-span-1">

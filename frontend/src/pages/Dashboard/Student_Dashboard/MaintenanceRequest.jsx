@@ -49,6 +49,12 @@ const MaintenanceRequest = () => {
       }
     };
   }, [stream]);
+  useEffect(() => {
+  if (isCameraOpen && stream && videoRef.current) {
+    videoRef.current.srcObject = stream;
+  }
+}, [isCameraOpen, stream]);
+
 
   const startCamera = async () => {
     setCameraError(null);
