@@ -41,6 +41,15 @@ export const MARK_NOTICE_READ_API = "/notices";
 export const GET_NOTICE_STATS_API = "/notices/stats";
 export const GET_ALL_NOTICES_API = "/notices/all";
 
+// Public Notice APIs
+export const CREATE_PUBLIC_NOTICE_API = "/public-notices";
+export const GET_ALL_PUBLIC_NOTICES_API = "/public-notices";
+export const GET_PUBLISHED_PUBLIC_NOTICES_API = "/public-notices/published";
+export const GET_PUBLIC_NOTICE_BY_ID_API = "/public-notices";
+export const UPDATE_PUBLIC_NOTICE_API = "/public-notices";
+export const DELETE_PUBLIC_NOTICE_API = "/public-notices";
+export const PUBLISH_PUBLIC_NOTICE_API = "/public-notices";
+
 // Send OTP
 export async function sendOtp(email) {
   return apiConnector("POST", SEND_OTP_API, { email });
@@ -481,6 +490,159 @@ export async function getNoticeStats() {
   } catch (error) {
     console.log("GET_NOTICE_STATS_API ERROR............", error);
     toast.error(error.response?.data?.message || "Failed to Fetch Notice Statistics");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// ========================================
+// PUBLIC NOTICE FUNCTIONS
+// ========================================
+
+// Create a new public notice
+export async function createPublicNotice(formData) {
+  const toastId = toast.loading("Creating public notice...");
+  let result = null;
+  try {
+    const response = await apiConnector("POST", CREATE_PUBLIC_NOTICE_API, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log("CREATE_PUBLIC_NOTICE_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Create Public Notice");
+    }
+    result = response?.data;
+    toast.success("Public notice created successfully!");
+  } catch (error) {
+    console.log("CREATE_PUBLIC_NOTICE_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Create Public Notice");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Get all public notices (for admin/provost)
+export async function getAllPublicNotices(params = {}) {
+  let result = null;
+  try {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${GET_ALL_PUBLIC_NOTICES_API}?${queryString}` : GET_ALL_PUBLIC_NOTICES_API;
+    
+    const response = await apiConnector("GET", url);
+    console.log("GET_ALL_PUBLIC_NOTICES_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Public Notices");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_ALL_PUBLIC_NOTICES_API ERROR............", error);
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  return result;
+}
+
+// Get published public notices (for public view)
+export async function getPublishedPublicNotices(params = {}) {
+  let result = null;
+  try {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${GET_PUBLISHED_PUBLIC_NOTICES_API}?${queryString}` : GET_PUBLISHED_PUBLIC_NOTICES_API;
+    
+    const response = await apiConnector("GET", url);
+    console.log("GET_PUBLISHED_PUBLIC_NOTICES_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Published Notices");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_PUBLISHED_PUBLIC_NOTICES_API ERROR............", error);
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  return result;
+}
+
+// Get a public notice by ID
+export async function getPublicNoticeById(noticeId) {
+  let result = null;
+  try {
+    const response = await apiConnector("GET", `${GET_PUBLIC_NOTICE_BY_ID_API}/${noticeId}`);
+    console.log("GET_PUBLIC_NOTICE_BY_ID_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Fetch Public Notice");
+    }
+    result = response?.data;
+  } catch (error) {
+    console.log("GET_PUBLIC_NOTICE_BY_ID_API ERROR............", error);
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  return result;
+}
+
+// Update a public notice
+export async function updatePublicNotice(noticeId, formData) {
+  const toastId = toast.loading("Updating public notice...");
+  let result = null;
+  try {
+    const response = await apiConnector("PUT", `${UPDATE_PUBLIC_NOTICE_API}/${noticeId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log("UPDATE_PUBLIC_NOTICE_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Update Public Notice");
+    }
+    result = response?.data;
+    toast.success("Public notice updated successfully!");
+  } catch (error) {
+    console.log("UPDATE_PUBLIC_NOTICE_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Update Public Notice");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Delete a public notice
+export async function deletePublicNotice(noticeId) {
+  const toastId = toast.loading("Deleting public notice...");
+  let result = null;
+  try {
+    const response = await apiConnector("DELETE", `${DELETE_PUBLIC_NOTICE_API}/${noticeId}`);
+    console.log("DELETE_PUBLIC_NOTICE_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Delete Public Notice");
+    }
+    result = response?.data;
+    toast.success("Public notice deleted successfully!");
+  } catch (error) {
+    console.log("DELETE_PUBLIC_NOTICE_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Delete Public Notice");
+    result = error.response?.data || { success: false, message: error.message };
+  }
+  toast.dismiss(toastId);
+  return result;
+}
+
+// Publish a public notice
+export async function publishPublicNotice(noticeId) {
+  const toastId = toast.loading("Publishing notice...");
+  let result = null;
+  try {
+    const response = await apiConnector("PATCH", `${PUBLISH_PUBLIC_NOTICE_API}/${noticeId}/publish`);
+    console.log("PUBLISH_PUBLIC_NOTICE_API RESPONSE............", response);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could Not Publish Public Notice");
+    }
+    result = response?.data;
+    toast.success("Public notice published successfully!");
+  } catch (error) {
+    console.log("PUBLISH_PUBLIC_NOTICE_API ERROR............", error);
+    toast.error(error.response?.data?.message || "Failed to Publish Public Notice");
     result = error.response?.data || { success: false, message: error.message };
   }
   toast.dismiss(toastId);
