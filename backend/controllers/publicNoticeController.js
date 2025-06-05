@@ -23,15 +23,15 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   // Accept PDF files and images
-  if (file.mimetype === 'application/pdf' || 
-      file.mimetype.startsWith('image/')) {
+  if (file.mimetype === 'application/pdf' ||
+    file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
     cb(new Error('Only PDF and image files are allowed!'), false);
   }
 };
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
@@ -47,9 +47,9 @@ const generateNoticePDF = async (notice) => {
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-    
+
     const page = await browser.newPage();
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -140,17 +140,17 @@ const generateNoticePDF = async (notice) => {
       </body>
       </html>
     `;
-    
+
     await page.setContent(html);
-    
+
     const pdfPath = path.join(__dirname, '../uploads/notices/pdfs');
     if (!fs.existsSync(pdfPath)) {
       fs.mkdirSync(pdfPath, { recursive: true });
     }
-    
+
     const filename = `notice-${notice._id}-${Date.now()}.pdf`;
     const fullPath = path.join(pdfPath, filename);
-    
+
     await page.pdf({
       path: fullPath,
       format: 'A4',
@@ -162,7 +162,7 @@ const generateNoticePDF = async (notice) => {
         left: '20mm'
       }
     });
-    
+
     return `uploads/notices/pdfs/${filename}`;
   } catch (error) {
     console.error('PDF generation error:', error);
@@ -178,7 +178,7 @@ const generateNoticePDF = async (notice) => {
 const createNotice = async (req, res) => {
   try {
     const { title, content, category, effectiveDate, expiryDate, isImportant, status } = req.body;
-    
+
     const noticeData = {
       title,
       content,
@@ -220,7 +220,7 @@ const createNotice = async (req, res) => {
     }
 
     await notice.populate('author', 'firstName lastName email');
-    
+
     res.status(201).json({
       success: true,
       message: 'Notice created successfully',
@@ -240,7 +240,7 @@ const createNotice = async (req, res) => {
 const getAllNotices = async (req, res) => {
   try {
     const { status, category, page = 1, limit = 10, search } = req.query;
-    
+
     const filter = {};
     if (status) filter.status = status;
     if (category) filter.category = category;
@@ -282,12 +282,12 @@ const getAllNotices = async (req, res) => {
 const getPublishedNotices = async (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query;
-    
-    const filter = { 
+
+    const filter = {
       status: 'published',
       effectiveDate: { $lte: new Date() }
     };
-    
+
     if (category) filter.category = category;
 
     // Only show notices that haven't expired
@@ -361,7 +361,7 @@ const getNoticeById = async (req, res) => {
 const updateNotice = async (req, res) => {
   try {
     const { title, content, category, effectiveDate, expiryDate, isImportant, status } = req.body;
-    
+
     const notice = await PublicNotice.findById(req.params.id);
     if (!notice) {
       return res.status(404).json({

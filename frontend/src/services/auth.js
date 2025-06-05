@@ -505,11 +505,8 @@ export async function createPublicNotice(formData) {
   const toastId = toast.loading("Creating public notice...");
   let result = null;
   try {
-    const response = await apiConnector("POST", CREATE_PUBLIC_NOTICE_API, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    const response = await apiConnector("POST", CREATE_PUBLIC_NOTICE_API, formData);
     console.log("CREATE_PUBLIC_NOTICE_API RESPONSE............", response);
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could Not Create Public Notice");
@@ -531,7 +528,7 @@ export async function getAllPublicNotices(params = {}) {
   try {
     const queryString = new URLSearchParams(params).toString();
     const url = queryString ? `${GET_ALL_PUBLIC_NOTICES_API}?${queryString}` : GET_ALL_PUBLIC_NOTICES_API;
-    
+
     const response = await apiConnector("GET", url);
     console.log("GET_ALL_PUBLIC_NOTICES_API RESPONSE............", response);
     if (!response?.data?.success) {
@@ -547,17 +544,20 @@ export async function getAllPublicNotices(params = {}) {
 
 // Get published public notices (for public view)
 export async function getPublishedPublicNotices(params = {}) {
+  console.log("API: Calling getPublishedPublicNotices with params:", params);
   let result = null;
   try {
     const queryString = new URLSearchParams(params).toString();
     const url = queryString ? `${GET_PUBLISHED_PUBLIC_NOTICES_API}?${queryString}` : GET_PUBLISHED_PUBLIC_NOTICES_API;
-    
+    console.log("API: Making request to URL:", url);
+
     const response = await apiConnector("GET", url);
     console.log("GET_PUBLISHED_PUBLIC_NOTICES_API RESPONSE............", response);
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could Not Fetch Published Notices");
     }
     result = response?.data;
+    console.log("API: Returning result:", result);
   } catch (error) {
     console.log("GET_PUBLISHED_PUBLIC_NOTICES_API ERROR............", error);
     result = error.response?.data || { success: false, message: error.message };
@@ -587,11 +587,8 @@ export async function updatePublicNotice(noticeId, formData) {
   const toastId = toast.loading("Updating public notice...");
   let result = null;
   try {
-    const response = await apiConnector("PUT", `${UPDATE_PUBLIC_NOTICE_API}/${noticeId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    const response = await apiConnector("PUT", `${UPDATE_PUBLIC_NOTICE_API}/${noticeId}`, formData);
     console.log("UPDATE_PUBLIC_NOTICE_API RESPONSE............", response);
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could Not Update Public Notice");

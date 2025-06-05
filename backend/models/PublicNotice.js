@@ -79,15 +79,15 @@ PublicNoticeSchema.index({ category: 1, publishedAt: -1 });
 PublicNoticeSchema.index({ effectiveDate: 1 });
 
 // Virtual for checking if notice is active
-PublicNoticeSchema.virtual('isActive').get(function() {
+PublicNoticeSchema.virtual('isActive').get(function () {
   const now = new Date();
-  return this.status === 'published' && 
-         this.effectiveDate <= now && 
-         (!this.expiryDate || this.expiryDate >= now);
+  return this.status === 'published' &&
+    this.effectiveDate <= now &&
+    (!this.expiryDate || this.expiryDate >= now);
 });
 
 // Pre-save middleware to set publishedAt when status changes to published
-PublicNoticeSchema.pre('save', function(next) {
+PublicNoticeSchema.pre('save', function (next) {
   if (this.status === 'published' && !this.publishedAt) {
     this.publishedAt = new Date();
   }

@@ -22,8 +22,16 @@ app.use(cors({
     'http://localhost:5173', // local frontend
     'https://project-hms-frontend-l3vz.onrender.com' // deployed frontend
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
+  ],
   credentials: true
 }));
 app.use(express.json());

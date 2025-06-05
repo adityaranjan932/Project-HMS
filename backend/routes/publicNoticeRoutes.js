@@ -10,7 +10,7 @@ const {
   deleteNotice,
   publishNotice
 } = require('../controllers/publicNoticeController');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Public routes (no authentication required)
 router.get('/published', getPublishedNotices);
