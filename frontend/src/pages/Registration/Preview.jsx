@@ -1,16 +1,16 @@
 import React from "react";
 
 const Preview = ({ formData }) => (
-  <div className="space-y-6 animate-fadeIn">
-    <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
+  <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
       Preview Your Information
     </h2>
 
-    <div className="bg-gray-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
-      <h3 className="font-medium text-indigo-600 mb-3 flex items-center">
+    <div className="bg-gray-50 p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+      <h3 className="font-medium text-indigo-600 mb-3 flex items-center text-sm sm:text-base">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2"
+          className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -22,31 +22,41 @@ const Preview = ({ formData }) => (
         </svg>
         Personal Information
       </h3>
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
         <div className="text-gray-600 font-medium">Student Name:</div>
-        <div>{formData.studentName || "Not available"}</div>
+        <div className="break-words">
+          {formData.studentName || "Not available"}
+        </div>
         <div className="text-gray-600 font-medium">Father's Name:</div>
-        <div>{formData.fatherName || "Not available"}</div>
+        <div className="break-words">
+          {formData.fatherName || "Not available"}
+        </div>
         <div className="text-gray-600 font-medium">Mother's Name:</div>
-        <div>{formData.motherName || "Not available"}</div>
+        <div className="break-words">
+          {formData.motherName || "Not available"}
+        </div>
         <div className="text-gray-600 font-medium">Roll Number:</div>
-        <div>{formData.rollno || "Not provided"}</div>
+        <div className="break-words">{formData.rollno || "Not provided"}</div>
         <div className="text-gray-600 font-medium">Course:</div>
-        <div>{formData.courseName || "Not available"}</div>
+        <div className="break-words">
+          {formData.courseName || "Not available"}
+        </div>
         <div className="text-gray-600 font-medium">Semester:</div>
-        <div>{formData.semester || "Not provided"}</div>
+        <div className="break-words">{formData.semester || "Not provided"}</div>
         <div className="text-gray-600 font-medium">SGPA (Odd Semester):</div>
-        <div>{formData.sgpaOdd || "Not available"}</div>
+        <div className="break-words">{formData.sgpaOdd || "Not available"}</div>
         <div className="text-gray-600 font-medium">SGPA (Even Semester):</div>
-        <div>{formData.sgpaEven || "Not available"}</div>
+        <div className="break-words">
+          {formData.sgpaEven || "Not available"}
+        </div>
       </div>
     </div>
 
-    <div className="bg-gray-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
-      <h3 className="font-medium text-indigo-600 mb-3 flex items-center">
+    <div className="bg-gray-50 p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+      <h3 className="font-medium text-indigo-600 mb-3 flex items-center text-sm sm:text-base">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2"
+          className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -55,19 +65,19 @@ const Preview = ({ formData }) => (
         </svg>
         Contact Information
       </h3>
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
         <div className="text-gray-600 font-medium">Email:</div>
-        <div>{formData.email || "Not provided"}</div>
+        <div className="break-all">{formData.email || "Not provided"}</div>
         <div className="text-gray-600 font-medium">Mobile:</div>
-        <div>{formData.mobile || "Not provided"}</div>
+        <div className="break-words">{formData.mobile || "Not provided"}</div>
       </div>
     </div>
 
-    <div className="bg-gray-50 p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
-      <h3 className="font-medium text-indigo-600 mb-3 flex items-center">
+    <div className="bg-gray-50 p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+      <h3 className="font-medium text-indigo-600 mb-3 flex items-center text-sm sm:text-base">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-2"
+          className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -75,7 +85,7 @@ const Preview = ({ formData }) => (
         </svg>
         Hostel Preferences
       </h3>
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
         <div className="text-gray-600 font-medium">Gender:</div>
         <div>
           {formData.gender === "male"
@@ -97,7 +107,7 @@ const Preview = ({ formData }) => (
       </div>
     </div>
 
-    <p className="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+    <p className="text-xs sm:text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
       Please review all information carefully before proceeding to submit. You
       won't be able to make changes after submission.
     </p>

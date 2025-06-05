@@ -142,17 +142,15 @@ const CourseRegistrationForm = ({
       setIsLoading(false);
     }
   };
-
   return (
-    <div className="space-y-5 animate-fadeIn">
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
+    <div className="space-y-4 sm:space-y-5 animate-fadeIn">
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
         Personal Information
       </h2>
-
       {/* Student Details (Read-only) */}
       {studentDetails.name && (
-        <div className="grid grid-cols-2 gap-5">
-          <div className="col-span-2 sm:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Student Name
             </label>
@@ -160,10 +158,10 @@ const CourseRegistrationForm = ({
               type="text"
               value={studentDetails.name}
               readOnly
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed text-sm sm:text-base"
             />
           </div>
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Father's Name
             </label>
@@ -171,10 +169,10 @@ const CourseRegistrationForm = ({
               type="text"
               value={studentDetails.fatherName}
               readOnly
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed text-sm sm:text-base"
             />
           </div>
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mother's Name
             </label>
@@ -182,10 +180,10 @@ const CourseRegistrationForm = ({
               type="text"
               value={studentDetails.motherName}
               readOnly
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed text-sm sm:text-base"
             />
           </div>
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               SGPA (Odd Semester)
             </label>
@@ -193,10 +191,10 @@ const CourseRegistrationForm = ({
               type="text"
               value={studentDetails.sgpaOdd}
               readOnly
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed text-sm sm:text-base"
             />
           </div>
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1 sm:col-span-2 md:col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               SGPA (Even Semester)
             </label>
@@ -204,13 +202,12 @@ const CourseRegistrationForm = ({
               type="text"
               value={studentDetails.sgpaEven}
               readOnly
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed text-sm sm:text-base"
             />
           </div>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-5">
+      )}{" "}
+      <div className="grid grid-cols-1 gap-4 sm:gap-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Course Name *
@@ -219,7 +216,7 @@ const CourseRegistrationForm = ({
             name="course"
             value={formData.course}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
           >
             <option value="">Select Course</option>
@@ -231,8 +228,7 @@ const CourseRegistrationForm = ({
           </select>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Subject Name *
@@ -241,7 +237,7 @@ const CourseRegistrationForm = ({
             name="subject"
             value={formData.subject}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
           >
             <option value="">Select Subject</option>
@@ -254,9 +250,8 @@ const CourseRegistrationForm = ({
           </select>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-5">
-        <div className="col-span-2 sm:col-span-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Current Year *
           </label>
@@ -264,7 +259,7 @@ const CourseRegistrationForm = ({
             name="semester"
             value={formData.semester}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
           >
             <option value="">Select Year</option>
@@ -273,7 +268,7 @@ const CourseRegistrationForm = ({
             <option value="4">4th year</option>
           </select>
         </div>
-        <div className="col-span-2 sm:col-span-1">
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Exam Type *
           </label>
@@ -281,7 +276,7 @@ const CourseRegistrationForm = ({
             name="examType"
             value={formData.examType}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
           >
             <option value="">Exam Type</option>
@@ -289,9 +284,8 @@ const CourseRegistrationForm = ({
           </select>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-5">
-        <div className="col-span-2 sm:col-span-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Roll No. *
           </label>
@@ -300,13 +294,13 @@ const CourseRegistrationForm = ({
             name="rollno"
             value={formData.rollno}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
             placeholder="Enter your roll number"
             maxLength="15"
           />
         </div>
-        <div className="col-span-2 sm:col-span-1">
+        <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Date of Birth (DD/MM/YYYY) *
           </label>
@@ -315,15 +309,14 @@ const CourseRegistrationForm = ({
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
             placeholder="DD/MM/YYYY"
             maxLength="10"
           />
         </div>
-      </div>
-
-      <div className="mt-4">
+      </div>{" "}
+      <div className="mt-4 sm:mt-6">
         <button
           onClick={checkEligibility}
           disabled={
@@ -334,16 +327,16 @@ const CourseRegistrationForm = ({
             !formData.rollno ||
             !formData.dateOfBirth
           }
-          className={`w-full py-2 px-4 rounded-lg text-white font-medium transition-all duration-300 ${
+          className={`w-full py-2 sm:py-3 px-4 rounded-lg text-white font-medium transition-all duration-300 min-h-[44px] touch-manipulation text-sm sm:text-base ${
             isLoading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700"
+              : "bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200"
           }`}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
               <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                className="animate-spin -ml-1 mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -362,14 +355,15 @@ const CourseRegistrationForm = ({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Checking Eligibility...
+              <span className="text-sm sm:text-base">
+                Checking Eligibility...
+              </span>
             </div>
           ) : (
             "Check Eligibility"
           )}
         </button>
       </div>
-
       {isEligible !== null && (
         <div
           className={`mt-4 p-4 rounded-lg ${
@@ -389,7 +383,6 @@ const CourseRegistrationForm = ({
           )}
         </div>
       )}
-
       <div className="text-xs text-gray-500 mt-4">
         Fields marked with * are required
       </div>

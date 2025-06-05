@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux'; // Assuming you use Redux for token/user state
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux"; // Assuming you use Redux for token/user state
+import { toast } from "react-hot-toast";
 import {
   createHostelFeeOrder,
   createMessFeeOrder,
   verifyPayment,
   getMyPaymentHistory,
-} from '../../../services/auth'; // Corrected path
-import { apiConnector } from '../../../services/apiconnector'; // For Razorpay key if not in order response
+} from "../../../services/auth"; // Corrected path
+import { apiConnector } from "../../../services/apiconnector"; // For Razorpay key if not in order response
 
 const FeesPayment = () => {
-  const [messSemester, setMessSemester] = useState('odd'); // 'odd' or 'even'
+  const [messSemester, setMessSemester] = useState("odd"); // 'odd' or 'even'
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [loadingHostelPay, setLoadingHostelPay] = useState(false);
@@ -22,8 +22,8 @@ const FeesPayment = () => {
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => {
         resolve(true);
       };
@@ -45,11 +45,11 @@ const FeesPayment = () => {
       if (response && response.success) {
         setPaymentHistory(response.data || []);
       } else {
-        toast.error(response?.message || 'Failed to fetch payment history.');
+        toast.error(response?.message || "Failed to fetch payment history.");
         setPaymentHistory([]);
       }
     } catch (error) {
-      toast.error('Error fetching payment history.');
+      toast.error("Error fetching payment history.");
       console.error("Payment history fetch error:", error);
       setPaymentHistory([]);
     }
@@ -68,16 +68,18 @@ const FeesPayment = () => {
 
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded) {
-      toast.error('Razorpay SDK failed to load. Check your internet connection.');
+      toast.error(
+        "Razorpay SDK failed to load. Check your internet connection."
+      );
       return;
     }
 
     let orderResponse;
-    if (feeType === 'hostel') {
+    if (feeType === "hostel") {
       setLoadingHostelPay(true);
       orderResponse = await createHostelFeeOrder(token);
       setLoadingHostelPay(false);
-    } else if (feeType === 'mess') {
+    } else if (feeType === "mess") {
       if (!semester) {
         toast.error("Please select a semester for mess fee payment.");
         return;
@@ -88,19 +90,22 @@ const FeesPayment = () => {
     }
 
     if (!orderResponse || !orderResponse.success) {
-      toast.error(orderResponse?.message || 'Failed to create payment order.');
+      toast.error(orderResponse?.message || "Failed to create payment order.");
       return;
     }
 
-    const { orderId, amount, currency, key, studentName, studentEmail } = orderResponse;
+    const { orderId, amount, currency, key, studentName, studentEmail } =
+      orderResponse;
     // const razorpayKey = process.env.VITE_RAZORPAY_KEY; // If key is not in orderResponse
 
     const options = {
       key: key, // Use key from backend response
       amount: amount,
       currency: currency,
-      name: 'HMS Payments',
-      description: `${feeType === 'hostel' ? 'Hostel Fee' : `Mess Fee (${semester} semester)`}`,
+      name: "HMS Payments",
+      description: `${
+        feeType === "hostel" ? "Hostel Fee" : `Mess Fee (${semester} semester)`
+      }`,
       order_id: orderId,
       handler: async function (response) {
         const verificationData = {
@@ -110,29 +115,31 @@ const FeesPayment = () => {
         };
         const verificationResult = await verifyPayment(verificationData, token);
         if (verificationResult && verificationResult.success) {
-          toast.success(verificationResult.message || 'Payment successful!');
+          toast.success(verificationResult.message || "Payment successful!");
           fetchPaymentHistory(); // Refresh history
         } else {
-          toast.error(verificationResult?.message || 'Payment verification failed.');
+          toast.error(
+            verificationResult?.message || "Payment verification failed."
+          );
         }
       },
       prefill: {
-        name: studentName || 'Student Name',
-        email: studentEmail || 'student@example.com',
+        name: studentName || "Student Name",
+        email: studentEmail || "student@example.com",
         // contact: '9999999999' // Optional: if you have student's phone number
       },
       notes: {
-        address: 'Hostel Management System',
+        address: "Hostel Management System",
         feeType: feeType,
-        semester: semester || 'N/A'
+        semester: semester || "N/A",
       },
       theme: {
-        color: '#3399cc',
+        color: "#3399cc",
       },
     };
 
     const paymentObject = new window.Razorpay(options);
-    paymentObject.on('payment.failed', function (response) {
+    paymentObject.on("payment.failed", function (response) {
       toast.error(`Payment Failed: ${response.error.description}`);
       console.error("Payment Failed:", response.error);
     });
@@ -140,95 +147,217 @@ const FeesPayment = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-700">Fees Payment</h2>
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
+          Fees Payment
+        </h2>
 
-      {/* Hostel Fee Payment */}
-      <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-xl font-medium mb-4 text-gray-600">Hostel Fee</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Pay your annual hostel fees here. Ensure your allotment is confirmed before proceeding.
-        </p>
-        <button
-          onClick={() => handlePayment('hostel')}
-          disabled={loadingHostelPay}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out disabled:opacity-50"
-        >
-          {loadingHostelPay ? 'Processing...' : 'Pay Hostel Fee'}
-        </button>
-      </div>
-
-      {/* Mess Fee Payment */}
-      <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-xl font-medium mb-4 text-gray-600">Mess Fee</h3>
-        <p className="text-sm text-gray-500 mb-2">
-          Pay your semester-wise mess fees. Select the semester for which you want to pay.
-        </p>
-        <div className="flex items-center space-x-4 mb-4">
-          <label htmlFor="messSemester" className="block text-sm font-medium text-gray-700">
-            Select Semester:
-          </label>
-          <select
-            id="messSemester"
-            value={messSemester}
-            onChange={(e) => setMessSemester(e.target.value)}
-            className="mt-1 block w-full md:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-            <option value="odd">Odd Semester</option>
-            <option value="even">Even Semester</option>
-          </select>
-        </div>
-        <button
-          onClick={() => handlePayment('mess', messSemester)}
-          disabled={loadingMessPay}
-          className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out disabled:opacity-50"
-        >
-          {loadingMessPay ? 'Processing...' : `Pay Mess Fee (${messSemester === 'odd' ? 'Odd' : 'Even'} Sem)`}
-        </button>
-      </div>
-
-      {/* Payment History */}
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-xl font-medium mb-4 text-gray-600">Payment History</h3>
-        {loadingHistory ? (
-          <p className="text-gray-500">Loading payment history...</p>
-        ) : paymentHistory.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (INR)</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paymentHistory.map((payment) => (
-                  <tr key={payment._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(payment.transactionDate || payment.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{payment.paymentFor}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{payment.amount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{payment.semester === 'full_year' ? 'Annual' : payment.semester}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        payment.status === 'captured' ? 'bg-green-100 text-green-800' :
-                        payment.status === 'created' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {payment.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate" title={payment.razorpayOrderId}>{payment.razorpayOrderId?.substring(0,15) || 'N/A'}...</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Payment Cards Container */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Hostel Fee Payment */}
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-gray-200">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-700 flex items-center">
+              🏠 Hostel Fee
+            </h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              Pay your annual hostel fees here. Ensure your allotment is
+              confirmed before proceeding.
+            </p>
+            <button
+              onClick={() => handlePayment("hostel")}
+              disabled={loadingHostelPay || !token}
+              className="w-full py-3 sm:py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base"
+            >
+              {loadingHostelPay ? "Processing..." : "Pay Hostel Fee"}
+            </button>
           </div>
-        ) : (
-          <p className="text-gray-500">No payment history found.</p>
+
+          {/* Mess Fee Payment */}
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-gray-200">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-700 flex items-center">
+              🍽️ Mess Fee
+            </h3>
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              Pay your semester mess fees. Select the appropriate semester
+              below.
+            </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Semester *
+              </label>
+              <select
+                value={messSemester}
+                onChange={(e) => setMessSemester(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base"
+              >
+                <option value="odd">Odd Semester</option>
+                <option value="even">Even Semester</option>
+              </select>
+            </div>
+            <button
+              onClick={() => handlePayment("mess", messSemester)}
+              disabled={loadingMessPay || !token}
+              className="w-full py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base"
+            >
+              {loadingMessPay
+                ? "Processing..."
+                : `Pay Mess Fee (${
+                    messSemester.charAt(0).toUpperCase() + messSemester.slice(1)
+                  } Sem)`}
+            </button>
+          </div>
+        </div>
+
+        {/* Payment History */}
+        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-700">
+              📋 Payment History
+            </h3>
+            <button
+              onClick={fetchPaymentHistory}
+              disabled={loadingHistory}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm shadow-sm"
+            >
+              {loadingHistory ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
+
+          {loadingHistory ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading payment history...</p>
+            </div>
+          ) : paymentHistory.length === 0 ? (
+            <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <p className="text-gray-500 text-lg">No payment history found.</p>
+              <p className="text-sm text-gray-400 mt-2">
+                Your completed payments will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="hidden sm:block">
+                <table className="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Date
+                      </th>
+                      <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Fee Type
+                      </th>
+                      <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Amount
+                      </th>
+                      <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Status
+                      </th>
+                      <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                        Payment ID
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentHistory.map((payment, index) => (
+                      <tr
+                        key={index}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                          {new Date(
+                            payment.createdAt || payment.date
+                          ).toLocaleDateString()}
+                        </td>
+                        <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700 capitalize">
+                          {payment.feeType || "N/A"}
+                          {payment.semester && ` (${payment.semester})`}
+                        </td>
+                        <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700 font-medium">
+                          ₹{payment.amount || 0}
+                        </td>
+                        <td className="border border-gray-200 px-4 py-3 text-sm">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              payment.status === "success" ||
+                              payment.status === "completed"
+                                ? "bg-green-100 text-green-800"
+                                : payment.status === "pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {payment.status || "Unknown"}
+                          </span>
+                        </td>
+                        <td className="border border-gray-200 px-4 py-3 text-sm text-gray-600 font-mono">
+                          {payment.paymentId ||
+                            payment.razorpay_payment_id ||
+                            "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile view - Cards */}
+              <div className="sm:hidden space-y-4">
+                {paymentHistory.map((payment, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-semibold text-gray-700 capitalize">
+                        {payment.feeType || "N/A"}
+                        {payment.semester && ` (${payment.semester})`}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          payment.status === "success" ||
+                          payment.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : payment.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {payment.status || "Unknown"}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>
+                        <span className="font-medium">Amount:</span> ₹
+                        {payment.amount || 0}
+                      </p>
+                      <p>
+                        <span className="font-medium">Date:</span>{" "}
+                        {new Date(
+                          payment.createdAt || payment.date
+                        ).toLocaleDateString()}
+                      </p>
+                      <p>
+                        <span className="font-medium">Payment ID:</span>{" "}
+                        <span className="font-mono text-xs">
+                          {payment.paymentId ||
+                            payment.razorpay_payment_id ||
+                            "N/A"}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!token && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm mt-6">
+            ⚠️ Please log in to make payments and view your payment history.
+          </div>
         )}
       </div>
     </div>

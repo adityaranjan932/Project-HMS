@@ -18,11 +18,9 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
 
     try {
       setIsCheckingEmail(true);
-      const response = await apiConnector(
-        "POST",
-        "/auth/check-email",
-        { email: formData.email }
-      );
+      const response = await apiConnector("POST", "/auth/check-email", {
+        email: formData.email,
+      });
       return response.data;
     } catch (error) {
       console.error("Error checking email:", error);
@@ -53,16 +51,14 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
         return;
       }
       // Send OTP
-      const response = await apiConnector(
-        "POST",
-        "/auth/send-otp",
-        { email: formData.email }
-      );
+      const response = await apiConnector("POST", "/auth/send-otp", {
+        email: formData.email,
+      });
       setOtpSent(true);
       alert("OTP sent to your email.");
       // Optionally store OTP expiration
       if (response.data.expiresAt) {
-        localStorage.setItem('otpExpiresAt', response.data.expiresAt);
+        localStorage.setItem("otpExpiresAt", response.data.expiresAt);
       }
     } catch (error) {
       alert(error.response?.data?.message || "Failed to send OTP");
@@ -78,11 +74,10 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
     }
     setIsVerifying(true);
     try {
-      const verifyRes = await apiConnector(
-        "POST",
-        "/auth/verify-otp",
-        { email: formData.email, otp: formData.otp }
-      );
+      const verifyRes = await apiConnector("POST", "/auth/verify-otp", {
+        email: formData.email,
+        otp: formData.otp,
+      });
       if (verifyRes.data.success) {
         alert("OTP verified successfully!");
         setIsOtpVerifiedLocal(true);
@@ -100,14 +95,13 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
       setIsVerifying(false);
     }
   };
-
   return (
-    <div className="space-y-5 animate-fadeIn">
-      <h2 className="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
+    <div className="space-y-4 sm:space-y-5 animate-fadeIn">
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
         Email & Mobile Verification
       </h2>
 
-      <div className="space-y-5">
+      <div className="space-y-4 sm:space-y-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email Address *
@@ -117,7 +111,7 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
             placeholder="Enter your email address"
           />
@@ -126,17 +120,17 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
           </p>
           {emailExists && (
             <p className="text-xs text-red-500 mt-1">
-              This email is already registered. Please use a different email or login.
+              This email is already registered. Please use a different email or
+              login.
             </p>
           )}
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Mobile Number *
           </label>
           <div className="flex">
-            <span className="inline-flex items-center px-3 text-gray-500 bg-gray-100 rounded-l-md border border-r-0 border-gray-300">
+            <span className="inline-flex items-center px-2 sm:px-3 text-sm sm:text-base text-gray-500 bg-gray-100 rounded-l-md border border-r-0 border-gray-300">
               +91
             </span>
             <input
@@ -144,13 +138,12 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
               required
               placeholder="Enter your mobile number"
             />
           </div>
-        </div>
-
+        </div>{" "}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Password *
@@ -160,12 +153,11 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+            className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
             required
             placeholder="Enter your password"
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Confirm Password *
@@ -175,13 +167,13 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border ${
+            className={`w-full px-3 sm:px-4 py-2 border ${
               formData.password &&
               formData.confirmPassword &&
               formData.password !== formData.confirmPassword
                 ? "border-red-500"
                 : "border-gray-300"
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300`}
+            } rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation`}
             required
             placeholder="Confirm your password"
           />
@@ -193,29 +185,28 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               </p>
             )}
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Verification OTP *
           </label>
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <input
               type="text"
               name="otp"
               value={formData.otp}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
               placeholder="Enter OTP"
               required
               disabled={!otpSent}
             />
             {otpSent && !isOtpVerifiedLocal && !isVerifying ? (
               <button
-                className={`px-4 py-2 ${
+                className={`w-full sm:w-auto px-4 py-2 ${
                   isVerifying
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700"
-                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500`}
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[44px] touch-manipulation font-medium text-sm sm:text-base`}
                 onClick={verifyOtp}
                 disabled={isVerifying}
               >
@@ -223,11 +214,11 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
               </button>
             ) : !otpSent ? (
               <button
-                className={`px-4 py-2 ${
+                className={`w-full sm:w-auto px-4 py-2 ${
                   isCheckingEmail
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-indigo-600 hover:bg-indigo-700"
-                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                } text-white rounded-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px] touch-manipulation font-medium text-sm sm:text-base`}
                 onClick={sendOtp}
               >
                 Send OTP
@@ -236,7 +227,7 @@ const EmailMobileVerification = ({ formData, handleChange, onOtpVerified }) => {
           </div>
           {otpSent && !isOtpVerifiedLocal && (
             <button
-              className="mt-2 text-sm text-indigo-600 hover:underline"
+              className="mt-2 text-sm text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
               onClick={sendOtp}
               disabled={isCheckingEmail}
             >

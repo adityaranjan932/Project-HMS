@@ -154,319 +154,341 @@ const PublicNotice = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Public Notice Management</h2>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          Public Notices
+        </h2>
         <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditingNotice(null); // Reset editing state
+            resetForm(); // Clear form when opening
+          }}
+          className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center shadow-md"
         >
-          {showForm ? "Cancel" : "Create New Notice"}
+          {showForm ? "Hide Form" : "Create New Notice"}
         </button>
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex gap-4 items-center">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Status Filter:
-          </label>
-          <select
-            value={filter.status}
-            onChange={(e) =>
-              setFilter((prev) => ({ ...prev, status: e.target.value }))
-            }
-            className="px-3 py-2 border rounded"
+      <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Status
+            </label>
+            <select
+              name="status"
+              value={filter.status}
+              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+            >
+              <option value="all">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Category
+            </label>
+            <select
+              name="category"
+              value={filter.category}
+              onChange={(e) =>
+                setFilter({ ...filter, category: e.target.value })
+              }
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+            >
+              <option value="all">All Categories</option>
+              <option value="General">General</option>
+              <option value="Academic">Academic</option>
+              <option value="Events">Events</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <button
+            onClick={fetchNotices} // Assuming fetchNotices applies the current filter state
+            className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center shadow-sm"
           >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Category Filter:
-          </label>
-          <select
-            value={filter.category}
-            onChange={(e) =>
-              setFilter((prev) => ({ ...prev, category: e.target.value }))
-            }
-            className="px-3 py-2 border rounded"
-          >
-            <option value="all">All Categories</option>
-            <option value="Academic">Academic</option>
-            <option value="Administrative">Administrative</option>
-            <option value="Events">Events</option>
-            <option value="Facilities">Facilities</option>
-            <option value="Emergency">Emergency</option>
-            <option value="General">General</option>
-          </select>
+            Apply Filters
+          </button>
         </div>
       </div>
 
-      {/* Create/Edit Form */}
+      {/* Form Section */}
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 bg-white p-6 rounded-lg border border-gray-200 mb-6"
-        >
-          <h3 className="text-lg font-semibold">
+        <div className="mb-8 p-4 sm:p-6 bg-white rounded-lg shadow-lg">
+          <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-gray-800">
             {editingNotice ? "Edit Notice" : "Create New Notice"}
           </h3>
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Enter notice title"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Category *
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                  required
+                >
+                  <option value="General">General</option>
+                  <option value="Academic">Academic</option>
+                  <option value="Events">Events</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 font-medium">Notice Title *</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Content *
+              </label>
+              <textarea
+                name="content"
+                value={formData.content}
                 onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
+                rows="4"
+                placeholder="Enter notice content"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-y text-sm"
                 required
               />
             </div>
 
-            <div>
-              <label className="block mb-1 font-medium">Category *</label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
-                required
-              >
-                <option value="Academic">Academic</option>
-                <option value="Administrative">Administrative</option>
-                <option value="Events">Events</option>
-                <option value="Facilities">Facilities</option>
-                <option value="Emergency">Emergency</option>
-                <option value="General">General</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Notice Content *</label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
-              rows="6"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium">Effective Date *</label>
-              <input
-                type="date"
-                name="effectiveDate"
-                value={formData.effectiveDate}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Effective Date *
+                </label>
+                <input
+                  type="date"
+                  name="effectiveDate"
+                  value={formData.effectiveDate}
+                  onChange={handleInputChange}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Expiry Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  name="expiryDate"
+                  value={formData.expiryDate}
+                  onChange={handleInputChange}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block mb-1 font-medium">
-                Expiry Date (Optional)
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Attachments (Optional)
               </label>
               <input
-                type="date"
-                name="expiryDate"
-                value={formData.expiryDate}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
+                type="file"
+                name="attachments"
+                multiple
+                onChange={handleFileChange}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
               />
+              {attachments.length > 0 && (
+                <div className="mt-2 text-xs text-gray-600">
+                  {attachments.length} file(s) selected:{" "}
+                  {attachments.map((f) => f.name).join(", ")}
+                </div>
+              )}
             </div>
-          </div>
 
-          <div>
-            <label className="block mb-1 font-medium">
-              Attachments (Optional)
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png"
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Accepted formats: PDF, JPG, PNG (Max 10MB per file)
-            </p>
-          </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isImportant"
+                  name="isImportant"
+                  checked={formData.isImportant}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="isImportant"
+                  className="ml-2 text-sm font-medium text-gray-700"
+                >
+                  Mark as Important
+                </label>
+              </div>
 
-          <div className="flex items-center gap-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                name="isImportant"
-                checked={formData.isImportant}
-                onChange={handleInputChange}
-                className="mr-2"
-              />
-              Mark as Important
-            </label>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, status: "published" }))
-              }
-              className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
-            >
-              Publish Notice
-            </button>
-            <button
-              type="submit"
-              onClick={() =>
-                setFormData((prev) => ({ ...prev, status: "draft" }))
-              }
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
-            >
-              Save as Draft
-            </button>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="bg-red-200 text-red-800 px-4 py-2 rounded hover:bg-red-300"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 disabled:opacity-50 transition-colors text-sm font-medium shadow-sm"
+                  disabled={loading} // Consider a specific submitting state if needed
+                >
+                  {editingNotice ? "Update Notice" : "Create Notice"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                >
+                  Reset Form
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       )}
 
       {/* Notices List */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4">
-          Public Notices ({notices.length})
-        </h3>
-
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading notices...</p>
-          </div>
-        ) : notices.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No notices found. Create your first public notice!
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {notices.map((notice) => (
-              <div
-                key={notice._id}
-                className="p-4 bg-white rounded border flex justify-between items-start"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-medium text-lg">{notice.title}</h4>
-                    {notice.isImportant && (
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                        IMPORTANT
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-600 mb-2 line-clamp-2">
-                    {notice.content}
-                  </p>
-                  <div className="text-sm text-gray-500 space-y-1">
-                    <p>
-                      <span className="font-medium">Category:</span>{" "}
-                      {notice.category}
-                    </p>
-                    <p>
-                      <span className="font-medium">Effective:</span>{" "}
-                      {new Date(notice.effectiveDate).toLocaleDateString()}
-                    </p>
-                    {notice.expiryDate && (
-                      <p>
-                        <span className="font-medium">Expires:</span>{" "}
-                        {new Date(notice.expiryDate).toLocaleDateString()}
-                      </p>
-                    )}
-                    <p>
-                      <span className="font-medium">Created:</span>{" "}
-                      {new Date(notice.createdAt).toLocaleDateString()}
-                    </p>
-                    {notice.publishedAt && (
-                      <p>
-                        <span className="font-medium">Published:</span>{" "}
-                        {new Date(notice.publishedAt).toLocaleDateString()}
-                      </p>
-                    )}
-                    {notice.views > 0 && (
-                      <p>
-                        <span className="font-medium">Views:</span>{" "}
-                        {notice.views}
-                      </p>
-                    )}
-                    {notice.attachments && notice.attachments.length > 0 && (
-                      <p>
-                        <span className="font-medium">Attachments:</span>{" "}
-                        {notice.attachments.length} file(s)
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2 ml-4">
+      {loading ? (
+        <div className="text-center py-10">
+          <p className="text-gray-600 text-lg">Loading notices...</p>
+        </div>
+      ) : notices.length === 0 ? (
+        <div className="text-center py-10 bg-white rounded-lg shadow-sm">
+          <p className="text-gray-500 text-lg">No notices found.</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Try adjusting your filters or create a new notice.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {notices.map((notice) => (
+            <div
+              key={notice._id}
+              className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col justify-between hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="text-lg font-semibold text-gray-800 leading-tight">
+                    {notice.title}
+                  </h4>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusColor(
                       notice.status
                     )}`}
                   >
-                    {notice.status.toUpperCase()}
+                    {notice.status.charAt(0).toUpperCase() +
+                      notice.status.slice(1)}
                   </span>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleEdit(notice)}
-                      className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded border border-blue-200 hover:bg-blue-50"
-                    >
-                      Edit
-                    </button>
-                    {notice.status === "draft" && (
-                      <button
-                        onClick={() => handlePublish(notice._id)}
-                        className="text-green-600 hover:text-green-800 text-sm px-2 py-1 rounded border border-green-200 hover:bg-green-50"
-                      >
-                        Publish
-                      </button>
-                    )}
-                    {notice.pdfPath && (
-                      <a
-                        href={`${import.meta.env.VITE_API_BASE_URL}/${
-                          notice.pdfPath
-                        }`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-purple-600 hover:text-purple-800 text-sm px-2 py-1 rounded border border-purple-200 hover:bg-purple-50"
-                      >
-                        PDF
-                      </a>
-                    )}
-                    <button
-                      onClick={() => handleDelete(notice._id)}
-                      className="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded border border-red-200 hover:bg-red-50"
-                    >
-                      Delete
-                    </button>
+                </div>
+
+                <p className="text-xs text-gray-500 mb-1">
+                  Category:{" "}
+                  <span className="font-medium text-gray-600">
+                    {notice.category}
+                  </span>
+                </p>
+                {notice.isImportant && (
+                  <p className="text-xs font-semibold text-red-500 mb-2 flex items-center">
+                    IMPORTANT
+                  </p>
+                )}
+
+                <p className="text-sm text-gray-700 mb-3 leading-relaxed line-clamp-3">
+                  {notice.content}
+                </p>
+
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>
+                    Effective:{" "}
+                    <span className="font-medium text-gray-600">
+                      {new Date(notice.effectiveDate).toLocaleDateString()}
+                    </span>
+                  </p>
+                  {notice.expiryDate && (
+                    <p>
+                      Expires:{" "}
+                      <span className="font-medium text-gray-600">
+                        {new Date(notice.expiryDate).toLocaleDateString()}
+                      </span>
+                    </p>
+                  )}
+                  <p>
+                    Created:{" "}
+                    <span className="font-medium text-gray-600">
+                      {new Date(notice.createdAt).toLocaleDateString()}
+                    </span>
+                  </p>
+                </div>
+
+                {notice.attachments && notice.attachments.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs font-medium text-gray-700 mb-1">
+                      Attachments:
+                    </p>
+                    <ul className="space-y-1">
+                      {notice.attachments.map((att, index) => (
+                        <li key={index} className="text-xs">
+                          <a
+                            href={att.url} // Assuming attachment object has a URL
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-teal-600 hover:text-teal-700 hover:underline truncate block"
+                          >
+                            {att.filename || `Attachment ${index + 1}`}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
+                )}
+              </div>
+
+              <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                  {notice.status === "draft" && (
+                    <button
+                      onClick={() => handlePublish(notice._id)}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors w-full sm:w-auto"
+                    >
+                      Publish
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleEdit(notice);
+                      setShowForm(true); // Open form when editing
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(notice._id)}
+                    className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors w-full sm:w-auto"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

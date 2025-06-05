@@ -149,173 +149,164 @@ const StudentQueries = () => {
   const filteredRequests = getFilteredRequests();
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
-          All Student Requests
-        </h2>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
+        Student Queries & Requests
+      </h2>
 
-        {/* Filter buttons */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { key: "all", label: "All Requests" },
-            { key: "maintenance", label: "Maintenance" },
-            { key: "leave", label: "Leave Requests" },
-            { key: "feedback", label: "Feedback" },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === key
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {label} (
-              {key === "all"
-                ? allRequests.length
-                : allRequests.filter((r) => r.type === key).length}
-              )
-            </button>
-          ))}
-        </div>
+      {/* Filter Controls */}
+      <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+        <label
+          htmlFor="requestFilter"
+          className="block text-sm font-medium text-gray-700 mb-1.5"
+        >
+          Filter by Request Type:
+        </label>
+        <select
+          id="requestFilter"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full sm:w-auto p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+        >
+          <option value="all">All Requests</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="leave">Leave Requests</option>
+          <option value="feedback">Feedback</option>
+        </select>
       </div>
 
-      {filteredRequests.length === 0 && !loading && (
-        <p className="text-gray-600 text-center py-10">
-          No {filter === "all" ? "" : filter} requests found.
-        </p>
+      {loading && (
+        <div className="text-center py-10">
+          <FaSpinner className="animate-spin mx-auto text-3xl text-teal-600 mb-3" />
+          <p className="text-gray-600 text-lg">Loading requests...</p>
+        </div>
       )}
 
-      {filteredRequests.length > 0 && (
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student Details
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Request Details
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Photo/Subject
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date Submitted
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRequests.map((request, index) => (
-                <tr
-                  key={`${request.type}-${request._id || index}`}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        request.type === "maintenance"
-                          ? "bg-orange-100 text-orange-800"
-                          : request.type === "leave"
-                          ? "bg-purple-100 text-purple-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
-                      {request.typeLabel}
+      {error && (
+        <div
+          className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-6"
+          role="alert"
+        >
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && filteredRequests.length === 0 && (
+        <div className="text-center py-10 bg-white rounded-lg shadow-sm">
+          <p className="text-gray-500 text-lg">No requests found.</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Try adjusting the filter or check back later.
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && filteredRequests.length > 0 && (
+        <div className="space-y-4 sm:space-y-6">
+          {filteredRequests.map((req) => (
+            <div
+              key={req._id}
+              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+            >
+              <div
+                className={`p-5 border-l-4 ${getStatusColor(
+                  req.status,
+                  req.type
+                )}`}
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {req.typeLabel} - ID: {req._id.slice(-6)}
+                  </h3>
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusColor(
+                      req.status,
+                      req.type,
+                      true // isBadge
+                    )}`}
+                  >
+                    {req.status
+                      ? req.status.charAt(0).toUpperCase() + req.status.slice(1)
+                      : "Pending"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm mb-3">
+                  <div>
+                    <span className="text-gray-500">Student: </span>
+                    <span className="text-gray-700 font-medium">
+                      {req.studentName}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {request.studentName}
-                      </p>
-                      <p className="text-gray-500">{request.studentEmail}</p>
-                      {request.studentRoom !== "N/A" && (
-                        <p className="text-gray-500">
-                          Room: {request.studentRoom}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    <div className="max-w-xs">
-                      <p className="truncate" title={request.details}>
-                        {request.details}
-                      </p>
-                      {request.type === "maintenance" &&
-                        request.requestType && (
-                          <p className="text-xs text-gray-500 capitalize mt-1">
-                            Category: {request.requestType}
-                          </p>
-                        )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {request.type === "maintenance" && request.photo ? (
-                      <img
-                        src={request.photo}
-                        alt="Maintenance Request"
-                        className="h-10 w-10 object-cover rounded cursor-pointer hover:opacity-75"
-                        onClick={() => openImageModal(request.photo)}
-                        title="Click to enlarge"
-                      />
-                    ) : request.type === "feedback" && request.subject ? (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {request.subject}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">No photo</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {new Date(request.requestDate).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                        request.status,
-                        request.type
-                      )}`}
-                    >
-                      {request.status ||
-                        (request.type === "feedback" ? "Submitted" : "Pending")}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Email: </span>
+                    <span className="text-gray-700 font-medium break-all">
+                      {req.studentEmail}
                     </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Room: </span>
+                    <span className="text-gray-700 font-medium">
+                      {req.studentRoom}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Date: </span>
+                    <span className="text-gray-700 font-medium">
+                      {new Date(req.requestDate).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {req.subject && (
+                  <p className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Subject:</span> {req.subject}
+                  </p>
+                )}
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                  <span className="font-medium">Details:</span> {req.details}
+                </p>
+
+                {req.type === "maintenance" && req.photoUrl && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => openImageModal(req.photoUrl)}
+                      className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center"
+                    >
+                      View Attached Photo
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Action buttons could be added here if needed */}
+              {/* Example: 
+                <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200 flex justify-end gap-2">
+                  <button className="px-3 py-1.5 text-xs font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">
+                    Mark as Resolved
+                  </button>
+                </div>
+              */}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Image Modal */}
       {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-          onClick={closeImageModal}
-        >
-          <div
-            className="bg-white p-4 rounded-lg shadow-xl max-w-full max-h-full overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-xl max-w-lg w-full relative">
             <img
               src={selectedImage}
-              alt="Enlarged maintenance request"
-              className="max-w-full max-h-[80vh] rounded"
+              alt="Maintenance Request Attachment"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-md"
             />
             <button
               onClick={closeImageModal}
-              className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors block mx-auto"
+              className="absolute top-3 right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors"
+              aria-label="Close image modal"
             >
-              Close
+              &times;
             </button>
           </div>
         </div>

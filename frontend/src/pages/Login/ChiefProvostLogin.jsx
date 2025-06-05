@@ -12,9 +12,8 @@ const ChiefProvostLogin = () => {
       window.location.href = "/chief-provost-login";
     }, 500);
   };
-
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <LoginComp
         url="/chief-provost-login"

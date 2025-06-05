@@ -129,163 +129,219 @@ const StudentNotices = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <FaSpinner className="animate-spin mr-3 text-2xl text-blue-600" />
-        <p className="text-lg text-gray-600">Loading your notices...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-sm w-full">
+          <FaSpinner className="animate-spin mx-auto text-4xl text-blue-600 mb-4" />
+          <p className="text-lg text-gray-600">Loading notices...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">My Notices</h2>
-          <p className="text-gray-600 mt-1">
-            {notices.length} notice{notices.length !== 1 ? "s" : ""} total
-            {unreadCount > 0 && (
-              <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-sm rounded-full">
-                {unreadCount} unread
-              </span>
-            )}
-          </p>
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center justify-center sm:justify-start gap-2">
+              <FaBell className="text-blue-600" />
+              Student Notices
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
+              Stay updated with important announcements and notices
+            </p>
+          </div>
+          {unreadCount > 0 && (
+            <div className="bg-red-100 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-center">
+              <span className="font-semibold">{unreadCount}</span> unread notice
+              {unreadCount !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
-      </div>
 
-      {notices.length === 0 ? (
-        <div className="text-center py-16">
-          <FaBell className="mx-auto text-6xl text-gray-300 mb-4" />
-          <h3 className="text-xl font-medium text-gray-600 mb-2">
-            No notices yet
-          </h3>
-          <p className="text-gray-500">
-            You'll see notices from your provost here
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {notices.map((notice) => (
-            <div
-              key={notice._id}
-              onClick={() => handleNoticeClick(notice)}
-              className={`bg-white border rounded-lg p-6 cursor-pointer transition-all hover:shadow-md ${
-                !notice.isRead
-                  ? "border-l-4 border-l-blue-500 bg-blue-50/30"
-                  : "border-gray-200"
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-grow">
-                  <div className="mt-1">{getNoticeIcon(notice.noticeType)}</div>
-
-                  <div className="flex-grow">
-                    <div className="flex items-center justify-between mb-2">
+        {notices.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12 text-center">
+            <FaBell className="mx-auto text-6xl text-gray-300 mb-4" />
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2">
+              No Notices Yet
+            </h3>
+            <p className="text-gray-500 text-sm sm:text-base">
+              You'll see important notices and announcements here when they're
+              available.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Notices Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+              {notices.map((notice) => (
+                <div
+                  key={notice._id}
+                  onClick={() => handleNoticeClick(notice)}
+                  className={`bg-white rounded-lg shadow-md border-l-4 p-4 sm:p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+                    !notice.isRead
+                      ? "border-l-blue-500 bg-blue-50/30"
+                      : "border-l-gray-300"
+                  }`}
+                >
+                  {/* Notice Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {getNoticeIcon(notice.noticeType)}
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium border ${getNoticeTypeColor(
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${getNoticeTypeColor(
                           notice.noticeType
                         )}`}
                       >
                         {notice.noticeType}
                       </span>
-                      <div className="flex items-center space-x-2">
-                        {notice.isUrgent && (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
-                            Urgent
-                          </span>
-                        )}
-                        {!notice.isRead && (
-                          <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                        )}
-                      </div>
                     </div>
-
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      {notice.subject}
-                    </h3>
-
-                    <p className="text-gray-600 mb-3 line-clamp-2">
-                      {notice.message}
-                    </p>
-
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div>
-                        <span className="font-medium">From:</span>{" "}
-                        {notice.senderId?.name || "N/A"}
-                      </div>
-                      <div>
-                        {new Date(notice.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      {notice.isUrgent && (
+                        <FaExclamationTriangle className="text-yellow-500 text-sm" />
+                      )}
+                      {!notice.isRead && (
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                <div className="ml-4">
-                  <FaEye className="text-gray-400" />
+                  {/* Notice Content */}
+                  <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base line-clamp-2">
+                    {notice.subject}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-3">
+                    {notice.message}
+                  </p>
+
+                  {/* Notice Footer */}
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>
+                      {new Date(notice.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <FaEye className="text-xs" />
+                      View Details
+                    </span>
+                  </div>
+
+                  {notice.actionRequired && (
+                    <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
+                      <strong>Action Required:</strong> {notice.actionRequired}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-md">
+                <div className="text-sm text-gray-600 text-center sm:text-left">
+                  Showing page {pagination.currentPage} of{" "}
+                  {pagination.totalPages}
+                  <span className="hidden sm:inline">
+                    {" "}
+                    ({pagination.totalNotices} total notices)
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => loadNotices(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded font-medium">
+                    {pagination.currentPage}
+                  </span>
+                  <button
+                    onClick={() => loadNotices(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            )}
+          </>
+        )}
 
-      {/* Notice Detail Modal */}
-      {modalOpen && selectedNotice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  {getNoticeIcon(selectedNotice.noticeType)}
-                  <div>
+        {/* Notice Detail Modal */}
+        {modalOpen && selectedNotice && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    {getNoticeIcon(selectedNotice.noticeType)}
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium border ${getNoticeTypeColor(
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${getNoticeTypeColor(
                         selectedNotice.noticeType
                       )}`}
                     >
                       {selectedNotice.noticeType}
                     </span>
                     {selectedNotice.isUrgent && (
-                      <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                      <span className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+                        <FaExclamationTriangle />
                         Urgent
                       </span>
                     )}
                   </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                    {selectedNotice.subject}
+                  </h2>
                 </div>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <FaTimes size={24} />
+                  <FaTimes size={20} />
                 </button>
               </div>
 
-              {/* Content */}
-              <div className="space-y-6">
+              {/* Modal Content */}
+              <div className="p-4 sm:p-6 space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    {selectedNotice.subject}
-                  </h2>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>
-                      <span className="font-medium">From:</span>{" "}
-                      {selectedNotice.senderId?.name} (
-                      {selectedNotice.senderId?.role})
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Notice Details
+                  </h3>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                      {selectedNotice.message}
                     </p>
-                    <p>
-                      <span className="font-medium">Sent:</span>{" "}
+                  </div>
+                </div>
+
+                {selectedNotice.actionRequired && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                      <FaExclamationTriangle />
+                      Action Required
+                    </h4>
+                    <p className="text-yellow-700 text-sm">
+                      {selectedNotice.actionRequired}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                  <div>
+                    <p className="text-sm text-gray-500">Sent on</p>
+                    <p className="font-medium text-gray-800">
                       {new Date(selectedNotice.createdAt).toLocaleDateString(
                         "en-US",
                         {
+                          weekday: "long",
                           year: "numeric",
                           month: "long",
                           day: "numeric",
@@ -294,12 +350,16 @@ const StudentNotices = () => {
                         }
                       )}
                     </p>
-                    {selectedNotice.isRead && (
-                      <p>
-                        <span className="font-medium">Read:</span>{" "}
+                  </div>
+                  {selectedNotice.readAt && (
+                    <div>
+                      <p className="text-sm text-gray-500">Read on</p>
+                      <p className="font-medium text-gray-800 flex items-center gap-2">
+                        <FaCheck className="text-green-500 text-sm" />
                         {new Date(selectedNotice.readAt).toLocaleDateString(
                           "en-US",
                           {
+                            weekday: "long",
                             year: "numeric",
                             month: "long",
                             day: "numeric",
@@ -308,47 +368,24 @@ const StudentNotices = () => {
                           }
                         )}
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Notice Details
-                  </h3>
-                  <div className="prose max-w-none">
-                    <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                      {selectedNotice.message}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedNotice.actionRequired && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-yellow-800 mb-2 flex items-center">
-                      <FaExclamationTriangle className="mr-2" />
-                      Action Required
-                    </h4>
-                    <p className="text-yellow-700">
-                      {selectedNotice.actionRequired}
-                    </p>
-                  </div>
-                )}
               </div>
 
-              {/* Footer */}
-              <div className="mt-8 pt-6 border-t flex justify-end">
+              {/* Modal Footer */}
+              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6">
                 <button
                   onClick={closeModal}
-                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
                 >
                   Close
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

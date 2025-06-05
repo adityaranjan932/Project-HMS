@@ -44,9 +44,8 @@ const ProvostLogin = () => {
     }
     toast.dismiss(toastId);
   };
-
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       {/* Pass the API endpoint path if your LoginComp expects it, otherwise it's not needed if handleSubmit handles the API call */}
       <LoginComp onSubmit={handleSubmit} isLoading={isLoading} />

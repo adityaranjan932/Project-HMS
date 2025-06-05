@@ -28,9 +28,8 @@ const StudentLogin = () => {
       setIsLoading(false);
     }
   };
-
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <LoginComp
         url="/student-login"

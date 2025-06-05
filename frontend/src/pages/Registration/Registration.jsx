@@ -121,8 +121,8 @@ const MultiStepForm = () => {
               confirmPassword: formData.confirmPassword,
               otp: formData.otp,
               mobile: formData.mobile,
-              studentName: formData.studentName || formData.name || '',
-              gender: formData.gender || '',
+              studentName: formData.studentName || formData.name || "",
+              gender: formData.gender || "",
             }
           );
           if (response.data.success) {

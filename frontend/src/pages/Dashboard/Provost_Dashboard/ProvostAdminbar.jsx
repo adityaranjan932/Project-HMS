@@ -9,12 +9,13 @@ import {
   FaBars,
   FaTimes,
   FaSignOutAlt,
-  FaDatabase
+  FaDatabase,
 } from "react-icons/fa";
-import { logout } from '../../../services/auth';
-import { toast } from 'react-hot-toast';
+import { logout } from "../../../services/auth";
+import { toast } from "react-hot-toast";
 
-const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const ProvostAdminbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const location = useLocation();
@@ -26,13 +27,14 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
   };
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
       if (token) {
         const result = await logout(token);
         if (result && result.success) {
           // Navigate to login page after successful logout
-          navigate('/login');
+          navigate("/login");
         }
       } else {
         // If no token found, still clear storage and redirect
@@ -41,7 +43,7 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
         toast.success("Logged out successfully!");
-        navigate('/login');
+        navigate("/login");
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -63,13 +65,17 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
 
       {/* Sidebar */}
       <nav
-        className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40 flex flex-col`} // Added flex flex-col
+        className={`${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-b from-teal-800 to-teal-900 shadow-xl transition-transform duration-300 ease-in-out z-40 flex flex-col`}
       >
         <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold text-white md:ml-0 ml-8">
+          <Link
+            className="text-2xl font-bold text-white ml-8 md:ml-0"
+            to="/provost-login"
+          >
             Provost Portal
-          </h2>
+          </Link>
           <div className="mt-2 h-1 w-16 bg-teal-400 mx-auto rounded-full"></div>
         </div>
 
@@ -86,14 +92,17 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
           </p>
         </div>
 
-        <ul className="mt-8 space-y-1 px-3 flex-grow overflow-y-auto"> {/* Added flex-grow overflow-y-auto */}
+        <ul className="mt-8 space-y-1 px-3 flex-grow overflow-y-auto">
+          {" "}
+          {/* Added flex-grow overflow-y-auto */}
           <li>
             <Link
               to="/provost-login/view-profiles"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/view-profiles")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                isActive("/view-profiles")
                   ? "bg-teal-700 text-white font-medium shadow-md"
-                  : "text-teal-100 hover:bg-teal-700/50"
-                }`}
+                  : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+              }`}
             >
               <FaSearch className="mr-3" />
               View Student Profiles
@@ -102,10 +111,11 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
           <li>
             <Link
               to="/provost-login/student-notice"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/student-notice")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                isActive("/student-notice")
                   ? "bg-teal-700 text-white font-medium shadow-md"
-                  : "text-teal-100 hover:bg-teal-700/50"
-                }`}
+                  : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+              }`}
             >
               <FaBell className="mr-3" />
               Student Notice
@@ -114,10 +124,11 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
           <li>
             <Link
               to="/provost-login/student-queries"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/student-queries")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                isActive("/student-queries")
                   ? "bg-teal-700 text-white font-medium shadow-md"
-                  : "text-teal-100 hover:bg-teal-700/50"
-                }`}
+                  : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+              }`}
             >
               <FaClipboardList className="mr-3" />
               Student Queries
@@ -126,144 +137,119 @@ const ProvostAdminbar = () => {  const [isMobileMenuOpen, setIsMobileMenuOpen] =
           <li>
             <Link
               to="/provost-login/public-notice"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/public-notice")
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                isActive("/public-notice")
                   ? "bg-teal-700 text-white font-medium shadow-md"
-                  : "text-teal-100 hover:bg-teal-700/50"
-                }`}
+                  : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+              }`}
             >
               <FaBullhorn className="mr-3" />
               Public Notice
             </Link>
           </li>
-
           <li>
             <Link
               to="/provost-login/allotment-data"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all ${isActive("/allotment-data") // Corrected isActive check
+              className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                isActive("/allotment-data")
                   ? "bg-teal-700 text-white font-medium shadow-md"
-                  : "text-teal-100 hover:bg-teal-700/50"
-                }`}
+                  : "text-teal-100 hover:bg-teal-700/50 hover:text-white"
+              }`}
             >
               <FaDatabase className="mr-3" />
               Allotment Data
             </Link>
           </li>
-
         </ul>
 
-        {/* Removed absolute bottom-0 w-full from the div below */}
-        <div className="p-4"> 
-          <div className="bg-teal-700/30 rounded-lg p-4 text-teal-200 text-sm">
-            <p className="font-medium mb-1">Need help?</p>
-            <p>Contact IT support at it@university.edu</p>
-          </div>
+        <div className="mt-auto p-4">
+          <button
+            onClick={() => setShowLogoutMenu(true)}
+            className="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all shadow-md"
+          >
+            <FaSignOutAlt className="mr-2" />
+            Logout
+          </button>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-grow">
+      {/* Main content */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         {/* Header */}
-        <header className="bg-white shadow-md z-10">
-          <div className="flex items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-bold text-gray-800 md:ml-0 ml-10">
-              Provost Dashboard
+        <header className="bg-white shadow-md rounded-lg p-4 mb-6 flex justify-between items-center">
+          <div className="flex items-center">
+            <img
+              src="/universitylogo.png"
+              alt="Logo"
+              className="h-10 w-10 mr-3"
+            />
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 hidden sm:block">
+              Hostel Management System
             </h1>
-
-            {/* Right side elements */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover border-2 border-teal-100 shadow-sm cursor-pointer hover:border-teal-300 transition-all"
-                  onClick={() => setShowProfileModal(true)}
-                />
-
-                {/* Dropdown menu */}
-                {showLogoutMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <button
-                      onClick={() => {
-                        setShowProfileModal(true);
-                        setShowLogoutMenu(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                    >
-                      <FaSignOutAlt className="mr-2" /> Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Logout button */}
-              <button
-                onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-                className="flex items-center justify-center p-2 rounded-full bg-teal-100 text-teal-800 hover:bg-teal-200 transition-all"
-              >
-                <FaSignOutAlt size={16} />
-              </button>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 block sm:hidden">
+              HMS
+            </h1>
           </div>
-
-          {/* Breadcrumb or secondary header */}
-          <div className="px-6 py-2 bg-teal-50 border-t border-teal-100">
-            <p className="text-sm text-teal-800">
-              Thursday, April 03, 2025, 7:29 PM IST • Spring Semester
-            </p>
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
+              <FaBell size={20} />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileModal(!showProfileModal)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-600 flex items-center"
+              >
+                <FaUserCircle size={24} />
+              </button>
+              {showProfileModal && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                  <Link
+                    to="/provost-login/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      setShowLogoutMenu(true);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-grow p-6 lg:p-8 xl:p-10 overflow-auto bg-gray-50"> {/* Added more padding for different screen sizes */}
-          <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-200 min-h-[calc(100vh-180px)]"> {/* Increased shadow, padding and ensured min height */}
-            <Outlet />
-          </div>
-        </main>
+        <Outlet />
+      </main>
 
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-600 mt-auto"> {/* Ensured footer is at the bottom */}
-          © 2025 University Provost Portal • All rights reserved
-        </footer>
-      </div>
-
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0   z-30 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
-      )}
-
-      {/* Profile Image Modal */}
-      {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="relative bg-white rounded-lg max-w-2xl w-full mx-4">
-            <button
-              onClick={() => setShowProfileModal(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-              <FaTimes size={24} />
-            </button>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Profile Photo</h3>
-              <div className="flex justify-center">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Profile"
-                  className="w-64 h-64 object-cover rounded-lg shadow-md"
-                />
-              </div>
-              <div className="mt-4 text-center">
-                <p className="font-medium text-lg">Dr. James Wilson</p>
-                <p className="text-gray-600">Provost ID: PR12345</p>
-              </div>
+      {/* Logout Confirmation Modal */}
+      {showLogoutMenu && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-600 mb-6 text-center text-sm sm:text-base">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleLogout}
+                className="w-full sm:flex-1 bg-red-600 text-white py-2.5 px-4 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+              <button
+                onClick={() => setShowLogoutMenu(false)}
+                className="w-full sm:flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

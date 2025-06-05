@@ -67,12 +67,15 @@ const Adminbar = () => {
       <nav
         className={`${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-br from-indigo-800 via-indigo-700 to-indigo-900 shadow-2xl transition-transform duration-300 ease-in-out z-40`}
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 bg-gradient-to-br from-indigo-800 via-indigo-700 to-indigo-900 shadow-2xl transition-transform duration-300 ease-in-out z-40 flex flex-col`}
       >
         <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold text-white tracking-wide md:ml-0 ml-10">
+          <Link
+            className="text-2xl font-bold text-white tracking-wide ml-10 md:ml-0"
+            to="/student-login"
+          >
             Student Portal
-          </h2>
+          </Link>
           <div className="mt-2 h-1 w-16 bg-indigo-400 mx-auto rounded-full"></div>
         </div>
 
@@ -89,14 +92,14 @@ const Adminbar = () => {
           </p>
         </div>
 
-        <ul className="mt-8 space-y-2 px-3">
+        <ul className="mt-8 space-y-2 px-3 flex-grow overflow-y-auto">
           <li>
             <Link
               to="/student-login/maintenance-request"
               className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive("/maintenance-request")
                   ? "bg-indigo-700 text-white font-medium shadow-md"
-                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1"
+                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1 hover:text-white"
               }`}
             >
               <FaWrench className="mr-3" />
@@ -109,7 +112,7 @@ const Adminbar = () => {
               className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive("/feedback")
                   ? "bg-indigo-700 text-white font-medium shadow-md"
-                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1"
+                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1 hover:text-white"
               }`}
             >
               <FaCommentAlt className="mr-3" />
@@ -122,20 +125,20 @@ const Adminbar = () => {
               className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive("/leave-apply")
                   ? "bg-indigo-700 text-white font-medium shadow-md"
-                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1"
+                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1 hover:text-white"
               }`}
             >
               <FaCalendarAlt className="mr-3" />
               Leave Apply
             </Link>
-          </li>{" "}
+          </li>
           <li>
             <Link
               to="/student-login/fees-payment"
               className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive("/fees-payment")
                   ? "bg-indigo-700 text-white font-medium shadow-md"
-                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1"
+                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1 hover:text-white"
               }`}
             >
               <FaCreditCard className="mr-3" />
@@ -148,129 +151,104 @@ const Adminbar = () => {
               className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive("/notices")
                   ? "bg-indigo-700 text-white font-medium shadow-md"
-                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1"
+                  : "text-indigo-100 hover:bg-indigo-600/50 hover:translate-x-1 hover:text-white"
               }`}
             >
               <FaBell className="mr-3" />
-              My Notices
+              Notices
             </Link>
           </li>
         </ul>
 
-        <div className="absolute bottom-0 w-full p-4">
-          <div className="bg-indigo-700/30 backdrop-blur-sm rounded-lg p-4 text-indigo-200 text-sm border border-indigo-600/20">
-            <p className="font-medium mb-1">Need help?</p>
-            <p>Contact support at support@university.edu</p>
-          </div>
+        {/* Logout Button - Moved to the bottom */}
+        <div className="mt-auto p-4">
+          <button
+            onClick={() => setShowLogoutMenu(true)}
+            className="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all shadow-md"
+          >
+            <FaSignOutAlt className="mr-2" />
+            Logout
+          </button>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-grow">
+      {/* Main content */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         {/* Header */}
-        <header className="bg-white shadow-md z-10">
-          <div className="flex items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-bold text-gray-800 md:ml-0 ml-10">
-              Student Dashboard
+        <header className="bg-white shadow-md rounded-lg p-4 mb-6 flex justify-between items-center">
+          <div className="flex items-center">
+            <img
+              src="/universitylogo.png"
+              alt="Logo"
+              className="h-10 w-10 mr-3"
+            />
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 hidden sm:block">
+              Hostel Management System
             </h1>
-
-            {/* Right side elements */}
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white animate-pulse"></span>
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 shadow-sm cursor-pointer hover:border-indigo-300 transition-all duration-300 transform hover:scale-110"
-                  onClick={() => setShowProfileModal(true)}
-                />
-
-                {/* Dropdown menu */}
-                {showLogoutMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100 animate-fadeIn">
-                    <button
-                      onClick={() => {
-                        setShowProfileModal(true);
-                        setShowLogoutMenu(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 transition-colors duration-150"
-                    >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 flex items-center"
-                    >
-                      <FaSignOutAlt className="mr-2" /> Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Logout button */}
-              <button
-                onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-                className="flex items-center justify-center p-2 rounded-full bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-all duration-300 transform hover:rotate-12"
-              >
-                <FaSignOutAlt size={16} />
-              </button>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 block sm:hidden">
+              HMS
+            </h1>
           </div>
-
-          {/* Breadcrumb or secondary header */}
-          <div className="px-6 py-2 bg-indigo-50 border-t border-indigo-100">
-            <p className="text-sm text-indigo-800">
-              Thursday, April 03, 2025, 8:02 PM IST • Spring Semester
-            </p>
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
+              <FaBell size={20} />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileModal(!showProfileModal)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-600 flex items-center"
+              >
+                <FaUserCircle size={24} />
+              </button>
+              {showProfileModal && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                  <Link
+                    to="/student-login/profile"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      setShowLogoutMenu(true);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="flex-grow p-6 overflow-auto bg-gray-50 bg-pattern">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300">
-            <Outlet />
-          </div>
-        </main>
+        <Outlet />
+      </main>
 
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-600">
-          © 2025 University Student Portal • All rights reserved
-        </footer>
-      </div>
-
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-transparent  z-30 lg:hidden transition-all duration-300"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
-      )}
-
-      {/* Profile Image Modal */}
-      {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
-          <div className="relative bg-white rounded-lg max-w-2xl w-full mx-4 shadow-2xl transform transition-all duration-300">
-            <button
-              onClick={() => setShowProfileModal(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-            >
-              <FaTimes size={24} />
-            </button>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4 text-indigo-900">
-                Profile Photo
-              </h3>
-              <div className="flex justify-center">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Profile"
-                  className="w-64 h-64 object-cover rounded-lg shadow-md border-4 border-indigo-100"
-                />
-              </div>
-              <div className="mt-4 text-center">
-                <p className="font-medium text-lg text-indigo-900">John Doe</p>
-                <p className="text-gray-600">Student ID: ST12345</p>
-              </div>
+      {/* Logout Confirmation Modal */}
+      {showLogoutMenu && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-600 mb-6 text-center text-sm sm:text-base">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleLogout}
+                className="w-full sm:flex-1 bg-red-600 text-white py-2.5 px-4 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+              <button
+                onClick={() => setShowLogoutMenu(false)}
+                className="w-full sm:flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

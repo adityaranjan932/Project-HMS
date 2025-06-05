@@ -7,11 +7,13 @@ import Feedback from "./pages/Dashboard/Student_Dashboard/Feedback";
 import LeaveApply from "./pages/Dashboard/Student_Dashboard/LeaveApply";
 import FeesPayment from "./pages/Dashboard/Student_Dashboard/FeesPayment";
 import StudentNotices from "./pages/Dashboard/Student_Dashboard/StudentNotices";
+import StudentDashboard from "./pages/Dashboard/Student_Dashboard/StudentDashboard";
 import ProvostAdminbar from "./pages/Dashboard/Provost_Dashboard/ProvostAdminbar";
 import ViewProfiles from "./pages/Dashboard/Provost_Dashboard/ViewProfiles";
 import StudentNotice from "./pages/Dashboard/Provost_Dashboard/StudentNotice";
 import StudentQueries from "./pages/Dashboard/Provost_Dashboard/StudentQueries";
 import PublicNotice from "./pages/Dashboard/Provost_Dashboard/PublicNotice";
+import ProvostDashboard from "./pages/Dashboard/Provost_Dashboard/ProvostDashboard";
 
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
@@ -46,10 +48,10 @@ const App = () => {
         <Route path="/hostel/:hostelId" element={<HostelDetailsPage />} />
         <Route path="/facility/:facilityId" element={<FacilityDetailsPage />} />
         <Route path="/rules/:ruleId" element={<RuleDetailsPage />} />{" "}
-        {/* Added route */}
-        {/* Student Dashboard Routes */}{" "}
+        {/* Added route */} {/* Student Dashboard Routes */}{" "}
         <Route element={<ProtectedRoute />}>
           <Route path="/student-login" element={<Adminbar />}>
+            <Route index element={<StudentDashboard />} />
             <Route
               path="maintenance-request"
               element={<MaintenanceRequest />}
@@ -59,10 +61,11 @@ const App = () => {
             <Route path="fees-payment" element={<FeesPayment />} />
             <Route path="notices" element={<StudentNotices />} />
           </Route>
-        </Route>
+        </Route>{" "}
         {/* Provost Dashboard Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/provost-login" element={<ProvostAdminbar />}>
+            <Route index element={<ProvostDashboard />} />
             <Route path="view-profiles" element={<ViewProfiles />} />
             <Route path="student-notice" element={<StudentNotice />} />
             <Route path="student-queries" element={<StudentQueries />} />
