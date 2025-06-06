@@ -62,10 +62,13 @@ const allottedStudentSchema = new mongoose.Schema({
     allottedBedId: {
         type: String,
         required: true,
-    },
-    floor: { // Added floor information
+    }, floor: { // Added floor information
         type: String, // A, B, C
         required: true,
+    },
+    hostelName: { // Added hostel name information
+        type: String,
+        default: "Kautilya Hall",
     },
     allotmentDate: {
         type: Date,

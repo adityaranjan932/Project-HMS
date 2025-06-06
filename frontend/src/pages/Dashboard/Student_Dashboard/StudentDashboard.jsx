@@ -50,10 +50,9 @@ const StudentDashboard = () => {
               () => ({ data: [] })
             ),
           ]);
-
           const maintenance = maintenanceRes.data || [];
           const leave = leaveRes.data || [];
-          const notices = noticesRes.data || [];
+          const notices = noticesRes.data?.data || [];
 
           // Combine and sort recent requests
           const allRequests = [

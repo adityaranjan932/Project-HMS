@@ -42,7 +42,7 @@ exports.allotRooms = async (req, res) => {
                 const bedInState = roomInState.beds.find(b => b.bedId === allottedStudent.allottedBedId);
                 if (bedInState && !bedInState.studentId) {
                     bedInState.studentId = allottedStudent.userId._id.toString();
-                    bedInState.rollNumber = allottedStudent.rollNumber; 
+                    bedInState.rollNumber = allottedStudent.rollNumber;
                     roomInState.currentOccupancy++;
                 }
             }
@@ -97,7 +97,7 @@ exports.allotRooms = async (req, res) => {
             }
         });
         console.log(`Calculated remaining beds in Kautilya Hall (boys): ${remainingBedsInHostel}`);
-        
+
         if (studentsToProcess.length > remainingBedsInHostel) {
             console.log(`More eligible male students (${studentsToProcess.length}) than remaining available beds (${remainingBedsInHostel}). Slicing to top ${remainingBedsInHostel} by SGPA.`);
             studentsToProcess = studentsToProcess.slice(0, remainingBedsInHostel);
@@ -152,18 +152,18 @@ exports.allotRooms = async (req, res) => {
                 tempOtherStudentsFromSinglePref.push(student);
             }
         }
-        
+
         // Add students who couldn't get their single preference to the main otherStudents list
         if (tempOtherStudentsFromSinglePref.length > 0) {
             otherStudents.push(...tempOtherStudentsFromSinglePref);
             console.log(`Added ${tempOtherStudentsFromSinglePref.length} students from single preference to otherStudents list.`);
         }
-        
+
         // Re-sort otherStudents as it might have new additions from singlePreferenceStudents
-        otherStudents.sort((a,b) => b.averageSgpa - a.averageSgpa); 
+        otherStudents.sort((a, b) => b.averageSgpa - a.averageSgpa);
         console.log(`Re-sorted otherStudents list. Now has ${otherStudents.length} students:`);
         otherStudents.forEach(s => console.log(`  -> Considering for Other/Triple: ${s.userId.name}, Roll: ${s.rollNumber}, SGPA: ${s.averageSgpa}, OriginalPref: ${s.roomPreference}, ID: ${s._id}`));
-        
+
         for (const student of otherStudents) {
             if (newlyAllottedStudentsList.length >= remainingBedsInHostel) {
                 console.log("Reached remainingBedsInHostel limit during otherStudents (triple) allotment.");
@@ -277,7 +277,7 @@ const getRoomAvailabilityFromStaticData = (roomsData) => {
     };
 
     roomsData.forEach(room => {
-        if (room.hostelType === 'boys') { 
+        if (room.hostelType === 'boys') {
             if (room.type === 'single') {
                 availability.boys.singleTotalBeds += room.capacity;
                 availability.boys.singleOccupiedBeds += room.currentOccupancy; // This is now correctly updated
@@ -326,8 +326,8 @@ exports.getRoomAvailability = async (req, res) => {
                 }
             }
         });
-        const availability = getRoomAvailabilityFromStaticData(currentHostelRoomsState); 
-        
+        const availability = getRoomAvailabilityFromStaticData(currentHostelRoomsState);
+
         res.status(200).json({ success: true, availability });
     } catch (error) {
         console.error('Error in getRoomAvailability endpoint:', error);
@@ -339,8 +339,15 @@ exports.getRoomAvailability = async (req, res) => {
 exports.getAllAllottedStudents = async (req, res) => {
     try {
         const allottedStudents = await AllottedStudent.find({})
-            .populate('studentProfileId', 'name rollNumber courseName semester sgpaOdd sgpaEven averageSgpa roomPreference') // Populate details from RegisteredStudentProfile
-            .populate('userId', 'email'); // Populate user details like email if needed
+            .populate({
+                path: 'studentProfileId',
+                select: 'name rollNumber courseName semester sgpaOdd sgpaEven roomPreference gender department contactNumber fatherName motherName',
+                populate: {
+                    path: 'userId',
+                    select: 'name email gender'
+                }
+            })
+            .populate('userId', 'name email gender'); // Also populate user details directly
 
         if (!allottedStudents || allottedStudents.length === 0) {
             return res.status(200).json({
@@ -349,13 +356,37 @@ exports.getAllAllottedStudents = async (req, res) => {
                 data: [],
                 count: 0
             });
-        }
+        }        // Enhance the data to ensure all necessary fields are available
+        const enhancedData = allottedStudents.map(student => {
+            const studentObj = student.toObject();
+
+            // If studentProfileId data is missing, use data from the AllottedStudent record itself
+            if (studentObj.studentProfileId) {
+                // Use the name from the nested User model if available, otherwise from the profile or AllottedStudent
+                studentObj.studentProfileId.name = studentObj.studentProfileId.name ||
+                    studentObj.studentProfileId.userId?.name ||
+                    studentObj.name;
+
+                // Ensure other fields are populated from the AllottedStudent record if missing
+                studentObj.studentProfileId.rollNumber = studentObj.studentProfileId.rollNumber || studentObj.rollNumber;
+                studentObj.studentProfileId.courseName = studentObj.studentProfileId.courseName || studentObj.courseName;
+                studentObj.studentProfileId.email = studentObj.studentProfileId.userId?.email || studentObj.userId?.email;
+                studentObj.studentProfileId.gender = studentObj.studentProfileId.gender || studentObj.studentProfileId.userId?.gender;
+            }
+
+            // Ensure hostelName is populated - if missing, set default based on hostel type
+            if (!studentObj.hostelName) {
+                studentObj.hostelName = studentObj.allottedHostelType === 'boys' ? 'Kautilya Hall' : 'Other Hostel';
+            }
+
+            return studentObj;
+        });
 
         res.status(200).json({
             success: true,
             message: "Successfully retrieved allotted students.",
-            data: allottedStudents,
-            count: allottedStudents.length
+            data: enhancedData,
+            count: enhancedData.length
         });
 
     } catch (error) {

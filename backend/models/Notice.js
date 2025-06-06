@@ -10,10 +10,9 @@ const NoticeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
-  },
-  noticeType: {
+  }, noticeType: {
     type: String,
-    enum: ['Behavioral Warning', 'Academic Warning', 'Disciplinary Action', 'General Notice'],
+    enum: ['Behavioral Warning', 'Academic Warning', 'Disciplinary Action', 'General Notice', 'Room Inspection', 'Fee Notice'],
     required: true
   },
   subject: {

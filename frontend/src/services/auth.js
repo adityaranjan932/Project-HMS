@@ -50,6 +50,11 @@ export const UPDATE_PUBLIC_NOTICE_API = "/public-notices";
 export const DELETE_PUBLIC_NOTICE_API = "/public-notices";
 export const PUBLISH_PUBLIC_NOTICE_API = "/public-notices";
 
+// Feedback APIs
+export const SUBMIT_FEEDBACK_API = "/feedback/submit";
+export const GET_FEEDBACK_API = "/feedback";
+export const GET_ALL_FEEDBACK_API = "/feedback/all";
+
 // Send OTP
 export async function sendOtp(email) {
   return apiConnector("POST", SEND_OTP_API, { email });

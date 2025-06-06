@@ -5,11 +5,19 @@ const mongoose = require("mongoose");
 // Send a notice to a student
 exports.sendNotice = async (req, res) => {
   try {
+    console.log("=== SEND NOTICE REQUEST ===");
+    console.log("Request body:", req.body);
+    console.log("User from auth middleware:", req.user);
+
     const { recipientId, noticeType, subject, message, actionRequired, isUrgent } = req.body;
     const senderId = req.user.id; // Provost ID from auth middleware
 
+    console.log("Sender ID:", senderId);
+    console.log("Recipient ID:", recipientId);
+
     // Validate required fields
     if (!recipientId || !noticeType || !subject || !message) {
+      console.log("Validation failed - missing required fields");
       return res.status(400).json({
         success: false,
         message: "Recipient, notice type, subject, and message are required."

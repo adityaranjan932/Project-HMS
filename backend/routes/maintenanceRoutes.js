@@ -1,5 +1,5 @@
 const express = require("express");
-const { submitMaintenanceRequest, getUserMaintenanceRequests, getAllMaintenanceRequests } = require("../controllers/maintenanceController");
+const { submitMaintenanceRequest, getUserMaintenanceRequests, getAllMaintenanceRequests, resolveMaintenanceRequest } = require("../controllers/maintenanceController");
 const { auth, isProvost } = require("../middleware/auth");
 
 const router = express.Router();
@@ -12,5 +12,8 @@ router.get("/my", auth, getUserMaintenanceRequests);
 
 // Get all maintenance requests (for provost)
 router.get("/all", auth, isProvost, getAllMaintenanceRequests);
+
+// Resolve a maintenance request (for provost)
+router.put("/resolve/:requestId", auth, isProvost, resolveMaintenanceRequest);
 
 module.exports = router;

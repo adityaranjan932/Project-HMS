@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiConnector } from "../../../services/apiconnector"; // Adjust path if necessary
+import { apiConnector } from "../../../services/apiconnector";
 import {
   FaSpinner,
   FaTimes,
@@ -9,7 +9,28 @@ import {
   FaGraduationCap,
   FaBuilding,
   FaBed,
+  FaSearch,
+  FaFilter,
+  FaEye,
+  FaBell,
+  FaUserCheck,
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+  FaIdCard,
+  FaUsers,
+  FaSortAmountDown,
+  FaDownload,
+  FaTh,
+  FaListUl,
+  FaUserGraduate,
+  FaChevronDown,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaStar,
+  FaHome,
+  FaHashtag,
 } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 
 const ViewProfiles = () => {
   const [allStudents, setAllStudents] = useState([]);
@@ -20,6 +41,19 @@ const ViewProfiles = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Enhanced state management
+  const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [sortBy, setSortBy] = useState("name"); // name, rollNumber, room, allotmentDate
+  const [filterBy, setFilterBy] = useState("all"); // all, male, female, course-wise
+  const [courseFilter, setCourseFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState(new Set());
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    maleStudents: 0,
+    femaleStudents: 0,
+    courses: [],
+  });
   useEffect(() => {
     const fetchAllottedStudents = async () => {
       setLoading(true);
@@ -34,18 +68,48 @@ const ViewProfiles = () => {
 
         const response = await apiConnector(
           "GET",
-          "/allotment/allotted-students", // Corrected API endpoint
+          "/allotment/allotted-students",
           null,
           { Authorization: `Bearer ${token}` }
         );
-        setAllStudents(response.data?.data || []); // Data from getAllAllottedStudents
-        setFilteredStudents(response.data?.data || []);
+
+        const studentsData = response.data?.data || [];
+        setAllStudents(studentsData);
+        setFilteredStudents(studentsData);
+
+        // Calculate statistics
+        const totalStudents = studentsData.length;
+        const maleStudents = studentsData.filter(
+          (student) =>
+            student.studentProfileId?.gender?.toLowerCase() === "male"
+        ).length;
+        const femaleStudents = studentsData.filter(
+          (student) =>
+            student.studentProfileId?.gender?.toLowerCase() === "female"
+        ).length;
+        const courses = [
+          ...new Set(
+            studentsData
+              .map((student) => student.studentProfileId?.courseName)
+              .filter(Boolean)
+          ),
+        ];
+
+        setStats({
+          totalStudents,
+          maleStudents,
+          femaleStudents,
+          courses,
+        });
+
+        toast.success(`Loaded ${totalStudents} student profiles`);
       } catch (err) {
         console.error("Error fetching allotted students:", err);
-        setError(
+        const errorMessage =
           err.response?.data?.message ||
-            "Failed to fetch student profiles. Please ensure the API endpoint is correct and you are authorized."
-        );
+          "Failed to fetch student profiles. Please ensure the API endpoint is correct and you are authorized.";
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -53,37 +117,135 @@ const ViewProfiles = () => {
 
     fetchAllottedStudents();
   }, []);
-
+  // Enhanced filtering and sorting logic
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredStudents(allStudents);
-      return;
-    }
-    const lowercasedSearchTerm = searchTerm.toLowerCase();
-    const filtered = allStudents.filter((student) => {
-      // Updated to match the actual data structure from getAllAllottedStudents
-      const nameMatch = student.studentProfileId?.name
-        ?.toLowerCase()
-        .includes(lowercasedSearchTerm);
-      const rollNumberMatch = student.studentProfileId?.rollNumber
-        ?.toLowerCase()
-        .includes(lowercasedSearchTerm);
-      return nameMatch || rollNumberMatch;
-    });
-    setFilteredStudents(filtered);
-  }, [searchTerm, allStudents]);
+    let filtered = [...allStudents];
 
+    // Apply search filter
+    if (searchTerm) {
+      const lowercasedSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter((student) => {
+        const nameMatch = student.studentProfileId?.name
+          ?.toLowerCase()
+          .includes(lowercasedSearchTerm);
+        const rollNumberMatch = student.studentProfileId?.rollNumber
+          ?.toLowerCase()
+          .includes(lowercasedSearchTerm);
+        const emailMatch = student.studentProfileId?.email
+          ?.toLowerCase()
+          .includes(lowercasedSearchTerm);
+        const courseMatch = student.studentProfileId?.courseName
+          ?.toLowerCase()
+          .includes(lowercasedSearchTerm);
+        const roomMatch = student.allottedRoomNumber
+          ?.toString()
+          .includes(lowercasedSearchTerm);
+
+        return (
+          nameMatch || rollNumberMatch || emailMatch || courseMatch || roomMatch
+        );
+      });
+    }
+
+    // Apply additional filters
+    if (filterBy === "male") {
+      filtered = filtered.filter(
+        (student) => student.studentProfileId?.gender?.toLowerCase() === "male"
+      );
+    } else if (filterBy === "female") {
+      filtered = filtered.filter(
+        (student) =>
+          student.studentProfileId?.gender?.toLowerCase() === "female"
+      );
+    }
+
+    if (courseFilter) {
+      filtered = filtered.filter(
+        (student) => student.studentProfileId?.courseName === courseFilter
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return (a.studentProfileId?.name || "").localeCompare(
+            b.studentProfileId?.name || ""
+          );
+        case "rollNumber":
+          return (a.studentProfileId?.rollNumber || "").localeCompare(
+            b.studentProfileId?.rollNumber || ""
+          );
+        case "room":
+          return (a.allottedRoomNumber || 0) - (b.allottedRoomNumber || 0);
+        case "allotmentDate":
+          return (
+            new Date(b.allotmentDate || 0) - new Date(a.allotmentDate || 0)
+          );
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredStudents(filtered);
+  }, [searchTerm, allStudents, filterBy, courseFilter, sortBy]);
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
-  // Updated functions for actions
+
+  // Enhanced action handlers
   const handleViewFullProfile = (student) => {
     setSelectedStudent(student);
     setModalOpen(true);
   };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedStudent(null);
+  };
+
+  const handleSendNotice = (studentId) => {
+    toast.success("Notice sending feature will be implemented!");
+    console.log("Send notice to student:", studentId);
+    // TODO: Implement functionality to send a notice
+  };
+
+  const handleBulkAction = (action) => {
+    if (selectedStudents.size === 0) {
+      toast.error("Please select students first");
+      return;
+    }
+
+    switch (action) {
+      case "notice":
+        toast.success(`Sending notice to ${selectedStudents.size} students`);
+        break;
+      case "export":
+        toast.success(`Exporting ${selectedStudents.size} student profiles`);
+        break;
+      default:
+        break;
+    }
+
+    setSelectedStudents(new Set());
+  };
+
+  const toggleStudentSelection = (studentId) => {
+    const newSelection = new Set(selectedStudents);
+    if (newSelection.has(studentId)) {
+      newSelection.delete(studentId);
+    } else {
+      newSelection.add(studentId);
+    }
+    setSelectedStudents(newSelection);
+  };
+
+  const selectAllStudents = () => {
+    if (selectedStudents.size === filteredStudents.length) {
+      setSelectedStudents(new Set());
+    } else {
+      setSelectedStudents(new Set(filteredStudents.map((s) => s._id)));
+    }
   };
 
   // Add keyboard shortcut for closing modal
@@ -99,242 +261,521 @@ const ViewProfiles = () => {
       // Prevent body scroll when modal is open
       document.body.style.overflow = "hidden";
     }
-
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
       document.body.style.overflow = "unset";
     };
   }, [modalOpen]);
-
-  const handleSendNotice = (studentId) => {
-    console.log("Send notice to student:", studentId);
-    // Implement functionality to send a notice
-  };
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <FaSpinner className="animate-spin mr-3 text-2xl text-blue-600" />
-        <p className="text-lg text-gray-600">Loading student profiles...</p>
+      <div className="flex items-center justify-center py-20 bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+        <div className="text-center">
+          <div className="relative">
+            <FaSpinner className="animate-spin mx-auto text-4xl text-blue-600 mb-4" />
+            <div className="absolute inset-0 rounded-full border-2 border-blue-200 border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-lg text-gray-600 font-medium">
+            Loading student profiles...
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Gathering the latest information for you
+          </p>
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="p-4 sm:p-6 text-center text-red-500">{error}</div>;
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <FaExclamationCircle className="mx-auto text-4xl text-red-500 mb-4" />
+          <h3 className="text-lg font-semibold text-red-800 mb-2">
+            Unable to Load Profiles
+          </h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
   }
-
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-        View Student Profiles
-      </h2>
+    <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
 
-      {/* Search Bar */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search by name or roll number..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm sm:text-base"
-        />
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between relative z-10">
+          <div className="flex-1">
+            <div className="flex items-center mb-3">
+              <FaUsers className="text-blue-200 mr-2" />
+              <span className="text-blue-100 text-sm font-medium">
+                Student Management
+              </span>
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-3">
+              Student Profiles
+            </h1>
+            <p className="text-blue-100 text-lg max-w-md">
+              Browse and manage all registered student profiles with advanced
+              search and filtering options.
+            </p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="mt-6 lg:mt-0 lg:ml-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
+              <FaUsers className="mx-auto text-2xl text-blue-200 mb-2" />
+              <p className="text-2xl font-bold text-white">
+                {stats.totalStudents}
+              </p>
+              <p className="text-blue-100 text-xs">Total Students</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
+              <FaUserGraduate className="mx-auto text-2xl text-blue-200 mb-2" />
+              <p className="text-2xl font-bold text-white">
+                {stats.courses.length}
+              </p>
+              <p className="text-blue-100 text-xs">Courses</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
+              <FaUser className="mx-auto text-2xl text-blue-200 mb-2" />
+              <p className="text-2xl font-bold text-white">
+                {stats.maleStudents}
+              </p>
+              <p className="text-blue-100 text-xs">Male</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center">
+              <FaUser className="mx-auto text-2xl text-blue-200 mb-2" />
+              <p className="text-2xl font-bold text-white">
+                {stats.femaleStudents}
+              </p>
+              <p className="text-blue-100 text-xs">Female</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {loading && (
-        <div className="text-center py-10">
-          <FaSpinner className="animate-spin mx-auto text-3xl text-teal-600 mb-3" />
-          <p className="text-gray-600 text-lg">Loading profiles...</p>
-        </div>
-      )}
+      {/* Enhanced Search and Filter Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
+          {/* Search Bar */}
+          <div className="relative flex-1 max-w-md">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name, roll number, email, course, or room..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
 
-      {error && (
-        <div
-          className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-6"
-          role="alert"
-        >
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
-        </div>
-      )}
-
-      {!loading && !error && filteredStudents.length === 0 && (
-        <div className="text-center py-10 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-500 text-lg">No student profiles found.</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Try a different search term or check back later.
-          </p>
-        </div>
-      )}
-
-      {!loading && !error && filteredStudents.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {filteredStudents.map((student) => (
-            <div
-              key={student._id} // Assuming student._id is unique
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden"
+          {/* Filter and Action Buttons */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                showFilters
+                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
-              <div className="p-5 flex-grow">
-                <div className="flex items-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mr-4 shrink-0">
-                    <FaUser className="text-3xl text-teal-600" />
-                  </div>
-                  <div>
-                    <h3
-                      className="text-lg font-semibold text-gray-800 truncate"
-                      title={student.studentProfileId?.name}
-                    >
-                      {student.studentProfileId?.name || "N/A"}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      Roll: {student.studentProfileId?.rollNumber || "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-sm mb-4">
-                  <InfoItem
-                    label="Email"
-                    value={student.studentProfileId?.email || "N/A"}
-                    isEmail
-                  />
-                  <InfoItem
-                    label="Room"
-                    value={student.allottedRoomNumber || "N/A"}
-                  />
-                  <InfoItem label="Floor" value={student.floor || "N/A"} />
-                  <InfoItem
-                    label="Course"
-                    value={student.studentProfileId?.courseName || "N/A"}
-                  />
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-3 border-t border-gray-200">
-                <button
-                  onClick={() => handleViewFullProfile(student)}
-                  className="w-full px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
-                >
-                  View Full Profile
-                </button>
-                {/* Add other action buttons here if needed */}
-              </div>
+              <FaFilter className="mr-2" />
+              Filters
+              <FaChevronDown
+                className={`ml-2 transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>{" "}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-blue-600"
+                }`}
+              >
+                <FaTh />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === "list"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-blue-600"
+                }`}
+              >
+                <FaListUl />
+              </button>
             </div>
-          ))}
+            {selectedStudents.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">
+                  {selectedStudents.size} selected
+                </span>
+                <button
+                  onClick={() => handleBulkAction("notice")}
+                  className="flex items-center px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                >
+                  <FaBell className="mr-1" />
+                  Send Notice
+                </button>
+                <button
+                  onClick={() => handleBulkAction("export")}
+                  className="flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                >
+                  <FaDownload className="mr-1" />
+                  Export
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort By
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="name">Name</option>
+                <option value="rollNumber">Roll Number</option>
+                <option value="room">Room Number</option>
+                <option value="allotmentDate">Allotment Date</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Gender
+              </label>
+              <select
+                value={filterBy}
+                onChange={(e) => setFilterBy(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="all">All Genders</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Course
+              </label>
+              <select
+                value={courseFilter}
+                onChange={(e) => setCourseFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="">All Courses</option>
+                {stats.courses.map((course) => (
+                  <option key={course} value={course}>
+                    {course}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setFilterBy("all");
+                  setCourseFilter("");
+                  setSortBy("name");
+                  setSearchTerm("");
+                }}
+                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Results Summary */}
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-gray-600">
+            Showing{" "}
+            <span className="font-semibold">{filteredStudents.length}</span> of{" "}
+            <span className="font-semibold">{stats.totalStudents}</span>{" "}
+            students
+          </p>
+
+          {filteredStudents.length > 0 && (
+            <button
+              onClick={selectAllStudents}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {selectedStudents.size === filteredStudents.length
+                ? "Deselect All"
+                : "Select All"}
+            </button>
+          )}
+        </div>
+      </div>
+      {/* Students Grid/List */}
+      {filteredStudents.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FaUserGraduate className="text-4xl text-gray-300" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            No Students Found
+          </h3>
+          <p className="text-gray-500 mb-6">
+            {searchTerm || filterBy !== "all" || courseFilter
+              ? "No students match your current search criteria."
+              : "No student profiles are available at the moment."}
+          </p>
+          {(searchTerm || filterBy !== "all" || courseFilter) && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setFilterBy("all");
+                setCourseFilter("");
+              }}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                : "space-y-4"
+            }
+          >
+            {filteredStudents.map((student) => (
+              <StudentCard
+                key={student._id}
+                student={student}
+                viewMode={viewMode}
+                isSelected={selectedStudents.has(student._id)}
+                onToggleSelection={toggleStudentSelection}
+                onViewProfile={handleViewFullProfile}
+                onSendNotice={handleSendNotice}
+              />
+            ))}
+          </div>
         </div>
       )}
 
       {/* Modal for Full Profile */}
       {modalOpen && selectedStudent && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-auto my-8 transform transition-all duration-300 ease-out scale-100 opacity-100">
-            <div className="p-5 sm:p-7 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">
-                Student Details
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full"
-                aria-label="Close modal"
-              >
-                <FaTimes size={20} />
-              </button>
-            </div>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto my-8 transform transition-all duration-300 ease-out scale-100 opacity-100">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
 
-            <div className="p-5 sm:p-7 space-y-5 max-h-[70vh] overflow-y-auto">
-              <div className="flex flex-col sm:flex-row items-center mb-6 pb-6 border-b border-gray-200">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-100 flex items-center justify-center mr-0 sm:mr-6 mb-4 sm:mb-0 shrink-0">
-                  <FaUser className="text-5xl sm:text-6xl text-teal-600" />
+              <div className="flex justify-between items-start relative z-10">
+                <div className="flex items-center">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                    <FaUser className="text-2xl text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold">
+                      {selectedStudent.studentProfileId?.name || "N/A"}
+                    </h3>
+                    <p className="text-blue-100 flex items-center mt-1">
+                      <FaIdCard className="mr-2" />
+                      Roll:{" "}
+                      {selectedStudent.studentProfileId?.rollNumber || "N/A"}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-center sm:text-left">
-                  <h4 className="text-2xl font-bold text-gray-800">
-                    {selectedStudent.studentProfileId?.name || "N/A"}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    Roll Number:{" "}
-                    {selectedStudent.studentProfileId?.rollNumber || "N/A"}
-                  </p>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-white/80 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
+                  aria-label="Close modal"
+                >
+                  <FaTimes size={20} />
+                </button>
+              </div>
+            </div>
+            {/* Modal Content */}
+            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+              {/* Contact Information */}
+              <div>
+                <h5 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <FaEnvelope className="mr-2 text-blue-600" />
+                  Contact Information
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <DetailItem
+                    label="Email Address"
+                    value={selectedStudent.studentProfileId?.email || "N/A"}
+                    icon={<FaEnvelope className="text-blue-600" />}
+                  />
+                  <DetailItem
+                    label="Phone Number"
+                    value={
+                      selectedStudent.studentProfileId?.phoneNumber || "N/A"
+                    }
+                    icon={<FaPhone className="text-green-600" />}
+                  />
+                  <DetailItem
+                    label="Gender"
+                    value={selectedStudent.studentProfileId?.gender || "N/A"}
+                    icon={<FaUser className="text-purple-600" />}
+                  />
+                  <DetailItem
+                    label="Date of Birth"
+                    value={
+                      selectedStudent.studentProfileId?.dateOfBirth
+                        ? new Date(
+                            selectedStudent.studentProfileId.dateOfBirth
+                          ).toLocaleDateString()
+                        : "N/A"
+                    }
+                    icon={<FaCalendarAlt className="text-orange-600" />}
+                  />
                 </div>
               </div>
 
-              <h5 className="text-sm font-semibold text-teal-700 uppercase tracking-wider mb-2">
-                Contact Information
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <DetailItem
-                  label="Email Address"
-                  value={selectedStudent.studentProfileId?.email || "N/A"}
-                  icon={<FaEnvelope className="text-teal-600" />}
-                />
-                <DetailItem
-                  label="Phone Number"
-                  value={selectedStudent.studentProfileId?.phoneNumber || "N/A"}
-                  icon={<FaPhone className="text-teal-600" />}
-                />
+              {/* Academic Details */}
+              <div>
+                <h5 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <FaGraduationCap className="mr-2 text-blue-600" />
+                  Academic Details
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <DetailItem
+                    label="Course"
+                    value={
+                      selectedStudent.studentProfileId?.courseName || "N/A"
+                    }
+                    icon={<FaGraduationCap className="text-blue-600" />}
+                  />
+                  <DetailItem
+                    label="Department"
+                    value={
+                      selectedStudent.studentProfileId?.department || "N/A"
+                    }
+                    icon={<FaBuilding className="text-indigo-600" />}
+                  />
+                  <DetailItem
+                    label="Year of Study"
+                    value={
+                      selectedStudent.studentProfileId?.yearOfStudy || "N/A"
+                    }
+                    icon={<FaCalendarAlt className="text-green-600" />}
+                  />
+                  <DetailItem
+                    label="Admission Date"
+                    value={
+                      selectedStudent.studentProfileId?.admissionDate
+                        ? new Date(
+                            selectedStudent.studentProfileId.admissionDate
+                          ).toLocaleDateString()
+                        : "N/A"
+                    }
+                    icon={<FaCalendarAlt className="text-teal-600" />}
+                  />
+                </div>
               </div>
 
-              <h5 className="text-sm font-semibold text-teal-700 uppercase tracking-wider mt-5 mb-2">
-                Academic Details
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <DetailItem
-                  label="Course"
-                  value={selectedStudent.studentProfileId?.courseName || "N/A"}
-                  icon={<FaGraduationCap className="text-teal-600" />}
-                />
-                <DetailItem
-                  label="Department"
-                  value={selectedStudent.studentProfileId?.department || "N/A"}
-                  icon={<FaBuilding className="text-teal-600" />}
-                />
+              {/* Hostel Information */}
+              <div>
+                <h5 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <FaHome className="mr-2 text-blue-600" />
+                  Hostel Information
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <DetailItem
+                    label="Hostel Name"
+                    value={selectedStudent.hostelName || "N/A"}
+                    icon={<FaBuilding className="text-blue-600" />}
+                  />
+                  <DetailItem
+                    label="Room Number"
+                    value={selectedStudent.allottedRoomNumber || "N/A"}
+                    icon={<FaBed className="text-green-600" />}
+                  />
+                  <DetailItem
+                    label="Floor"
+                    value={selectedStudent.floor || "N/A"}
+                    icon={<FaHashtag className="text-purple-600" />}
+                  />
+                  <DetailItem
+                    label="Allotment Date"
+                    value={
+                      selectedStudent.allotmentDate
+                        ? new Date(
+                            selectedStudent.allotmentDate
+                          ).toLocaleDateString()
+                        : "N/A"
+                    }
+                    icon={<FaCalendarAlt className="text-orange-600" />}
+                  />
+                </div>
               </div>
 
-              <h5 className="text-sm font-semibold text-teal-700 uppercase tracking-wider mt-5 mb-2">
-                Hostel Information
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <DetailItem
-                  label="Hostel Name"
-                  value={selectedStudent.hostelName || "N/A"}
-                  icon={<FaBuilding className="text-teal-600" />}
-                />
-                <DetailItem
-                  label="Room Number"
-                  value={selectedStudent.allottedRoomNumber || "N/A"}
-                  icon={<FaBed className="text-teal-600" />}
-                />
-                <DetailItem
-                  label="Floor"
-                  value={selectedStudent.floor || "N/A"}
-                  icon={<FaBed className="text-teal-600" />}
-                />
-                <DetailItem
-                  label="Allotment Date"
-                  value={
-                    selectedStudent.allotmentDate
-                      ? new Date(
-                          selectedStudent.allotmentDate
-                        ).toLocaleDateString()
-                      : "N/A"
-                  }
-                  icon={<FaBed className="text-teal-600" />}
-                />
-              </div>
-
-              {/* Add more details as needed */}
-            </div>
-
-            <div className="p-4 sm:p-5 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-3">
+              {/* Additional Information */}
+              {(selectedStudent.studentProfileId?.address ||
+                selectedStudent.studentProfileId?.guardianName) && (
+                <div>
+                  <h5 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <FaMapMarkerAlt className="mr-2 text-blue-600" />
+                    Additional Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedStudent.studentProfileId?.address && (
+                      <DetailItem
+                        label="Address"
+                        value={selectedStudent.studentProfileId.address}
+                        icon={<FaMapMarkerAlt className="text-red-600" />}
+                        fullWidth
+                      />
+                    )}
+                    {selectedStudent.studentProfileId?.guardianName && (
+                      <DetailItem
+                        label="Guardian Name"
+                        value={selectedStudent.studentProfileId.guardianName}
+                        icon={<FaUser className="text-indigo-600" />}
+                      />
+                    )}
+                    {selectedStudent.studentProfileId?.guardianPhone && (
+                      <DetailItem
+                        label="Guardian Phone"
+                        value={selectedStudent.studentProfileId.guardianPhone}
+                        icon={<FaPhone className="text-green-600" />}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>{" "}
+            {/* Modal Footer */}
+            <div className="p-6 bg-gray-50 border-t border-gray-200 rounded-b-2xl flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() =>
                   handleSendNotice(selectedStudent.studentProfileId?._id)
                 }
-                className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
               >
+                <FaBell className="mr-2" />
                 Send Notice
               </button>
               <button
                 onClick={handleCloseModal}
-                className="w-full sm:w-auto px-4 py-2.5 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                className="flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
               >
                 Close
               </button>
@@ -346,12 +787,164 @@ const ViewProfiles = () => {
   );
 };
 
+// StudentCard Component
+const StudentCard = ({
+  student,
+  viewMode,
+  isSelected,
+  onToggleSelection,
+  onViewProfile,
+  onSendNotice,
+}) => {
+  if (viewMode === "list") {
+    return (
+      <div className="flex items-center p-4 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-100 hover:border-blue-200 hover:shadow-md">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelection(student._id)}
+          className="mr-4 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+
+        <div className="flex-shrink-0 mr-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+            <FaUser className="text-blue-600" />
+          </div>
+        </div>
+
+        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+          <div>
+            <h3 className="font-semibold text-gray-900 truncate">
+              {student.studentProfileId?.name || "N/A"}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {student.studentProfileId?.rollNumber || "N/A"}
+            </p>
+          </div>
+
+          <div className="hidden md:block">
+            <p className="text-sm text-gray-600">
+              {student.studentProfileId?.courseName || "N/A"}
+            </p>
+          </div>
+
+          <div className="hidden md:block">
+            <p className="text-sm text-gray-600 flex items-center">
+              <FaBed className="mr-1" />
+              Room {student.allottedRoomNumber || "N/A"}
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onViewProfile(student)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="View Profile"
+            >
+              <FaEye />
+            </button>
+            <button
+              onClick={() => onSendNotice(student.studentProfileId?._id)}
+              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              title="Send Notice"
+            >
+              <FaBell />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Grid view
+  return (
+    <div className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex flex-col overflow-hidden border border-gray-100 hover:border-blue-200">
+      {/* Selection checkbox */}
+      <div className="absolute top-3 left-3 z-10">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelection(student._id)}
+          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="p-6 flex-grow relative">
+        {/* Profile Section */}
+        <div className="flex items-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center mr-4 shrink-0 group-hover:shadow-md transition-shadow">
+            <FaUser className="text-2xl text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3
+              className="text-lg font-semibold text-gray-800 truncate group-hover:text-blue-600 transition-colors"
+              title={student.studentProfileId?.name}
+            >
+              {student.studentProfileId?.name || "N/A"}
+            </h3>
+            <p className="text-sm text-gray-500 flex items-center">
+              <FaIdCard className="mr-1" />
+              {student.studentProfileId?.rollNumber || "N/A"}
+            </p>
+          </div>
+        </div>
+
+        {/* Student Details */}
+        <div className="space-y-3 text-sm">
+          <InfoItem
+            label="Email"
+            value={student.studentProfileId?.email || "N/A"}
+            icon={<FaEnvelope className="text-blue-500" />}
+            isEmail
+          />
+          <InfoItem
+            label="Course"
+            value={student.studentProfileId?.courseName || "N/A"}
+            icon={<FaGraduationCap className="text-green-500" />}
+          />
+          <InfoItem
+            label="Room"
+            value={student.allottedRoomNumber || "N/A"}
+            icon={<FaBed className="text-purple-500" />}
+          />
+          <InfoItem
+            label="Floor"
+            value={student.floor || "N/A"}
+            icon={<FaBuilding className="text-orange-500" />}
+          />
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 border-t border-gray-100 flex gap-2">
+        <button
+          onClick={() => onViewProfile(student)}
+          className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          <FaEye className="mr-2" />
+          View Details
+        </button>
+        <button
+          onClick={() => onSendNotice(student.studentProfileId?._id)}
+          className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+          title="Send Notice"
+        >
+          <FaBell />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Helper component for consistent display of information items in cards
-const InfoItem = ({ label, value, isEmail }) => (
-  <div className="flex justify-between items-start gap-2">
-    <p className="text-gray-500 whitespace-nowrap">{label}:</p>
+const InfoItem = ({ label, value, icon, isEmail }) => (
+  <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center gap-2 text-gray-500">
+      {icon}
+      <span className="text-xs">{label}:</span>
+    </div>
     <p
-      className={`font-medium text-gray-700 text-right ${
+      className={`font-medium text-gray-700 text-right text-xs ${
         isEmail ? "break-all" : "truncate"
       }`}
       title={value}
@@ -362,8 +955,12 @@ const InfoItem = ({ label, value, isEmail }) => (
 );
 
 // Helper component for detailed modal information
-const DetailItem = ({ label, value, icon, badge }) => (
-  <div className="flex justify-between items-center">
+const DetailItem = ({ label, value, icon, badge, fullWidth }) => (
+  <div
+    className={`flex justify-between items-center ${
+      fullWidth ? "col-span-2" : ""
+    }`}
+  >
     <div className="flex items-center gap-2">
       {icon}
       <span className="text-gray-600 font-medium">{label}:</span>
