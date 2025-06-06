@@ -7,8 +7,12 @@ const ProfessorCard = ({ name, title, imgSrc, email }) => (
       alt={name}
       className="w-16 h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 rounded-full mx-auto mb-2 lg:mb-3 object-cover border-2 border-red-700"
     />
-    <h4 className="text-sm lg:text-md font-semibold text-red-800 leading-tight">{name}</h4>
-    <p className="text-xs text-gray-600 mb-2 lg:mb-3 px-1 lg:px-2 leading-snug">{title}</p>
+    <h4 className="text-sm lg:text-md font-semibold text-red-800 leading-tight">
+      {name}
+    </h4>
+    <p className="text-xs text-gray-600 mb-2 lg:mb-3 px-1 lg:px-2 leading-snug">
+      {title}
+    </p>
     <div className="mt-2">
       <a
         href={`mailto:${email}`}
