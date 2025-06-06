@@ -74,7 +74,6 @@ const professors = [
     profileLink: "#",
     messageLink: "#",
   },
-
   {
     name: "Prof. V. K. Sharma",
     title: "Dean Students' Welfare, University of Lucknow",
@@ -82,24 +81,15 @@ const professors = [
     profileLink: "#",
     messageLink: "#",
   },
-
-
-  {
-    name: "Prof. Anoop Kumar Singh",
-    title: "Chief Provost, University of Lucknow",
-    imgSrc: i002,
-    profileLink: "#",
-    messageLink: "#",
-  },
 ];
 
 const CarouselSlider = () => {
   return (
-    <div className="w-full py-8 bg-gray-50">
-      <div className="mx-auto px-2 w-full">
-        <div className="flex flex-col lg:flex-row gap-6">
+    <div className="w-full py-4 lg:py-8 bg-gray-50">
+      <div className="container mx-auto px-2 lg:px-4 max-w-7xl">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Left Column: Professor Cards */}
-          <div className="w-full lg:w-2/12 flex flex-col space-y-6 ">
+          <div className="w-full lg:w-3/12 xl:w-2/12 flex flex-col lg:flex-col space-y-4 lg:space-y-6">
             {professors.map((prof) => (
               <ProfessorCard
                 className="object-cover"
@@ -114,7 +104,7 @@ const CarouselSlider = () => {
           </div>
 
           {/* Center Column: Swiper */}
-          <div className=" w-full lg:w-8/12  ">
+          <div className="w-full lg:w-6/12 xl:w-8/12">
             <Swiper
               modules={[Autoplay, Navigation, Pagination]}
               slidesPerView={1}
@@ -122,7 +112,7 @@ const CarouselSlider = () => {
               pagination={{ clickable: true }}
               autoplay={{ delay: 5000, disableOnInteraction: false }}
               loop={true}
-              className="rounded-lg shadow-xl h-[550px]"
+              className="rounded-lg shadow-xl h-[400px] lg:h-[500px] xl:h-[550px]"
             >
               {images.map((img, idx) => (
                 <SwiperSlide key={idx}>
@@ -137,8 +127,10 @@ const CarouselSlider = () => {
           </div>
 
           {/* Right Column: Notice Board */}
-          <div className="w-full lg:w-2/12">
-            <NoticeBoard />
+          <div className="w-full lg:w-3/12 xl:w-2/12">
+            <div className="h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden">
+              <NoticeBoard />
+            </div>
           </div>
         </div>
       </div>
