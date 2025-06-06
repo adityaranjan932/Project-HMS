@@ -11,7 +11,7 @@ import NoticeBoard from "./NoticeBoard"; // Added import
 // Import your images
 import i001 from "/img1.jpg";
 import i002 from "/img2.jpg";
-import i2 from "/VC.jpg"; 
+import i2 from "/VC.jpg";
 import i003 from "/img3.jpg";
 import i004 from "/img4.jpg";
 import i005 from "/Img5.jpg";
@@ -34,8 +34,7 @@ import i021 from "/C15.jpeg";
 import i022 from "/C16.jpeg";
 import i023 from "/C17.jpeg";
 import i024 from "/C18.jpeg";
-import i025 from "/C19.jpeg";  
-
+import i025 from "/C19.jpeg";
 
 const images = [
   // { src: i001, alt: "Image 1" },
@@ -71,25 +70,24 @@ const professors = [
     name: "Prof. Alok Kumar Rai",
     title: "Vice-Chancellor, University of Lucknow",
     imgSrc: i2,
-    profileLink: "#",
-    messageLink: "#",
+    email: "vc@lko.ac.in",
   },
   {
     name: "Prof. V. K. Sharma",
     title: "Dean Students' Welfare, University of Lucknow",
     imgSrc: i001,
-    profileLink: "#",
-    messageLink: "#",
+    email: "dsw@lko.ac.in",
   },
 ];
 
 const CarouselSlider = () => {
   return (
-    <div className="w-full py-4 lg:py-8 bg-gray-50">
-      <div className="container mx-auto px-2 lg:px-4 max-w-7xl">
+    <div className="w-full py-4 lg:py-12 bg-gray-50">
+      <div className="container mx-auto px-4 lg:px-18 max-w-full">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {" "}
           {/* Left Column: Professor Cards */}
-          <div className="w-full lg:w-3/12 xl:w-2/12 flex flex-col lg:flex-col space-y-4 lg:space-y-6">
+          <div className="w-full lg:w-3/12 xl:w-2/12 flex flex-col lg:flex-col space-y-4 lg:space-y-12">
             {professors.map((prof) => (
               <ProfessorCard
                 className="object-cover"
@@ -97,12 +95,10 @@ const CarouselSlider = () => {
                 name={prof.name}
                 title={prof.title}
                 imgSrc={prof.imgSrc}
-                profileLink={prof.profileLink}
-                messageLink={prof.messageLink}
+                email={prof.email}
               />
             ))}
           </div>
-
           {/* Center Column: Swiper */}
           <div className="w-full lg:w-6/12 xl:w-8/12">
             <Swiper
@@ -125,7 +121,6 @@ const CarouselSlider = () => {
               ))}
             </Swiper>
           </div>
-
           {/* Right Column: Notice Board */}
           <div className="w-full lg:w-3/12 xl:w-2/12">
             <div className="h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden">
@@ -133,10 +128,9 @@ const CarouselSlider = () => {
             </div>
           </div>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Marquee Section (Welcome Text) - Kept below the 3-column layout */}
-      <div className="mt-8 bg-gray-100 text-white py-4 px-6 text-center">
+      <div className="mt-8 bg-gray-100 text-white py-4 px-2 text-center">
         <h1 className="text-3xl font-bold mb-4 text-black">
           Welcome to the Hostel Management System
         </h1>
