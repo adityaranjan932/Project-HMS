@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { getReceivedNotices, markNoticeAsRead } from "../../../services/auth";
 import { toast } from "react-hot-toast";
+import NoticeViewer from "../../../components/NoticeViewer/NoticeViewer";
 
 const StudentNotices = () => {
   const [notices, setNotices] = useState([]);
@@ -66,10 +67,8 @@ const StudentNotices = () => {
       setLoading(false);
     }
   };
-
   const handleNoticeClick = async (notice) => {
     setSelectedNotice(notice);
-    setModalOpen(true);
 
     // Mark as read if not already read
     if (!notice.isRead) {
@@ -91,8 +90,7 @@ const StudentNotices = () => {
     }
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
+  const handleCloseNoticeViewer = () => {
     setSelectedNotice(null);
   };
 
@@ -159,7 +157,6 @@ const StudentNotices = () => {
             </div>
           )}
         </div>
-
         {notices.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12 text-center">
             <FaBell className="mx-auto text-6xl text-gray-300 mb-4" />
@@ -273,117 +270,13 @@ const StudentNotices = () => {
             )}
           </>
         )}
-
-        {/* Notice Detail Modal */}
-        {modalOpen && selectedNotice && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {getNoticeIcon(selectedNotice.noticeType)}
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${getNoticeTypeColor(
-                        selectedNotice.noticeType
-                      )}`}
-                    >
-                      {selectedNotice.noticeType}
-                    </span>
-                    {selectedNotice.isUrgent && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
-                        <FaExclamationTriangle />
-                        Urgent
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-                    {selectedNotice.subject}
-                  </h2>
-                </div>
-                <button
-                  onClick={closeModal}
-                  className="ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <FaTimes size={20} />
-                </button>
-              </div>
-
-              {/* Modal Content */}
-              <div className="p-4 sm:p-6 space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Notice Details
-                  </h3>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {selectedNotice.message}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedNotice.actionRequired && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
-                      <FaExclamationTriangle />
-                      Action Required
-                    </h4>
-                    <p className="text-yellow-700 text-sm">
-                      {selectedNotice.actionRequired}
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                  <div>
-                    <p className="text-sm text-gray-500">Sent on</p>
-                    <p className="font-medium text-gray-800">
-                      {new Date(selectedNotice.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </p>
-                  </div>
-                  {selectedNotice.readAt && (
-                    <div>
-                      <p className="text-sm text-gray-500">Read on</p>
-                      <p className="font-medium text-gray-800 flex items-center gap-2">
-                        <FaCheck className="text-green-500 text-sm" />
-                        {new Date(selectedNotice.readAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 sm:p-6">
-                <button
-                  onClick={closeModal}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Notice Detail Modal */} {/* NoticeViewer Modal */}
+        {selectedNotice && (
+          <NoticeViewer
+            notice={selectedNotice}
+            isOpen={!!selectedNotice}
+            onClose={handleCloseNoticeViewer}
+          />
         )}
       </div>
     </div>

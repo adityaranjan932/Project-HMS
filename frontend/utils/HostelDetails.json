@@ -1,13 +1,13 @@
 [
   {
     "hostelId": "H001",
-    "HostelName": "Kautalya Hall",
+    "HostelName": "Kautilya Hall",
     "Total-Capacity": 155,
     "No-of-rooms": {
       "singleSeater": 20,
       "tripleSeater": 45
     },
-    "description": "Kautalya Hall, one of the prominent Boys Hostels at University of Lucknow, is situated within the main campus, surrounded by other student residences. This large hostel features 132 living rooms, a Common Hall, a Dining Hall, and two expansive, beautiful lawns that create a lush green environment. The premises also include a Provost Office and a separate, furnished Guest House with two rooms. Kautalya Hall is wi-fi enabled and dedicated to providing students with all essential amenities, such as well-furnished rooms, water coolers with RO Purifiers, washing machines, refrigerators, geysers, an open-air gymnasium, and sports facilities. A common room offers a television, newspapers, magazines, and indoor games for student entertainment. There is also a well-equipped kitchen available. \n\n  Festivals like Diwali, Holi, Mahashivratri, New Year, and Eid, alongside national festivals. Numerous academic and cultural competitions have been organized in this hostel, notably under the Inter Hostel Fest-2020. \n\n Many distinguished professors from the university have served long tenures at this hostel.",
+    "description": "Kautilya Hall, one of the prominent Boys Hostels at University of Lucknow, is situated within the main campus, surrounded by other student residences. This large hostel features 132 living rooms, a Common Hall, a Dining Hall, and two expansive, beautiful lawns that create a lush green environment. The premises also include a Provost Office and a separate, furnished Guest House with two rooms. Kautilya Hall is wi-fi enabled and dedicated to providing students with all essential amenities, such as well-furnished rooms, water coolers with RO Purifiers, washing machines, refrigerators, geysers, an open-air gymnasium, and sports facilities. A common room offers a television, newspapers, magazines, and indoor games for student entertainment. There is also a well-equipped kitchen available. \n\n  Festivals like Diwali, Holi, Mahashivratri, New Year, and Eid, alongside national festivals. Numerous academic and cultural competitions have been organized in this hostel, notably under the Inter Hostel Fest-2020. \n\n Many distinguished professors from the university have served long tenures at this hostel.",
     "facilities": ["gym", "wifi", "library", "indoor sports"],
     "hostelFor": "male",
     "location": "New Campus",

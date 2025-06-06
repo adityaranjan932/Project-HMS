@@ -62,6 +62,7 @@ import {
   deletePublicNotice,
   publishPublicNotice,
 } from "../../../services/auth";
+import NoticeViewer from "../../../components/NoticeViewer/NoticeViewer";
 
 const PublicNotice = () => {
   // Add custom styles for animations
@@ -94,7 +95,6 @@ const PublicNotice = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
   // UI State
   const [showForm, setShowForm] = useState(false);
   const [editingNotice, setEditingNotice] = useState(null);
@@ -102,6 +102,7 @@ const PublicNotice = () => {
   const [selectedNotices, setSelectedNotices] = useState([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [selectedNotice, setSelectedNotice] = useState(null);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -316,7 +317,11 @@ const PublicNotice = () => {
     }
   };
   const handlePublish = async (noticeId) => {
-    if (!window.confirm("Are you sure you want to publish this notice? Once published, it will be visible to all users.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to publish this notice? Once published, it will be visible to all users."
+      )
+    ) {
       return;
     }
 
@@ -324,16 +329,21 @@ const PublicNotice = () => {
       console.log("Publishing notice with ID:", noticeId);
       const result = await publishPublicNotice(noticeId);
       console.log("Publish result:", result);
-      
+
       if (result.success) {
-        toast.success("Notice published successfully! It will now appear on the notice board.");
+        toast.success(
+          "Notice published successfully! It will now appear on the notice board."
+        );
         await fetchNotices(); // Refresh the notices list
-        
+
         // Also refresh the notice board data if there's a way to trigger it
-        window.dispatchEvent(new CustomEvent('refreshNoticeBoard'));
+        window.dispatchEvent(new CustomEvent("refreshNoticeBoard"));
       } else {
         console.error("Publish failed:", result);
-        toast.error(result.message || "Failed to publish notice. Please check if the server is running.");
+        toast.error(
+          result.message ||
+            "Failed to publish notice. Please check if the server is running."
+        );
       }
     } catch (error) {
       console.error("Publish error:", error);
@@ -341,10 +351,14 @@ const PublicNotice = () => {
         toast.error("Authentication failed. Please login again.");
       } else if (error.response?.status === 404) {
         toast.error("Notice not found. It may have been deleted.");
-      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
-        toast.error("Cannot connect to server. Please make sure the backend server is running on http://localhost:4000");
+      } else if (error.code === "NETWORK_ERROR" || !error.response) {
+        toast.error(
+          "Cannot connect to server. Please make sure the backend server is running on http://localhost:4000"
+        );
       } else {
-        toast.error(error.response?.data?.message || "Failed to publish notice");
+        toast.error(
+          error.response?.data?.message || "Failed to publish notice"
+        );
       }
     }
   };
@@ -370,7 +384,6 @@ const PublicNotice = () => {
     setRefreshing(false);
     toast.success("Data refreshed successfully");
   };
-
   const applyTemplate = (template) => {
     setFormData((prev) => ({
       ...prev,
@@ -382,6 +395,46 @@ const PublicNotice = () => {
     setSelectedTemplate(template);
     setShowTemplates(false);
     toast.success(`Template "${template.name}" applied`);
+  };
+  const handleViewNotice = (notice) => {
+    console.log("=== DEBUG: PublicNotice - Original notice data ===");
+    console.log("Notice object:", notice);
+    console.log("Notice keys:", Object.keys(notice));
+    console.log("Notice._id:", notice._id);
+    console.log("Notice.title:", notice.title);
+    console.log("Notice.content:", notice.content);
+    console.log("Notice.category:", notice.category);
+    console.log("Notice.isImportant:", notice.isImportant);
+    console.log("Notice.effectiveDate:", notice.effectiveDate);
+    console.log("Notice.expiryDate:", notice.expiryDate);
+    console.log("Notice.status:", notice.status);
+    console.log("Notice.attachments:", notice.attachments);
+    console.log("=== END DEBUG ===");
+
+    // Transform the notice data to ensure compatibility with NoticeViewer
+    const transformedNotice = {
+      _id: notice._id || notice.id,
+      title: notice.title || "No Title",
+      content: notice.content || "No Content",
+      category: notice.category || "General",
+      isImportant: notice.isImportant || false,
+      effectiveDate: notice.effectiveDate,
+      expiryDate: notice.expiryDate,
+      status: notice.status || "draft",
+      attachments: notice.attachments || [],
+      createdAt: notice.createdAt,
+      updatedAt: notice.updatedAt,
+    };
+
+    console.log("=== DEBUG: PublicNotice - Transformed notice data ===");
+    console.log("Transformed notice:", transformedNotice);
+    console.log("=== END DEBUG ===");
+
+    setSelectedNotice(transformedNotice);
+  };
+
+  const handleCloseNoticeViewer = () => {
+    setSelectedNotice(null);
   };
 
   const getFilteredNotices = () => {
@@ -1182,11 +1235,19 @@ const PublicNotice = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onPublish={handlePublish}
+              onView={handleViewNotice}
               expandedCard={expandedCard}
               setExpandedCard={setExpandedCard}
             />
-          ))}
+          ))}{" "}
         </div>
+      )}{" "}
+      {/* NoticeViewer Modal */}
+      {selectedNotice && (
+        <NoticeViewer
+          notice={selectedNotice}
+          onClose={handleCloseNoticeViewer}
+        />
       )}
     </div>
   );
@@ -1199,6 +1260,7 @@ const NoticeCard = ({
   onEdit,
   onDelete,
   onPublish,
+  onView,
   expandedCard,
   setExpandedCard,
 }) => {
@@ -1376,9 +1438,15 @@ const NoticeCard = ({
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
             <div className="text-xs text-gray-500">
               Created {formatDate(notice.createdAt)}
-            </div>
-
+            </div>{" "}
             <div className="flex gap-2">
+              <button
+                onClick={() => onView(notice)}
+                className="flex items-center px-3 py-1.5 text-xs font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors"
+              >
+                <FaEye className="mr-1" />
+                View
+              </button>
               {notice.status === "draft" && (
                 <button
                   onClick={() => onPublish(notice._id)}
@@ -1501,7 +1569,15 @@ const NoticeCard = ({
         )}
       </div>
       <div className="bg-gray-50 p-4 border-t border-gray-200">
+        {" "}
         <div className="flex gap-2 justify-end">
+          <button
+            onClick={() => onView(notice)}
+            className="flex items-center px-3 py-1.5 text-xs font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors"
+          >
+            <FaEye className="mr-1" />
+            View
+          </button>
           {notice.status === "draft" && (
             <button
               onClick={() => onPublish(notice._id)}

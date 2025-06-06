@@ -16,6 +16,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import { apiConnector } from "../../../services/apiconnector";
+import NoticeViewer from "../../../components/NoticeViewer/NoticeViewer";
 
 const StudentDashboard = () => {
   const [studentInfo, setStudentInfo] = useState(null);
@@ -23,6 +24,15 @@ const StudentDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [selectedNotice, setSelectedNotice] = useState(null);
+
+  const handleViewNotice = (notice) => {
+    setSelectedNotice(notice);
+  };
+
+  const handleCloseNoticeViewer = () => {
+    setSelectedNotice(null);
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -165,7 +175,6 @@ const StudentDashboard = () => {
       </div>
     );
   };
-
   const NotificationItem = ({ notice }) => (
     <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
       <div className="flex items-start justify-between">
@@ -174,9 +183,17 @@ const StudentDashboard = () => {
           <p className="text-sm text-blue-700 mt-1 line-clamp-2">
             {notice.message}
           </p>
-          <p className="text-xs text-blue-600 mt-2">
-            {new Date(notice.createdAt).toLocaleDateString()}
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-blue-600">
+              {new Date(notice.createdAt).toLocaleDateString()}
+            </p>
+            <button
+              onClick={() => handleViewNotice(notice)}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+            >
+              View Full Notice
+            </button>
+          </div>
         </div>
         <FaBell className="text-blue-500 ml-2" />
       </div>
@@ -380,13 +397,22 @@ const StudentDashboard = () => {
             <h3 className="font-semibold text-gray-900 mb-2">Office Hours</h3>
             <p className="text-sm text-gray-600">
               Hostel office is open for in-person assistance.
-            </p>
+            </p>{" "}
             <p className="text-sm font-medium text-indigo-600 mt-2">
               Mon-Fri: 9:00 AM - 6:00 PM
             </p>
           </div>
         </div>
       </div>
+
+      {/* NoticeViewer Modal */}
+      {selectedNotice && (
+        <NoticeViewer
+          notice={selectedNotice}
+          isOpen={!!selectedNotice}
+          onClose={handleCloseNoticeViewer}
+        />
+      )}
     </div>
   );
 };

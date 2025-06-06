@@ -175,6 +175,7 @@ import {
   getAllAllottedStudents,
 } from "../../../services/auth";
 import { toast } from "react-hot-toast";
+import NoticeViewer from "../../../components/NoticeViewer/NoticeViewer";
 
 const StudentNotice = () => {
   // Enhanced form state
@@ -225,6 +226,7 @@ const StudentNotice = () => {
   const [itemsPerPage] = useState(10);
   const [selectedNotices, setSelectedNotices] = useState([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState(null);
 
   // Templates and presets
   const [noticeTemplates, setNoticeTemplates] = useState([
@@ -427,6 +429,43 @@ const StudentNotice = () => {
       recipientId: student.userId,
     }));
     setShowStudentDropdown(false);
+  };
+  const handleViewNotice = (notice) => {
+    console.log("=== DEBUG: Original notice data ===");
+    console.log("notice:", notice);
+    console.log("notice.subject:", notice.subject);
+    console.log("notice.message:", notice.message);
+    console.log("notice.noticeType:", notice.noticeType);
+    console.log("notice.isUrgent:", notice.isUrgent);
+    console.log("================================");
+
+    // Transform the notice data to match NoticeViewer expectations
+    const transformedNotice = {
+      _id: notice._id || notice.id,
+      title: notice.subject || notice.title || "No Title",
+      content: notice.message || notice.content || "No Content",
+      category: notice.noticeType || notice.category || "General",
+      isImportant: notice.isUrgent || notice.isImportant || false,
+      publishedAt: notice.createdAt || notice.publishedAt || new Date(),
+      createdAt: notice.createdAt || new Date(),
+      effectiveDate: notice.effectiveDate || notice.createdAt || new Date(),
+      expiryDate: notice.expiryDate || null,
+      pdfPath: notice.pdfPath || null,
+      actionRequired: notice.actionRequired || null,
+      recipientName: notice.recipientId?.name || "Unknown Student",
+      status: notice.status || "sent",
+      isRead: notice.isRead || false,
+    };
+
+    console.log("=== DEBUG: Transformed notice data ===");
+    console.log("transformedNotice:", transformedNotice);
+    console.log("=========================================");
+
+    setSelectedNotice(transformedNotice);
+  };
+
+  const handleCloseNoticeViewer = () => {
+    setSelectedNotice(null);
   };
 
   const clearSelectedStudent = () => {
@@ -1022,13 +1061,21 @@ const StudentNotice = () => {
                         </div>
                         <h4 className="font-medium text-gray-800 text-sm mb-1">
                           {notice.subject}
-                        </h4>
+                        </h4>{" "}
                         <p className="text-xs text-gray-600 mb-2">
                           To: {notice.recipientId?.name || "N/A"}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {formatDate(notice.createdAt)}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-500">
+                            {formatDate(notice.createdAt)}
+                          </p>
+                          <button
+                            onClick={() => handleViewNotice(notice)}
+                            className="text-xs text-teal-600 hover:text-teal-700 font-medium"
+                          >
+                            View
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1124,9 +1171,15 @@ const StudentNotice = () => {
                             Action Required
                           </span>
                         )}
-                      </div>
-
+                      </div>{" "}
                       <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleViewNotice(notice)}
+                          className="flex items-center px-3 py-1.5 text-xs font-medium text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-colors"
+                        >
+                          <FaEye className="mr-1" />
+                          View
+                        </button>
                         {notice.isRead ? (
                           <span className="flex items-center text-green-600 text-sm">
                             <FaCheckCircle className="mr-1" />
@@ -1272,7 +1325,14 @@ const StudentNotice = () => {
             </div>
           </div>
         )}
-      </div>
+      </div>{" "}
+      {/* NoticeViewer Modal */}
+      {selectedNotice && (
+        <NoticeViewer
+          notice={selectedNotice}
+          onClose={handleCloseNoticeViewer}
+        />
+      )}
     </div>
   );
 };
