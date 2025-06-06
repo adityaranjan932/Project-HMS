@@ -281,21 +281,23 @@ const getAllNotices = async (req, res) => {
 // Get published notices for public view
 const getPublishedNotices = async (req, res) => {
   try {
-    const { category, page = 1, limit = 10 } = req.query;
+    const { category, page = 1, limit = 10, activeOnly } = req.query;
 
     const filter = {
-      status: 'published',
-      effectiveDate: { $lte: new Date() }
+      status: 'published'
     };
 
     if (category) filter.category = category;
 
-    // Only show notices that haven't expired
-    filter.$or = [
-      { expiryDate: { $exists: false } },
-      { expiryDate: null },
-      { expiryDate: { $gte: new Date() } }
-    ];
+    // If activeOnly is requested, apply date filters
+    if (activeOnly === 'true') {
+      filter.effectiveDate = { $lte: new Date() };
+      filter.$or = [
+        { expiryDate: { $exists: false } },
+        { expiryDate: null },
+        { expiryDate: { $gte: new Date() } }
+      ];
+    }
 
     const notices = await PublicNotice.find(filter)
       .populate('author', 'firstName lastName')

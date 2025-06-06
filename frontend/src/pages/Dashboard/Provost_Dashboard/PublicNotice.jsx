@@ -315,19 +315,37 @@ const PublicNotice = () => {
       }
     }
   };
-
   const handlePublish = async (noticeId) => {
+    if (!window.confirm("Are you sure you want to publish this notice? Once published, it will be visible to all users.")) {
+      return;
+    }
+
     try {
+      console.log("Publishing notice with ID:", noticeId);
       const result = await publishPublicNotice(noticeId);
+      console.log("Publish result:", result);
+      
       if (result.success) {
-        toast.success("Notice published successfully");
-        fetchNotices();
+        toast.success("Notice published successfully! It will now appear on the notice board.");
+        await fetchNotices(); // Refresh the notices list
+        
+        // Also refresh the notice board data if there's a way to trigger it
+        window.dispatchEvent(new CustomEvent('refreshNoticeBoard'));
       } else {
-        toast.error(result.message || "Failed to publish notice");
+        console.error("Publish failed:", result);
+        toast.error(result.message || "Failed to publish notice. Please check if the server is running.");
       }
     } catch (error) {
       console.error("Publish error:", error);
-      toast.error("Failed to publish notice");
+      if (error.response?.status === 401) {
+        toast.error("Authentication failed. Please login again.");
+      } else if (error.response?.status === 404) {
+        toast.error("Notice not found. It may have been deleted.");
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        toast.error("Cannot connect to server. Please make sure the backend server is running on http://localhost:4000");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to publish notice");
+      }
     }
   };
   const resetForm = () => {
